@@ -17,6 +17,9 @@ class Game:
         self.calculate_numbers(grid_size)
         print(self.grid) #checking line
 
+        #make sure mines aren't placed in the same place, also while we're at it make sure that first click isn't a mine (that cell is protected)
+
+
 
     def calculate_numbers(self, grid_size):
         for i in range(0,grid_size):
