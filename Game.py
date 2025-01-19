@@ -12,7 +12,7 @@ class Game:
         for i in range(0,no_of_mines):
             x = randint(0,(grid_size-1))
             y = randint(0,(grid_size-1))
-            self.grid[x][y] = 9
+            self.grid[x][y] = "*"
         print(self.grid)
 
         #REMOVE THIS LATER
@@ -32,7 +32,7 @@ class Game:
         count=0
         for i in range(x-1 if x>0 else x,x+2 if x<7 else x+1):
             for j in range(y-1 if y>0 else y,y+2 if y<7 else y+1):
-                if self.grid[i][j]==9:
+                if self.grid[i][j]=="*":
                     count+=1
         return count
 
