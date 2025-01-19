@@ -3,7 +3,7 @@ from random import randint
 class Game:
     def __init__(self, grid_size=8, no_of_mines=20):
         self.grid_size=grid_size
-        self.grid=[[0 for i in range(0,grid_size)] for j in range(0,grid_size)]
+        self.grid=[[0 for _ in range(0,grid_size)] for _ in range(0,grid_size)]
         print(self.grid)
         self.place_mines(grid_size, no_of_mines)
 
@@ -13,12 +13,9 @@ class Game:
             x = randint(0,(grid_size-1))
             y = randint(0,(grid_size-1))
             self.grid[x][y] = "*"
-        print(self.grid)
-
-        #REMOVE THIS LATER
-
+        print(self.grid) #checking line
         self.calculate_numbers(grid_size)
-        print(self.grid)
+        print(self.grid) #checking line
 
 
     def calculate_numbers(self, grid_size):
@@ -30,18 +27,33 @@ class Game:
 
     def mine_counter(self,x,y):
         count=0
-        for i in range(x-1 if x>0 else x, x+2 if x<self.grid_size-1 else x+1):
-            for j in range(y-1 if y>0 else y, y+2 if y<self.grid_size-1 else y+1):
-                if self.grid[i][j]=="*":
+        for i in range(x-1,x+2):
+            for j in range(y-1, y+2):
+                if self.has_mine(i,j):
                     count+=1
         return count
 
-    def has_mine(self,x,y):
-        #check if out of bounds
-        #return false if so
-        #if in bounds, check if mine is present
-        pass
+
+    def has_mine(self,row,column):
+        if row<0 or row>self.grid_size-1 or column<0 or column>self.grid_size-1:
+            return False
+        else:
+            if self.grid[row][column]=="*":
+                return True
+
+
+        #if row<0 or row>self.grid_size-1:
+        #    return False
+        #else:
+        #    if column<0 or column>self.grid_size-1:
+        #        return False
+        #    else:
+        #        if self.grid[row][column]=="*":
+        #            return True
 
 
 
-game = Game()
+#old code for mine_counter
+#for i in range(x-1 if x>0 else x, x+2 if x<self.grid_size-1 else x+1):
+    #for j in range(y-1 if y>0 else y, y+2 if y<self.grid_size-1 else y+1):
+        #if self.grid[i][j]=="*":
