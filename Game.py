@@ -30,11 +30,18 @@ class Game:
 
     def mine_counter(self,x,y):
         count=0
-        for i in range(x-1 if x>0 else x,x+2 if x<7 else x+1):
-            for j in range(y-1 if y>0 else y,y+2 if y<7 else y+1):
+        for i in range(x-1 if x>0 else x, x+2 if x<self.grid_size-1 else x+1):
+            for j in range(y-1 if y>0 else y, y+2 if y<self.grid_size-1 else y+1):
                 if self.grid[i][j]=="*":
                     count+=1
         return count
+
+    def has_mine(self,x,y):
+        #check if out of bounds
+        #return false if so
+        #if in bounds, check if mine is present
+        pass
+
 
 
 game = Game()
