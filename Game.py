@@ -24,7 +24,7 @@ class Game:
     def calculate_numbers(self, grid_size):
         for i in range(0,grid_size):
             for j in range(0,grid_size):
-                if self.grid[i][j]!=9:
+                if self.grid[i][j]!="*":
                     self.grid[i][j]=self.mine_counter(i,j)
 
 
