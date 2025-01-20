@@ -80,7 +80,8 @@ for i in range(0, game.grid_size):
         my_cell = Cell(i, j, game)
         cells[i][j] = my_cell
 
-ultrabutton = Button(root, text="ULT", bg="yellow",width=4, height=2, command = lambda: reveal_all(game)).grid(row=(game.grid_size), column=(game.grid_size))
+if input("Enter Password (it's password):")=="password":
+    ultrabutton = Button(root, text="ULT", bg="yellow",width=4, height=2, command = lambda: reveal_all(game)).grid(row=(game.grid_size), column=(game.grid_size))
 
 
 
