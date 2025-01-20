@@ -7,10 +7,10 @@ class Game:
     def __init__(self, grid_size=8, no_of_mines=20):
         self.grid_size = grid_size
         self.no_of_mines = no_of_mines
-        game_started = False
+        self.game_started = False
         self.grid = [[0 for _ in range(0, grid_size)] for _ in range(0, grid_size)]
         print(self.grid) #CHECKING LINE
-        self.place_mines(grid_size, no_of_mines)
+        #self.place_mines(grid_size, no_of_mines)
 
     def place_mines(self, grid_size, no_of_mines):
         for i in range(0, no_of_mines):
@@ -25,6 +25,7 @@ class Game:
         print(self.grid)  # CHECKING LINE
 
         # make sure mines aren't placed in the same place, also while we're at it make sure that first click isn't a mine (that cell is protected)
+
 
     def calculate_numbers(self, grid_size):
         for i in range(0, grid_size):
