@@ -19,6 +19,27 @@ class Cell:
 
 def open_cell(tile, x, y, board):
 
+    # if user clicks on revealed number
+    print(f"Cell ({x},{y}) is {(cells[x][y]).state}")
+    if (cells[x][y]).state == "Revealed" and board.grid[x][y] != "*":
+        print(f"Cell ({x},{y}) is {(cells[x][y]).state}")
+        #if number_of_flags(x, y) < (board.grid[x][y]):
+        #    for i in range(x - 1, x + 2):
+        #        for j in range(y - 1, y + 2):
+        #            if board.in_bounds(i, j) and (cells[i][j]).state == "Hidden":
+        #                (cells[i][j]).button.config(bg="white")
+        #                ((cells[i][j]).button).after(500, lambda row=i, column=j: ((cells[row][column]).button).config(bg="#d8d8d8"))
+
+        # if number_of_flags(x,y)==(board.grid[x][y]):
+        #    zero_auto_reveal(x,y)
+
+        if number_of_flags(x, y) > (board.grid[x][y]):
+            for i in range(x - 1, x + 2):
+                for j in range(y - 1, y + 2):
+                    if board.in_bounds(i, j) and (cells[i][j]).state == "Flagged":
+                        (cells[i][j]).button.config(bg="white")
+                        ((cells[i][j]).button).after(500, lambda row=i, column=j: ((cells[row][column]).button).config(bg="blue"))
+
     #if user clicks on Hidden tile
     if (cells[x][y]).state=="Hidden":
         print(f"Cell ({x},{y}) is {(cells[x][y]).state}")
@@ -27,13 +48,14 @@ def open_cell(tile, x, y, board):
             protected_coordinate.extend([x,y])
             board.place_mines(board.grid_size,board.no_of_mines)
         tile.config(text=board.grid[x][y])
-        (cells[x][y]).state = "Revealed"
+        #(cells[x][y]).state = "Revealed"
         tile.config(bg="white")
         if board.grid[x][y] == "*":
             print("GAME OVER!")
             tile.config(bg="red")
         elif board.grid[x][y]==0:
             auto_reveal(x,y)
+    (cells[x][y]).state = "Revealed"
 
     #if user clicks on revealed number
     if (cells[x][y]).state=="Revealed" and board.grid[x][y]!="*":
