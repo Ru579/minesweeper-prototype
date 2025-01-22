@@ -3,7 +3,7 @@ from random import randint
 protected_coordinate=[]
 
 
-class Game:
+class Board:
     def __init__(self, grid_size=8, no_of_mines=20):
         self.grid_size = grid_size
         self.no_of_mines = no_of_mines
@@ -47,20 +47,27 @@ class Game:
         else:
             return False
 
-        # if row<0 or row>self.grid_size-1 or column<0 or column>self.grid_size-1:
-        #    return False
-        # else:
-        #    if self.grid[row][column]=="*":
-        #        return True
+    def in_bounds(self,x,y):
+        if 0<=x<self.grid_size and 0<=y<self.grid_size:
+            return True
+        else:
+            return False
 
-        # if row<0 or row>self.grid_size-1:
-        #    return False
-        # else:
-        #    if column<0 or column>self.grid_size-1:
-        #        return False
-        #    else:
-        #        if self.grid[row][column]=="*":
-        #            return True
+
+
+# if row<0 or row>self.grid_size-1 or column<0 or column>self.grid_size-1:
+#    return False
+# else:
+#    if self.grid[row][column]=="*":
+#        return Tru
+# if row<0 or row>self.grid_size-1:
+#    return False
+# else:
+#    if column<0 or column>self.grid_size-1:
+#        return False
+#    else:
+#        if self.grid[row][column]=="*":
+#            return True
 
 # old code for mine_counter
 # for i in range(x-1 if x>0 else x, x+2 if x<self.grid_size-1 else x+1):
