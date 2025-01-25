@@ -9,8 +9,7 @@ class Board:
         self.no_of_mines = no_of_mines
         self.grid = [[Cell() for _ in range(0, grid_width)] for _ in range(0, grid_height)]
         self.protected_coordinate = []
-        # self.multi_reveal_occurred = False
-        self.place_mines(grid_height, grid_width, no_of_mines)  # TO BE REMOVED
+        self.flag_difference=0
 
     def place_mines(self, grid_height, grid_width, no_of_mines):
         for i in range(0, no_of_mines):
@@ -26,30 +25,9 @@ class Board:
         for i in range(0, grid_height):
             for j in range(0, grid_width):
                 if self.grid[i][j].value != "*":
-                    self.grid[i][j].value = self.mine_counter(i, j)
-
-    def mine_counter(self, x, y):
-        count = 0
-        for i in range(x - 1, x + 2):
-            for j in range(y - 1, y + 2):
-                if self.has_mine(i, j):
-                    count += 1
-        return str(count)
-
-    def has_mine(self, row, column):
-        if self.in_bounds(row, column) and self.grid[row][column].value == "*":
-            return True
-        else:
-            return False
-
-    def in_bounds(self, x, y):
-        if 0 <= x < self.grid_height and 0 <= y < self.grid_width:
-            return True
-        else:
-            return False
+                    self.grid[i][j].value = self.count_surroundings(i, j, lambda cell: cell.value == "*")
 
     def open_cell(self, x, y, game_started):
-        # self.multi_reveal_occurred = False
         if self.grid[x][y].state == "Hidden":
             if not game_started:
                 self.protected_coordinate.extend([x, y])
@@ -59,12 +37,16 @@ class Board:
                 print("GAME OVER!")  # to be replaced with proper game over function
             elif self.grid[x][y].value == "0":
                 self.auto_reveal(x, y)
-                # self.multi_reveal_occurred = True
 
         elif self.grid[x][y].state == "Revealed":
-            if self.number_of_flags(x, y) == self.grid[x][y].value:
+            if self.count_surroundings(x, y, lambda cell: cell.state == "Flagged") == self.grid[x][y].value:
                 self.auto_reveal(x, y)
-                # self.multi_reveal_occurred = True
+            #Once proper game over feature is added, first part of following if statement can be removed since it won't be possible to click on a revealed mine.
+            elif self.grid[x][y].value!="*" and int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) < int(self.grid[x][y].value):
+                self.flag_difference = int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) - int(self.grid[x][y].value)
+            #Once proper game over feature is added, first part of following if statement can be removed since it won't be possible to click on a revealed mine.
+            elif self.grid[x][y].value!="*" and int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) > int(self.grid[x][y].value):
+                self.flag_difference = int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) - int(self.grid[x][y].value)
 
     def flag_cell(self, x, y):
         if self.grid[x][y].state != "Revealed":
@@ -97,21 +79,26 @@ class Board:
             for j in range(0, self.grid_width):
                 self.grid[i][j].state = "Revealed"
 
-    def get_surrounding_cells(self,x,y): #returns a list of the coordinates of surrounding cells
-        pass
+    def in_bounds(self, x, y):
+        if 0 <= x < self.grid_height and 0 <= y < self.grid_width:
+            return True
+        else:
+            return False
 
-    def count_surroundings(self,x,y,predicate):
-        pass
-        #takes in a boolean checking funcion, applies it to cell in Cells (gotten from get_surrounding_cells method)
-
-
-    def number_of_flags(self, x, y):
-        flag_count = 0
+    def get_surrounding_cells(self, x, y):  # returns a list of the coordinates of surrounding cells
+        cells = []
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
-                if self.in_bounds(i, j) and self.grid[i][j].state=="Flagged":
-                    flag_count += 1
-        return str(flag_count)
+                if self.in_bounds(i, j):
+                    cells.append(self.grid[i][j])
+        return cells
+
+    def count_surroundings(self, x, y, predicate):
+        count = 0
+        for cell in self.get_surrounding_cells(x, y):
+            if predicate(cell):
+                count += 1
+        return str(count)
 
 # TO TEST BOARD
 # test_grid = [[0 for _ in range(0,8)] for _ in range(0,8)]

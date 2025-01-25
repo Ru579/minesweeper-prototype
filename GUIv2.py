@@ -5,28 +5,41 @@ from tkinter import *
 def ui_open_cell(x, y):
     game.open_cell(x, y)
     update_ui()
-    # if game.multi_revealed_occurred:
-    #    update_ui()
-    # else:
-    #    if game.get_cell(x,y,"state")=="Revealed":
-    #        tiles[x][y].config(text=game.get_cell(x,y,"value"), bg="white")
-    # game.multi_revealed_occurred = False
+    communicator.config(text="")
+    if game.flag_difference<0:
+        for i in range(x-1, x+2):
+            for j in range(y-1, y+2):
+                if game.board.in_bounds(i,j) and game.get_cell(i,j,"state")=="Hidden":
+                    tiles[i][j].config(bg="purple")
+                    tiles[i][j].after(500,lambda row=i, column=j: tiles[row][column].config(bg="#d8d8d8"))
+        communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
+    if game.flag_difference>0:
+        for i in range(x-1, x+2):
+            for j in range(y-1, y+2):
+                if game.board.in_bounds(i,j) and game.get_cell(i,j,"state")=="Flagged":
+                    tiles[i][j].config(bg="purple")
+                    tiles[i][j].after(500,lambda row=i, column=j: tiles[row][column].config(bg="blue"))
+        communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
+
+
 
 
 def ui_flag_cell(x, y):
-    game.board.flag_cell(x, y)
+    game.flag_cell(x, y)
     if game.get_cell(x, y, "state") == "Flagged":
         tiles[x][y].config(bg="blue", text="")
     if game.get_cell(x, y, "state") == "Hidden":
         tiles[x][y].config(bg="#d8d8d8", text="")
+    mines_left_counter.config(text=str(game.mines_left))
 
 
 def ui_confuse_cell(x, y):
-    game.board.confuse_cell(x, y)
+    game.confuse_cell(x, y)
     if game.get_cell(x, y, "state") == "Confused":
         tiles[x][y].config(bg="green", text="?")
     if game.get_cell(x, y, "state") == "Hidden":
         tiles[x][y].config(bg="#d8d8d8", text="")
+    mines_left_counter.config(text=str(game.mines_left))
 
 
 def update_ui():
@@ -34,25 +47,51 @@ def update_ui():
         for j in range(0, game.board.grid_width):
             if game.get_cell(i, j, "state") == "Revealed":
                 tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
-                # game.get_cell(i,j,"value"))
+                if game.get_cell(i, j, "value") == "*":
+                    tiles[i][j].config(bg="red")
+                if game.get_cell(i,j,"value")=="0":
+                    tiles[i][j].config(text="")
 
+def update_timer(time):
+    time+=1
+    timer.config(text=str(time))
+    timer.after(1000, lambda: update_timer(time))
 
 game = GameManager()
 
 classic_win = Tk()
 
-game.start_classic_mode("Beginner")
+cell_grid = Frame(classic_win)
+cell_grid.grid(row=1,column=1)
+
+game.start_classic_mode("Expert")
 
 tiles = [[Button(classic_win) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
 
 for i in range(0, game.board.grid_height):
     for j in range(0, game.board.grid_width):
-        tile = Button(classic_win, text="", width=4, height=2, bg="#d8d8d8")
+        tile = Button(cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
         current_tile = tile
         tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
         tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
         tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
-        tile.grid(row=i, column=j)
+        if game.difficulty=="Intermediate" or game.difficulty=="Expert":
+            tile.config(width=4, height=2, font=("Segoe UI", 9))
+        tile.grid(row=i+1, column=j+1)
         tiles[i][j] = tile
+
+title = Label(classic_win, text="MINESWEEPER.PROTO", font=("Calibri",20))
+title.grid(row=0, column=1)
+
+communicator = Label(classic_win, text="Click a cell to start", font=("Calibri",18), width=24)
+communicator.grid(row=2,column=1)
+
+mines_left_counter = Label(classic_win, text=str(game.mines_left), font=("Calibri", 20), width=2)
+mines_left_counter.grid(row=0,column=0)
+
+timer = Label(classic_win, text="0", font=("Calibri", 20), width=3)
+timer.grid(row=0,column=2)
+update_timer(0)
+
 
 mainloop()
