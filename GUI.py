@@ -92,7 +92,7 @@ def auto_reveal(x, y):
     for i in range(x - 1, x + 2):
         for j in range(y - 1, y + 2):
             if board.in_bounds(i, j):
-                (cells[i][j].button).invoke()
+                cells[i][j].button.invoke()
 
 
 def number_of_flags(x, y):

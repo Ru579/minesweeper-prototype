@@ -1,37 +1,31 @@
+from Cell import *
 from random import randint
-
-protected_coordinate=[]
 
 
 class Board:
-    def __init__(self, grid_size=8, no_of_mines=20):
-        self.grid_size = grid_size
+    def __init__(self, grid_height=0, grid_width=0, no_of_mines=0):
+        self.grid_height = grid_height
+        self.grid_width = grid_width
         self.no_of_mines = no_of_mines
-        self.game_started = False
-        self.grid = [[0 for _ in range(0, grid_size)] for _ in range(0, grid_size)]
-        print(self.grid) #CHECKING LINE
-        #self.place_mines(grid_size, no_of_mines)
+        self.grid = [[Cell() for _ in range(0, grid_width)] for _ in range(0, grid_height)]
+        self.protected_coordinate = []
+        self.multi_reveal_occurred = False
 
-    def place_mines(self, grid_size, no_of_mines):
+    def place_mines(self, grid_height, grid_width, no_of_mines):
         for i in range(0, no_of_mines):
             while True:
-                x = randint(0, (grid_size - 1))
-                y = randint(0, (grid_size - 1))
-                if self.grid[x][y]!="*" and [x,y]!=protected_coordinate:
-                    self.grid[x][y] = "*"
+                x = randint(0, (grid_height - 1))
+                y = randint(0, (grid_width - 1))
+                if self.grid[x][y].value != "*" and [x, y] != self.protected_coordinate:
+                    self.grid[x][y].value = "*"
                     break
-        print(self.grid)  # CHECKING LINE
-        self.calculate_numbers(grid_size)
-        print(self.grid)  # CHECKING LINE
+        self.calculate_numbers(grid_height, grid_width)
 
-        # make sure mines aren't placed in the same place, also while we're at it make sure that first click isn't a mine (that cell is protected)
-
-
-    def calculate_numbers(self, grid_size):
-        for i in range(0, grid_size):
-            for j in range(0, grid_size):
-                if self.grid[i][j] != "*":
-                    self.grid[i][j] = self.mine_counter(i, j)
+    def calculate_numbers(self, grid_height, grid_width):
+        for i in range(0, grid_height):
+            for j in range(0, grid_width):
+                if self.grid[i][j].value != "*":
+                    self.grid[i][j].value = self.mine_counter(i, j)
 
     def mine_counter(self, x, y):
         count = 0
@@ -42,34 +36,81 @@ class Board:
         return count
 
     def has_mine(self, row, column):
-        if 0 <= row < self.grid_size and 0 <= column < self.grid_size and self.grid[row][column] == "*":
+        if self.in_bounds(row, column) == True and self.grid[row][column].value == "*":
             return True
         else:
             return False
 
-    def in_bounds(self,x,y):
-        if 0<=x<self.grid_size and 0<=y<self.grid_size:
+    def in_bounds(self, x, y):
+        if 0 <= x < self.grid_height and 0 <= y < self.grid_width:
             return True
         else:
             return False
 
+    def open_cell(self, x, y, game_started):
+        self.multi_reveal_occurred = False
+        if self.grid[x][y].state == "Hidden":
+            if not game_started:
+                self.protected_coordinate.extend([x, y])
+                self.place_mines(self.grid_height, self.grid_width, self.no_of_mines)
+                print(self.grid)
+            self.grid[x][y].state = "Revealed"
+            if self.grid[x][y].value == "*":
+                print("GAME OVER!")  # to be replaced with proper game over function
+            elif self.grid[x][y].value == "0":
+                self.auto_reveal(x, y)
+                self.multi_reveal_occurred = True
+
+        if self.grid[x][y].state == "Revealed":
+            if self.number_of_flags(x, y) == self.grid[x][y].value:
+                self.auto_reveal(x, y)
+                self.multi_reveal_occurred = True
 
 
-# if row<0 or row>self.grid_size-1 or column<0 or column>self.grid_size-1:
-#    return False
-# else:
-#    if self.grid[row][column]=="*":
-#        return Tru
-# if row<0 or row>self.grid_size-1:
-#    return False
-# else:
-#    if column<0 or column>self.grid_size-1:
-#        return False
-#    else:
-#        if self.grid[row][column]=="*":
-#            return True
+    def flag_cell(self, x, y):
+        if self.grid[x][y].state != "Revealed":
+            if self.grid[x][y].state != "Flagged":
+                self.grid[x][y].state = "Flagged"
+                print(f"Tile ({x},{y}) flagged")  # CHECKING LINE
+            if self.grid[x][y].state == "Flagged":
+                self.grid[x][y].state = "Hidden"
+                print(f"Tile ({x},{y}) unflagged")  # CHECKING LINE
 
-# old code for mine_counter
-# for i in range(x-1 if x>0 else x, x+2 if x<self.grid_size-1 else x+1):
-# for j in range(y-1 if y>0 else y, y+2 if y<self.grid_size-1 else y+1):
-# if self.grid[i][j]=="*":
+    def confuse_cell(self, x, y):
+        if self.grid[x][y].state != "Revealed":
+            if self.grid[x][y].state != "Confused":
+                self.grid[x][y].state = "Confused"
+                print(f"Tile ({x},{y}) marked as a question")  # CHECKING LINE
+            if self.grid[x][y].state == "Confused":
+                self.grid[x][y].state = "Hidden"
+                print(f"Tile ({x},{y}) no longer marked as a question")  # CHECKING LINE
+
+    def auto_reveal(self, x, y):
+        for i in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
+                if self.in_bounds(i, j) and self.grid[i][j].state == "Hidden":
+                    self.grid[i][j].state = "Revealed"
+                    if self.grid[i][j].value == "0":
+                        self.auto_reveal(i, j)
+
+    def reveal_all(self):
+        for i in range(0, self.grid_height):
+            for j in range(0, self.grid_width):
+                self.grid[i][j].state = "Revealed"
+
+    def number_of_flags(self, x, y):
+        flag_count = 0
+        for i in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
+                if self.in_bounds(i, j):
+                    if self.grid[x][y].state == "Flagged":
+                        flag_count += 1
+        return flag_count
+
+# TO TEST BOARD
+# test_grid = [[0 for _ in range(0,8)] for _ in range(0,8)]
+# board=Board()
+# for i in range(0,8):
+#    for j in range(0,8):
+#        test_grid[i][j] = board.grid[i][j].value
+# print(test_grid)
