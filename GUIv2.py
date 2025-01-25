@@ -4,33 +4,37 @@ from tkinter import *
 
 def ui_open_cell(x,y):
     game.open_cell(x,y)
-    if game.multi_revealed_occurred:
-        update_ui()
-    else:
-        tiles[x][y].config(text=game.get_cell(x,y,"value"))
+    update_ui()
+    #if game.multi_revealed_occurred:
+    #    update_ui()
+    #else:
+    #    if game.get_cell(x,y,"state")=="Revealed":
+    #        tiles[x][y].config(text=game.get_cell(x,y,"value"), bg="white")
+    #game.multi_revealed_occurred = False
 
 
 def ui_flag_cell(x,y):
     game.board.flag_cell(x,y)
     if game.get_cell(x,y,"state")=="Flagged":
-        tiles[x][y].config(bg="blue")
+        tiles[x][y].config(bg="blue", text="")
     if game.get_cell(x,y,"state")=="Hidden":
-        tiles[x][y].config(bg="#d8d8d8")
+        tiles[x][y].config(bg="#d8d8d8", text="")
 
 
 def ui_confuse_cell(x,y):
     game.board.confuse_cell(x, y)
     if game.get_cell(x, y, "state") == "Confused":
-        tiles[x][y].config(bg="green")
+        tiles[x][y].config(bg="green", text="?")
     if game.get_cell(x, y, "state") == "Hidden":
-        tiles[x][y].config(bg="#d8d8d8")
+        tiles[x][y].config(bg="#d8d8d8", text="")
 
 
 def update_ui():
     for i in range(0,game.board.grid_height):
         for j in range(0, game.board.grid_width):
             if game.get_cell(i,j,"state")=="Revealed":
-                tiles[i][j].config(text=game.get_cell(i,j,"value"))
+                tiles[i][j].config(text= game.board.grid[i][j].value, bg="white")
+                                   #game.get_cell(i,j,"value"))
 
 
 

@@ -1,20 +1,17 @@
-#Needs to have the attribute game_started, which it passes into board during the open_cell function
-#It then, after calling the board.open_cell() function, needs to set its game_started attribute to True
-
-
 from Board import *
 
 class GameManager:
     def __init__(self):
         self.game_started=False
         self.board = Board()
-        self.multi_revealed_occurred = False
+        #self.multi_revealed_occurred = False
 
 
     def start_classic_mode(self, difficulty):
+        print("Start classic mode function called")
         self.game_started = True
         if difficulty == "Beginner":
-            self.board = Board(8, 8, 10)
+            self.board = Board(8, 8, 2)
         elif difficulty == "Intermediate":
             self.board = Board(16, 16, 40)
         elif difficulty == "Expert":
@@ -29,12 +26,8 @@ class GameManager:
 
 
     def open_cell(self, x, y):
+        print(f"Cell ({x},{y}) opened")
         self.board.open_cell(x,y,self.game_started)
-        self.multi_revealed_occurred = self.board.multi_reveal_occurred
-        self.game_started = True
-
-
-
-
-my_game = GameManager()
-my_game.start_classic_mode("Beginner")
+        #self.multi_revealed_occurred = self.board.multi_reveal_occurred
+        if not self.game_started:
+            self.game_started = True

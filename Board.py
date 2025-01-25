@@ -9,7 +9,8 @@ class Board:
         self.no_of_mines = no_of_mines
         self.grid = [[Cell() for _ in range(0, grid_width)] for _ in range(0, grid_height)]
         self.protected_coordinate = []
-        self.multi_reveal_occurred = False
+        #self.multi_reveal_occurred = False
+        self.place_mines(grid_height, grid_width, no_of_mines) #TO BE REMOVED
 
     def place_mines(self, grid_height, grid_width, no_of_mines):
         for i in range(0, no_of_mines):
@@ -48,23 +49,22 @@ class Board:
             return False
 
     def open_cell(self, x, y, game_started):
-        self.multi_reveal_occurred = False
+        #self.multi_reveal_occurred = False
         if self.grid[x][y].state == "Hidden":
             if not game_started:
                 self.protected_coordinate.extend([x, y])
                 self.place_mines(self.grid_height, self.grid_width, self.no_of_mines)
-                print(self.grid)
             self.grid[x][y].state = "Revealed"
             if self.grid[x][y].value == "*":
                 print("GAME OVER!")  # to be replaced with proper game over function
             elif self.grid[x][y].value == "0":
                 self.auto_reveal(x, y)
-                self.multi_reveal_occurred = True
+                #self.multi_reveal_occurred = True
 
-        if self.grid[x][y].state == "Revealed":
+        elif self.grid[x][y].state == "Revealed":
             if self.number_of_flags(x, y) == self.grid[x][y].value:
                 self.auto_reveal(x, y)
-                self.multi_reveal_occurred = True
+                #self.multi_reveal_occurred = True
 
 
     def flag_cell(self, x, y):
@@ -72,7 +72,7 @@ class Board:
             if self.grid[x][y].state != "Flagged":
                 self.grid[x][y].state = "Flagged"
                 print(f"Tile ({x},{y}) flagged")  # CHECKING LINE
-            if self.grid[x][y].state == "Flagged":
+            elif self.grid[x][y].state == "Flagged":
                 self.grid[x][y].state = "Hidden"
                 print(f"Tile ({x},{y}) unflagged")  # CHECKING LINE
 
@@ -81,7 +81,7 @@ class Board:
             if self.grid[x][y].state != "Confused":
                 self.grid[x][y].state = "Confused"
                 print(f"Tile ({x},{y}) marked as a question")  # CHECKING LINE
-            if self.grid[x][y].state == "Confused":
+            elif self.grid[x][y].state == "Confused":
                 self.grid[x][y].state = "Hidden"
                 print(f"Tile ({x},{y}) no longer marked as a question")  # CHECKING LINE
 
@@ -108,9 +108,16 @@ class Board:
         return flag_count
 
 # TO TEST BOARD
-# test_grid = [[0 for _ in range(0,8)] for _ in range(0,8)]
-# board=Board()
-# for i in range(0,8):
-#    for j in range(0,8):
-#        test_grid[i][j] = board.grid[i][j].value
-# print(test_grid)
+#test_grid = [[0 for _ in range(0,8)] for _ in range(0,8)]
+#board=Board(8,8,10)
+#for i in range(0,8):
+#   for j in range(0,8):
+#       test_grid[i][j] = board.grid[i][j].value
+#print(test_grid)
+
+#FOR TESTING
+                #test_grid = [[0 for _ in range(0, 8)] for _ in range(0, 8)]
+                #for i in range(0,8):
+                #  for j in range(0,8):
+                #      test_grid[i][j] = self.grid[i][j].value
+                #print(test_grid)
