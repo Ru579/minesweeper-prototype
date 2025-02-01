@@ -13,7 +13,7 @@ class GameManager:
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
         if difficulty == "Beginner":
-            self.board = Board(8, 8, 10)
+            self.board = Board(8, 8, 1)
             self.mines_left=10
         elif difficulty == "Intermediate":
             self.board = Board(16, 16, 40)
@@ -36,7 +36,7 @@ class GameManager:
         if not self.game_started:
             self.game_started = True
             self.game_has_been_won = False
-        if self.board.revealed_cells == self.board.grid_width * self.board.grid_height - self.board.no_of_mines:
+        if self.board.revealed_cells == self.board.grid_width * self.board.grid_height - self.board.no_of_mines and not self.board.game_over:
             self.game_win()
 
 

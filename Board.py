@@ -13,6 +13,7 @@ class Board:
         self.was_flagged = False
         self.revealed_cells = 0
         self.not_enough_flags = False
+        self.game_over = False
 
     def place_mines(self, grid_height, grid_width, no_of_mines):
         for i in range(0, no_of_mines):
@@ -38,7 +39,8 @@ class Board:
             self.grid[x][y].state = "Revealed"
             self.revealed_cells += 1
             if self.grid[x][y].value == "*":
-                print("GAME OVER!")  # to be replaced with proper game over function
+                self.game_over = True
+                #print("GAME OVER!")  # to be replaced with proper game over function
             elif self.grid[x][y].value == "0":
                 self.auto_reveal(x, y)
 

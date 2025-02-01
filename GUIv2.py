@@ -21,10 +21,7 @@ def ui_open_cell(x, y):
                     tiles[i][j].after(500,lambda row=i, column=j: tiles[row][column].config(bg="blue"))
         communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
 
-    game_win_check()
-    
-
-
+    game_state_check()
 
 
 def ui_flag_cell(x, y):
@@ -64,12 +61,50 @@ def update_timer(time):
     timer.config(text=str(time))
     timer.after(1000, lambda: update_timer(time))
 
-def game_win_check():
+def game_state_check():
     if game.game_has_been_won:
-        for i in range(0, game.board.grid_height):
-            for j in range(0, game.board.grid_width):
-                tiles[i][j].config(state = DISABLED)
-        communicator.config(text = "Congratulations!")
+        finish_game("Congratulations")
+    elif game.board.game_over:
+        finish_game("GAME OVER")
+    ## if the user has won the game
+    #if game.game_has_been_won:
+    #    for i in range(0, game.board.grid_height):
+    #        for j in range(0, game.board.grid_width):
+    #            tiles[i][j].config(state = DISABLED)
+    #    communicator.config(text = "Congratulations!")
+#
+    ## if the user has lost the game (opened a mine)
+    #if game.board.game_over:
+    #    for i in range(0, game.board.grid_height):
+    #        for j in range(0, game.board.grid_width):
+    #            tiles[i][j].config(state = DISABLED)
+    #    communicator.config(text = "GAME OVER!")
+
+def finish_game(outcome):
+    for i in range(0, game.board.grid_height):
+        for j in range(0, game.board.grid_width):
+            tiles[i][j].config(state=DISABLED)
+    communicator.config(text=outcome)
+    game_finished_window = Toplevel(classic_win)
+    game_finished_window.geometry("500x500")
+    game_finished_window.title(outcome)
+    final_time = [int(timer.cget("text"))//60, int(timer.cget("text"))%60]
+    Label(game_finished_window, text=f"Your time was: {final_time[0]}:{final_time[1]}\nPlease enter your username below").grid(row=0,column=0)
+    Entry(game_finished_window).grid(row=1,column=0)
+    Button(game_finished_window, text="CONFIRM", command=game_finished_window.destroy).grid(row=2,column=0)
+
+#def user_info_got():
+#    game_finished_window.destroy
+#    pass
+
+# finish making the timer look nice
+
+
+
+
+
+# use classic_win.destroy
+
 
 
 game = GameManager()
