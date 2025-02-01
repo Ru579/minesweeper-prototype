@@ -8,6 +8,7 @@ class GameManager:
         self.flag_difference = 0
         self.mines_left = 0
         self.difficulty = ""
+        self.game_has_been_won = False
 
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
@@ -16,7 +17,7 @@ class GameManager:
             self.mines_left=10
         elif difficulty == "Intermediate":
             self.board = Board(16, 16, 40)
-            self.mines_left = 1
+            self.mines_left = 40
         elif difficulty == "Expert":
             self.board = Board(16, 30, 99)
             self.mines_left = 99
@@ -34,6 +35,9 @@ class GameManager:
         self.board.flag_difference=0
         if not self.game_started:
             self.game_started = True
+            self.game_has_been_won = False
+        if self.board.revealed_cells == self.board.grid_width * self.board.grid_height - self.board.no_of_mines:
+            self.game_win()
 
 
     def flag_cell(self, x, y):
@@ -52,6 +56,9 @@ class GameManager:
         self.board.confuse_cell(x,y)
         if cell_was_flagged:
             self.mines_left+=1
+
+    def game_win(self):
+        self.game_has_been_won = True
 
 
 

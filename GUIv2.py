@@ -21,6 +21,9 @@ def ui_open_cell(x, y):
                     tiles[i][j].after(500,lambda row=i, column=j: tiles[row][column].config(bg="blue"))
         communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
 
+    game_win_check()
+    
+
 
 
 
@@ -28,8 +31,12 @@ def ui_flag_cell(x, y):
     game.flag_cell(x, y)
     if game.get_cell(x, y, "state") == "Flagged":
         tiles[x][y].config(bg="blue", text="")
-    if game.get_cell(x, y, "state") == "Hidden":
+    elif game.get_cell(x, y, "state") == "Hidden":
         tiles[x][y].config(bg="#d8d8d8", text="")
+        if game.board.not_enough_flags:
+            communicator.config(text = "Not enough flags")
+            communicator.after(500, lambda: communicator.config(text = ""))
+            game.board.not_enough_flags = False
     mines_left_counter.config(text=str(game.mines_left))
 
 
@@ -57,6 +64,14 @@ def update_timer(time):
     timer.config(text=str(time))
     timer.after(1000, lambda: update_timer(time))
 
+def game_win_check():
+    if game.game_has_been_won:
+        for i in range(0, game.board.grid_height):
+            for j in range(0, game.board.grid_width):
+                tiles[i][j].config(state = DISABLED)
+        communicator.config(text = "Congratulations!")
+
+
 game = GameManager()
 
 classic_win = Tk()
@@ -64,7 +79,8 @@ classic_win = Tk()
 cell_grid = Frame(classic_win)
 cell_grid.grid(row=1,column=1)
 
-game.start_classic_mode("Intermediate")
+difficulty = input("Enter difficulty:")
+game.start_classic_mode(difficulty)
 
 tiles = [[Button(classic_win) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
 

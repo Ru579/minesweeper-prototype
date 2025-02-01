@@ -11,6 +11,8 @@ class Board:
         self.protected_coordinate = []
         self.flag_difference=0
         self.was_flagged = False
+        self.revealed_cells = 0
+        self.not_enough_flags = False
 
     def place_mines(self, grid_height, grid_width, no_of_mines):
         for i in range(0, no_of_mines):
@@ -34,6 +36,7 @@ class Board:
                 self.protected_coordinate.extend([x, y])
                 self.place_mines(self.grid_height, self.grid_width, self.no_of_mines)
             self.grid[x][y].state = "Revealed"
+            self.revealed_cells += 1
             if self.grid[x][y].value == "*":
                 print("GAME OVER!")  # to be replaced with proper game over function
             elif self.grid[x][y].value == "0":
@@ -51,28 +54,28 @@ class Board:
 
     def flag_cell(self, x, y, mines_left):
         if self.grid[x][y].state != "Revealed":
-            if self.grid[x][y].state != "Flagged" and mines_left>0:
-                self.grid[x][y].state = "Flagged"
-                print(f"Tile ({x},{y}) flagged")  # CHECKING LINE
+            if self.grid[x][y].state != "Flagged":
+                if mines_left>0:
+                    self.grid[x][y].state = "Flagged"
+                else:
+                    self.not_enough_flags = True
             elif self.grid[x][y].state == "Flagged":
                 self.grid[x][y].state = "Hidden"
                 self.was_flagged = True
-                print(f"Tile ({x},{y}) unflagged")  # CHECKING LINE
 
     def confuse_cell(self, x, y):
         if self.grid[x][y].state != "Revealed":
             if self.grid[x][y].state != "Confused":
                 self.grid[x][y].state = "Confused"
-                print(f"Tile ({x},{y}) marked as a question")  # CHECKING LINE
             elif self.grid[x][y].state == "Confused":
                 self.grid[x][y].state = "Hidden"
-                print(f"Tile ({x},{y}) no longer marked as a question")  # CHECKING LINE
 
     def auto_reveal(self, x, y):
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if self.in_bounds(i, j) and self.grid[i][j].state == "Hidden":
                     self.grid[i][j].state = "Revealed"
+                    self.revealed_cells += 1
                     if self.grid[i][j].value == "0":
                         self.auto_reveal(i, j)
 
