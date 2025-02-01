@@ -68,16 +68,16 @@ def update_timer(minutes, seconds):
 
 def game_state_check():
     if game.game_has_been_won:
-        finish_game("Congratulations")
+        finish_game("WIN", "Congratulations!")
     elif game.board.game_over:
-        finish_game("GAME OVER")
+        finish_game("LOSE", "GAME OVER")
 
 
-def finish_game(outcome):
+def finish_game(outcome, message):
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
             tiles[i][j].config(state=DISABLED)
-    communicator.config(text=outcome)
+    communicator.config(text=message)
     classic_win.after(500, lambda: create_credit_window(outcome))
 
 
@@ -92,18 +92,43 @@ def create_credit_window(outcome):
         elif i == 1 or i == 2:
             game_finished_window.rowconfigure(i, weight=2)
     final_time = [timer.cget("text")[0:2], timer.cget("text")[3:5]]
-    Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
-    username = Entry(game_finished_window, font=("Calibri", 16))
-    username.grid(row=1, column=1)
-    Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_got(game_finished_window, username.get(), final_time)).grid(row=2, column=1)
+    timer.destroy()
+    Label(classic_win, text=f"{final_time[0]}:{final_time[1]}", font=("Calibri", 20), width=5).grid(row=0, column=2)
+    if outcome == "WIN":
+        Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
+        username = Entry(game_finished_window, font=("Calibri", 16))
+        username.grid(row=1, column=1)
+        Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_got(game_finished_window, username.get(), final_time)).grid(row=2, column=1)
+    elif outcome == "LOSE":
+        Label(game_finished_window, text=f"GAME OVER!\nYour time was {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
+        Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board(game_finished_window)).grid(row=2, column=1)
+        Button(game_finished_window, text="Close", font=("Calibri", 16), command=game_finished_window.destroy).grid(row=3, column=1)
 
 
 def user_info_got(window, username, time):  # where time is an array, 1st index is minutes, 2nd index is seconds
     window.destroy()
-    add_user_info(username,time)
+    add_user_info(username, time)
+
+
+def view_board(window):
+    window.destroy()
+    for i in range(0, game.board.grid_height):
+        for j in range(0, game.board.grid_width):
+            tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
+            if game.get_cell(i, j, "value") == "*":
+                tiles[i][j].config(bg="red")
+            if game.get_cell(i, j, "value") == "0":
+                tiles[i][j].config(text="")
 
 
 game = GameManager()
+
+main_menu = Tk()
+
+main_menu.geometry("1000x1000")
+
+
+
 
 classic_win = Tk()
 
@@ -140,5 +165,8 @@ mines_left_counter.grid(row=0, column=0)
 timer = Label(classic_win, text="0", font=("Calibri", 20), width=5)
 timer.grid(row=0, column=2)
 update_timer(0, 0)
+
+Button(classic_win, text="print scores?", width=10, bg="yellow", command=organise_scores).grid(row=2, column=2)
+
 
 mainloop()
