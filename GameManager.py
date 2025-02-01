@@ -13,7 +13,7 @@ class GameManager:
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
         if difficulty == "Beginner":
-            self.board = Board(8, 8, 1)
+            self.board = Board(8, 8, 2)
             self.mines_left=10
         elif difficulty == "Intermediate":
             self.board = Board(16, 16, 40)

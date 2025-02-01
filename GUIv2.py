@@ -56,55 +56,47 @@ def update_ui():
                 if game.get_cell(i,j,"value")=="0":
                     tiles[i][j].config(text="")
 
-def update_timer(time):
-    time+=1
-    timer.config(text=str(time))
-    timer.after(1000, lambda: update_timer(time))
+def update_timer(minutes, seconds):
+    seconds+=1
+    if seconds==60:
+        seconds = 0
+        minutes+=1
+    timer.config(text=f"{minutes:02}:{seconds:02}")
+    timer.after(1000, lambda: update_timer(minutes, seconds))
+
+
+
 
 def game_state_check():
     if game.game_has_been_won:
         finish_game("Congratulations")
     elif game.board.game_over:
         finish_game("GAME OVER")
-    ## if the user has won the game
-    #if game.game_has_been_won:
-    #    for i in range(0, game.board.grid_height):
-    #        for j in range(0, game.board.grid_width):
-    #            tiles[i][j].config(state = DISABLED)
-    #    communicator.config(text = "Congratulations!")
-#
-    ## if the user has lost the game (opened a mine)
-    #if game.board.game_over:
-    #    for i in range(0, game.board.grid_height):
-    #        for j in range(0, game.board.grid_width):
-    #            tiles[i][j].config(state = DISABLED)
-    #    communicator.config(text = "GAME OVER!")
 
 def finish_game(outcome):
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
             tiles[i][j].config(state=DISABLED)
     communicator.config(text=outcome)
+    classic_win.after(500, lambda: create_credit_window(outcome))
+
+def create_credit_window(outcome):
     game_finished_window = Toplevel(classic_win)
     game_finished_window.geometry("500x500")
     game_finished_window.title(outcome)
-    final_time = [int(timer.cget("text"))//60, int(timer.cget("text"))%60]
-    Label(game_finished_window, text=f"Your time was: {final_time[0]}:{final_time[1]}\nPlease enter your username below").grid(row=0,column=0)
-    Entry(game_finished_window).grid(row=1,column=0)
-    Button(game_finished_window, text="CONFIRM", command=game_finished_window.destroy).grid(row=2,column=0)
+    for i in range(3):
+        game_finished_window.columnconfigure(i, weight=1)
+        if i==0 or i==3:
+            game_finished_window.rowconfigure(i, weight=3)
+        elif i==1 or i==2:
+            game_finished_window.rowconfigure(i, weight=2)
+    final_time = [timer.cget("text")[0:2], timer.cget("text")[3:5]]
+    Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0,column=1)
+    Entry(game_finished_window, font=("Calibri", 16)).grid(row=1,column=1)
+    Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_got(game_finished_window)).grid(row=2,column=1)
 
-#def user_info_got():
-#    game_finished_window.destroy
-#    pass
-
-# finish making the timer look nice
-
-
-
-
-
-# use classic_win.destroy
-
+def user_info_got(window):
+    window.destroy()
 
 
 game = GameManager()
@@ -114,8 +106,9 @@ classic_win = Tk()
 cell_grid = Frame(classic_win)
 cell_grid.grid(row=1,column=1)
 
-difficulty = input("Enter difficulty:")
-game.start_classic_mode(difficulty)
+#difficulty = input("Enter difficulty:")
+#game.start_classic_mode(difficulty)
+game.start_classic_mode("Beginner")
 
 tiles = [[Button(classic_win) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
 
@@ -140,9 +133,9 @@ communicator.grid(row=2,column=1)
 mines_left_counter = Label(classic_win, text=str(game.mines_left), font=("Calibri", 20), width=2)
 mines_left_counter.grid(row=0,column=0)
 
-timer = Label(classic_win, text="0", font=("Calibri", 20), width=3)
+timer = Label(classic_win, text="0", font=("Calibri", 20), width=5)
 timer.grid(row=0,column=2)
-update_timer(0)
+update_timer(0,0)
 
 
 mainloop()
