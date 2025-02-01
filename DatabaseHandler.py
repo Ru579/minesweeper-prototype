@@ -18,3 +18,4 @@ def add_user_info(username, time):  # where time is an array, 1st index is minut
 #only add winners' scores to the database
 #organise database? shortest time at the top?
 #add menu, with option to view leaderboard
+#have different files for different things e.g. average time, best time ever, top 10 or 100 times (instead of organising the entire thing?), (eventually) levels for different game modes

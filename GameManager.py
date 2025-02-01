@@ -1,7 +1,6 @@
 from Board import *
 from DatabaseHandler import *
 
-
 class GameManager:
     def __init__(self):
         self.game_started = False
@@ -58,6 +57,3 @@ class GameManager:
 
     def game_win(self):
         self.game_has_been_won = True
-
-    def user_information(self, username, time):  # where time is an array, 1st index is minutes, 2nd index is seconds
-        add_user_info(username, time)

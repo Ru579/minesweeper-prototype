@@ -100,7 +100,7 @@ def create_credit_window(outcome):
 
 def user_info_got(window, username, time):  # where time is an array, 1st index is minutes, 2nd index is seconds
     window.destroy()
-    game.user_information(username, time)
+    add_user_info(username,time)
 
 
 game = GameManager()
