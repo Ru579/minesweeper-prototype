@@ -9,7 +9,7 @@ class Board:
         self.no_of_mines = no_of_mines
         self.grid = [[Cell() for _ in range(0, grid_width)] for _ in range(0, grid_height)]
         self.protected_coordinate = []
-        self.flag_difference=0
+        self.flag_difference = 0
         self.was_flagged = False
         self.revealed_cells = 0
         self.not_enough_flags = False
@@ -40,24 +40,24 @@ class Board:
             self.revealed_cells += 1
             if self.grid[x][y].value == "*":
                 self.game_over = True
-                #print("GAME OVER!")  # to be replaced with proper game over function
+                # print("GAME OVER!")  # to be replaced with proper game over function
             elif self.grid[x][y].value == "0":
                 self.auto_reveal(x, y)
 
         elif self.grid[x][y].state == "Revealed":
             if self.count_surroundings(x, y, lambda cell: cell.state == "Flagged") == self.grid[x][y].value:
                 self.auto_reveal(x, y)
-            #Once proper game over feature is added, first part of following if statement can be removed since it won't be possible to click on a revealed mine.
-            elif self.grid[x][y].value!="*" and int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) < int(self.grid[x][y].value):
+            # Once proper game over feature is added, first part of following if statement can be removed since it won't be possible to click on a revealed mine.
+            elif int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) < int(self.grid[x][y].value):
                 self.flag_difference = int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) - int(self.grid[x][y].value)
-            #Once proper game over feature is added, first part of following if statement can be removed since it won't be possible to click on a revealed mine.
-            elif self.grid[x][y].value!="*" and int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) > int(self.grid[x][y].value):
+            # Once proper game over feature is added, first part of following if statement can be removed since it won't be possible to click on a revealed mine.
+            elif int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) > int(self.grid[x][y].value):
                 self.flag_difference = int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) - int(self.grid[x][y].value)
 
     def flag_cell(self, x, y, mines_left):
         if self.grid[x][y].state != "Revealed":
             if self.grid[x][y].state != "Flagged":
-                if mines_left>0:
+                if mines_left > 0:
                     self.grid[x][y].state = "Flagged"
                 else:
                     self.not_enough_flags = True
