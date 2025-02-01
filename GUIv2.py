@@ -64,7 +64,7 @@ classic_win = Tk()
 cell_grid = Frame(classic_win)
 cell_grid.grid(row=1,column=1)
 
-game.start_classic_mode("Expert")
+game.start_classic_mode("Intermediate")
 
 tiles = [[Button(classic_win) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
 

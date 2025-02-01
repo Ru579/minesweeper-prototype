@@ -10,6 +10,7 @@ class Board:
         self.grid = [[Cell() for _ in range(0, grid_width)] for _ in range(0, grid_height)]
         self.protected_coordinate = []
         self.flag_difference=0
+        self.was_flagged = False
 
     def place_mines(self, grid_height, grid_width, no_of_mines):
         for i in range(0, no_of_mines):
@@ -48,13 +49,14 @@ class Board:
             elif self.grid[x][y].value!="*" and int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) > int(self.grid[x][y].value):
                 self.flag_difference = int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) - int(self.grid[x][y].value)
 
-    def flag_cell(self, x, y):
+    def flag_cell(self, x, y, mines_left):
         if self.grid[x][y].state != "Revealed":
-            if self.grid[x][y].state != "Flagged":
+            if self.grid[x][y].state != "Flagged" and mines_left>0:
                 self.grid[x][y].state = "Flagged"
                 print(f"Tile ({x},{y}) flagged")  # CHECKING LINE
             elif self.grid[x][y].state == "Flagged":
                 self.grid[x][y].state = "Hidden"
+                self.was_flagged = True
                 print(f"Tile ({x},{y}) unflagged")  # CHECKING LINE
 
     def confuse_cell(self, x, y):

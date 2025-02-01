@@ -16,7 +16,7 @@ class GameManager:
             self.mines_left=10
         elif difficulty == "Intermediate":
             self.board = Board(16, 16, 40)
-            self.mines_left = 40
+            self.mines_left = 1
         elif difficulty == "Expert":
             self.board = Board(16, 30, 99)
             self.mines_left = 99
@@ -37,11 +37,13 @@ class GameManager:
 
 
     def flag_cell(self, x, y):
-        self.board.flag_cell(x,y)
+        self.board.flag_cell(x,y, self.mines_left)
         if self.board.grid[x][y].state=="Flagged":
             self.mines_left-=1
-        elif self.board.grid[x][y].state!="Revealed":
+        elif self.board.grid[x][y].state!="Revealed" and self.board.was_flagged==True:
             self.mines_left+=1
+            self.board.was_flagged = False
+
 
     def confuse_cell(self, x, y):
         cell_was_flagged = False
