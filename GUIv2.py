@@ -130,7 +130,7 @@ def start_classic_mode():
 
     # difficulty = input("Enter difficulty:")
     # game.start_classic_mode(difficulty)
-    game.start_classic_mode("Beginner")
+    game.start_classic_mode("Expert")
 
     global tiles
     tiles = [[Button(classic_win) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
