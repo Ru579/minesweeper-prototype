@@ -13,7 +13,7 @@ class GameManager:
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
         if difficulty == "Beginner":
-            self.board = Board(8, 8, 1)
+            self.board = Board(8, 8, 2)
             self.mines_left = 10
         elif difficulty == "Intermediate":
             self.board = Board(16, 16, 40)
@@ -29,7 +29,6 @@ class GameManager:
             return self.board.grid[x][y].state
 
     def open_cell(self, x, y):
-        print(f"Cell ({x},{y}) opened")
         self.board.open_cell(x, y, self.game_started)
         self.flag_difference = self.board.flag_difference
         self.board.flag_difference = 0

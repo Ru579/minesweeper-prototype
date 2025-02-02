@@ -40,17 +40,14 @@ class Board:
             self.revealed_cells += 1
             if self.grid[x][y].value == "*":
                 self.game_over = True
-                # print("GAME OVER!")  # to be replaced with proper game over function
             elif self.grid[x][y].value == "0":
                 self.auto_reveal(x, y)
 
         elif self.grid[x][y].state == "Revealed":
             if self.count_surroundings(x, y, lambda cell: cell.state == "Flagged") == self.grid[x][y].value:
                 self.auto_reveal(x, y)
-            # Once proper game over feature is added, first part of following if statement can be removed since it won't be possible to click on a revealed mine.
             elif int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) < int(self.grid[x][y].value):
                 self.flag_difference = int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) - int(self.grid[x][y].value)
-            # Once proper game over feature is added, first part of following if statement can be removed since it won't be possible to click on a revealed mine.
             elif int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) > int(self.grid[x][y].value):
                 self.flag_difference = int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) - int(self.grid[x][y].value)
 
