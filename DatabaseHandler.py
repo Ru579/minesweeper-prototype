@@ -30,6 +30,10 @@ def organise_scores():
 
 
 #TO-DO:
-#add menu, with option to view leaderboard
+#finish menu
+#clean up code
+#make a "game frame" that holds all the cells, timer etc. that can be deleted, and is then replaced with the credit window
+#use grid.forget to hide the game board from view upon completion, and then either return it to view or destroy it
+#start time trial mode
 #statistics option, allows you to view average time, best time, furthest level reached in time trial
 #have different files for different things e.g. average time, best time ever, top 10 or 100 times (instead of organising the entire thing?), (eventually) levels for different game modes

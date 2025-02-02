@@ -121,52 +121,90 @@ def view_board(window):
                 tiles[i][j].config(text="")
 
 
+def start_classic_mode():
+    global classic_win
+    classic_win = Tk()
+
+    cell_grid = Frame(classic_win)
+    cell_grid.grid(row=1, column=1)
+
+    # difficulty = input("Enter difficulty:")
+    # game.start_classic_mode(difficulty)
+    game.start_classic_mode("Beginner")
+
+    global tiles
+    tiles = [[Button(classic_win) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
+
+    for i in range(0, game.board.grid_height):
+        for j in range(0, game.board.grid_width):
+            tile = Button(cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
+            current_tile = tile
+            tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
+            tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
+            tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
+            if game.difficulty == "Intermediate" or game.difficulty == "Expert":
+                tile.config(width=4, height=2, font=("Segoe UI", 9))
+            tile.grid(row=i + 1, column=j + 1)
+            tiles[i][j] = tile
+
+    title = Label(classic_win, text="MINESWEEPER.PROTO", font=("Calibri", 20))
+    title.grid(row=0, column=1)
+
+    global communicator
+    communicator = Label(classic_win, text="Click a cell to start", font=("Calibri", 18), width=24)
+    communicator.grid(row=2, column=1)
+
+    global mines_left_counter
+    mines_left_counter = Label(classic_win, text=str(game.mines_left), font=("Calibri", 20), width=2)
+    mines_left_counter.grid(row=0, column=0)
+
+    global timer
+    timer = Label(classic_win, text="0", font=("Calibri", 20), width=5)
+    timer.grid(row=0, column=2)
+    update_timer(0, 0)
+
+    #Button(classic_win, text="print scores?", width=10, bg="yellow", command=organise_scores).grid(row=2, column=2)
+
+
 game = GameManager()
 
 main_menu = Tk()
 
-main_menu.geometry("1000x1000")
+#title = Label(classic_win, text="MINESWEEPER.PROTO", font=("Calibri", 20))
+#communicator = Label(classic_win, text="Click a cell to start", font=("Calibri", 18), width=24)
+#mines_left_counter = Label(classic_win, text=str(game.mines_left), font=("Calibri", 20), width=2)
+#timer = Label(classic_win, text="0", font=("Calibri", 20), width=5)
+#tiles = [[Button(main_menu) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
+
+
+#configuring the geometry and rows of the main menu
+#main_menu.geometry("1000x1000")
+main_menu.columnconfigure(0, weight=2)
+main_menu.columnconfigure(1, weight=3)
+main_menu.columnconfigure(2, weight=2)
+main_menu.rowconfigure(0, weight=2)
+main_menu.rowconfigure(1, weight=1)
+main_menu.rowconfigure(2, weight=3)
+main_menu.rowconfigure(3, weight=1)
+
+#adding main widgets on the main_menu window
+Label(main_menu, text="MINESWEEPER", font=("Calibri", 40), bg="white", fg="black").grid(row=0,column=1, pady=7)
+Button(main_menu, text="CLASSIC", font=("Calibri", 30), bg="green", width=33, height=2, command=start_classic_mode).grid(row=1,column=1, pady=7)
+game_modes = Frame(main_menu)
+game_modes.grid(row=2,column=1)
+Button(main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).grid(row=3,column=0)
+Label(main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=15).grid(row=3,column=2)
+
+
+#Button(game_modes, text="CLASSIC", font=("Calibri", 24), bg="green", width=30).grid(row=0,column=1)
+Button(game_modes, text="Leaderboard", font=("Calibri", 24), bg="yellow", width=20,height = 2, pady=8).grid(row=0,column=0, padx=5,pady=3)
+Button(game_modes, text="Time Trial", font=("Calibri", 24), bg="blue", width=20,height = 2, pady=8).grid(row=0,column=1, padx=5,pady=3)
+Button(game_modes, text="Tips", font=("Calibri", 24), bg="purple", width=20,height = 2, pady=8).grid(row=1,column=0, padx=5,pady=3)
+Button(game_modes, text="Statistics", font=("Calibri", 24), bg="red", width=20,height = 2, pady=8).grid(row=1,column=1, padx=5,pady=3)
 
 
 
 
-classic_win = Tk()
-
-cell_grid = Frame(classic_win)
-cell_grid.grid(row=1, column=1)
-
-# difficulty = input("Enter difficulty:")
-# game.start_classic_mode(difficulty)
-game.start_classic_mode("Beginner")
-
-tiles = [[Button(classic_win) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
-
-for i in range(0, game.board.grid_height):
-    for j in range(0, game.board.grid_width):
-        tile = Button(cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
-        current_tile = tile
-        tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
-        tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
-        tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
-        if game.difficulty == "Intermediate" or game.difficulty == "Expert":
-            tile.config(width=4, height=2, font=("Segoe UI", 9))
-        tile.grid(row=i + 1, column=j + 1)
-        tiles[i][j] = tile
-
-title = Label(classic_win, text="MINESWEEPER.PROTO", font=("Calibri", 20))
-title.grid(row=0, column=1)
-
-communicator = Label(classic_win, text="Click a cell to start", font=("Calibri", 18), width=24)
-communicator.grid(row=2, column=1)
-
-mines_left_counter = Label(classic_win, text=str(game.mines_left), font=("Calibri", 20), width=2)
-mines_left_counter.grid(row=0, column=0)
-
-timer = Label(classic_win, text="0", font=("Calibri", 20), width=5)
-timer.grid(row=0, column=2)
-update_timer(0, 0)
-
-Button(classic_win, text="print scores?", width=10, bg="yellow", command=organise_scores).grid(row=2, column=2)
 
 
 mainloop()
