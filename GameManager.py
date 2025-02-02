@@ -8,11 +8,17 @@ class GameManager:
         self.flag_difference = 0
         self.mines_left = 0
         self.difficulty = ""
+        self.tt_difficulty = "" # difficulty for time trial
         self.game_has_been_won = False
+        self.board_done = False
+        self.game_mode = ""
         self.timer_on = False
+        self.stopwatch=0
+        self.stage = 0
 
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
+        self.game_mode = "Classic"
         if difficulty == "Beginner":
             self.board = Board(8, 8, 2)
             self.mines_left = 10
@@ -23,22 +29,35 @@ class GameManager:
             self.board = Board(16, 30, 99)
             self.mines_left = 99
 
+
+    def start_time_trial(self):
+        self.game_mode = "Time Trial"
+        self.board_done = False
+        self.stage = 6
+        self.stopwatch=0
+        self.board = Board(self.stage,self.stage, self.board.calculate_no_of_mines(self.stage, "Easy"))
+        self.mines_left = self.board.calculate_no_of_mines(self.stage, "Easy")
+
+
     def get_cell(self, x, y, info_needed):
         if info_needed == "value":
             return self.board.grid[x][y].value
         elif info_needed == "state":
             return self.board.grid[x][y].state
 
+
     def open_cell(self, x, y):
         self.board.open_cell(x, y, self.game_started)
         self.flag_difference = self.board.flag_difference
         self.board.flag_difference = 0
         if not self.game_started:
-            self.game_started = True
+            #self.game_started = True
             self.game_has_been_won = False
             self.timer_on = True
-        if self.board.revealed_cells == self.board.grid_width * self.board.grid_height - self.board.no_of_mines and not self.board.game_over:
-            self.game_win()
+        self.board_done_check()
+
+        #if self.board.revealed_cells == self.board.grid_width * self.board.grid_height - self.board.no_of_mines and not self.board.game_over:
+        #    self.game_win()
 
     def flag_cell(self, x, y):
         self.board.flag_cell(x, y, self.mines_left)
@@ -56,5 +75,25 @@ class GameManager:
         if cell_was_flagged:
             self.mines_left += 1
 
-    def game_win(self):
-        self.game_has_been_won = True
+    def board_done_check(self):
+        if self.board.revealed_cells == self.board.grid_width * self.board.grid_height - self.board.no_of_mines and not self.board.game_over:
+            if self.game_mode=="Classic":
+                self.game_has_been_won = True
+            elif self.game_mode=="Time Trial":
+                self.board_done = True
+
+    def time_stage_complete(self):
+        pass
+
+    def next_tt_stage(self):
+        self.stage+=1
+        if self.stage<13:
+            self.tt_difficulty = "Easy"
+        elif 13<=self.stage<=19:
+            self.tt_difficulty = "Medium"
+        elif 20<=self.stage<=26:
+            self.tt_difficulty = "Hard"
+        elif 27<=self.stage<=33:
+            self.tt_difficulty = "Very Hard"
+        self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, self.tt_difficulty))
+        self.mines_left = self.board.calculate_no_of_mines(self.stage, self.tt_difficulty)

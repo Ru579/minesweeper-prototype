@@ -4,7 +4,7 @@ scores = {}
 leaderboard={}
 
 
-def add_user_info(username, time):  # where time is an array, 1st index is minutes, 2nd index is seconds
+def add_classic_user_info(username, time):  # where time is an array, 1st index is minutes, 2nd index is seconds
     with open("scores.txt", "r") as file:
         for line in file:
             record = line.split(":")
@@ -12,6 +12,17 @@ def add_user_info(username, time):  # where time is an array, 1st index is minut
     date = datetime.datetime.now().strftime("%x").split("/")
     scores[f"{username}({date[1]}-{date[0]}-{date[2]})"] = f"{time[0]}-{time[1]}"
     with open("scores.txt", "w") as file:
+        for a, b in scores.items():
+            file.write(f"{a}:{b}\n")
+
+def add_tt_user_info(username, time):
+    with open("tt_scores.txt", "r") as file:
+        for line in file:
+            record = line.split(":")
+            scores[f"{record[0]}"] = record[1].strip("\n")
+    date = datetime.datetime.now().strftime("%x").split("/")
+    scores[f"{username}({date[1]}-{date[0]}-{date[2]})"] = f"{time[0]}-{time[1]}"
+    with open("tt_scores.txt", "w") as file:
         for a, b in scores.items():
             file.write(f"{a}:{b}\n")
 
