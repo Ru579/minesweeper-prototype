@@ -1,25 +1,26 @@
 from GameManager import *
-from tkinter import *
+from Widget import *
 
 
 def ui_open_cell(x, y):
     game.open_cell(x, y)
     update_ui()
-    communicator.config(text="")
+    widgets.communicator.config(text="")
+    widgets.timer.after(1000, lambda: update_timer(0,0))
     if game.flag_difference < 0:
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Hidden":
                     tiles[i][j].config(bg="purple")
                     tiles[i][j].after(500, lambda row=i, column=j: tiles[row][column].config(bg="#d8d8d8"))
-        communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
+        widgets.communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
     if game.flag_difference > 0:
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Flagged":
                     tiles[i][j].config(bg="purple")
                     tiles[i][j].after(500, lambda row=i, column=j: tiles[row][column].config(bg="blue"))
-        communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
+        widgets.communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
 
     game_state_check()
 
@@ -31,10 +32,10 @@ def ui_flag_cell(x, y):
     elif game.get_cell(x, y, "state") == "Hidden":
         tiles[x][y].config(bg="#d8d8d8", text="")
         if game.board.not_enough_flags:
-            communicator.config(text="Not enough flags")
-            communicator.after(500, lambda: communicator.config(text=""))
+            widgets.communicator.config(text="Not enough flags")
+            widgets.communicator.after(500, lambda: widgets.communicator.config(text=""))
             game.board.not_enough_flags = False
-    mines_left_counter.config(text=str(game.mines_left))
+    widgets.mines_left_counter.config(text=str(game.mines_left))
 
 
 def ui_confuse_cell(x, y):
@@ -43,7 +44,7 @@ def ui_confuse_cell(x, y):
         tiles[x][y].config(bg="green", text="?")
     if game.get_cell(x, y, "state") == "Hidden":
         tiles[x][y].config(bg="#d8d8d8", text="")
-    mines_left_counter.config(text=str(game.mines_left))
+    widgets.mines_left_counter.config(text=str(game.mines_left))
 
 
 def update_ui():
@@ -58,12 +59,13 @@ def update_ui():
 
 
 def update_timer(minutes, seconds):
-    seconds += 1
-    if seconds == 60:
-        seconds = 0
-        minutes += 1
-    timer.config(text=f"{minutes:02}:{seconds:02}")
-    timer.after(1000, lambda: update_timer(minutes, seconds))
+    if game.timer_on:
+        seconds += 1
+        if seconds == 60:
+            seconds = 0
+            minutes += 1
+        widgets.timer.config(text=f"{minutes:02}:{seconds:02}")
+        widgets.timer.after(1000, lambda: update_timer(minutes, seconds))
 
 
 def change_difficulty(difficulty):
@@ -88,14 +90,15 @@ def finish_game(outcome, message):
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
             tiles[i][j].config(state=DISABLED)
-    communicator.config(text=message)
+    widgets.communicator.config(text=message)
     game_frame.after(500, lambda: create_game_finished_window(outcome))
 
 
 def create_game_finished_window(outcome):
-    final_time = [timer.cget("text")[0:2], timer.cget("text")[3:5]]
-    timer.destroy()
-    Label(game_frame, text=f"{final_time[0]}:{final_time[1]}", font=("Calibri", 20), width=5).grid(row=0, column=2)
+    final_time = [widgets.timer.cget("text")[0:2], widgets.timer.cget("text")[3:5]]
+    game.timer_on = False
+    #timer.destroy()
+    #Label(game_frame, text=f"{final_time[0]}:{final_time[1]}", font=("Calibri", 20), width=5).grid(row=0, column=2)
     game_frame.forget()
     global game_finished_window
     game_finished_window = Frame(Minesweeper)
@@ -149,18 +152,15 @@ def start_game(game_mode):
     title = Label(game_frame, text="MINESWEEPER.PROTO", font=("Calibri", 20))
     title.grid(row=0, column=1)
 
-    global communicator
-    communicator = Label(game_frame, text="Click a cell to start", font=("Calibri", 18), width=24)
-    communicator.grid(row=2, column=1)
+    widgets.communicator = Label(game_frame, text="Click a cell to start", font=("Calibri", 18), width=24)
+    widgets.communicator.grid(row=2, column=1)
 
-    global timer
-    timer = Label(game_frame, text="00:00", font=("Calibri", 20), width=5)
-    timer.grid(row=0, column=2)
-    timer.after(1000, lambda: update_timer(0, 0))
+    widgets.timer = Label(game_frame, text="00:00", font=("Calibri", 20), width=5)
+    widgets.timer.grid(row=0, column=2)
+    widgets.timer.after(1000, lambda: update_timer(0, 0))
 
-    global cell_grid
-    cell_grid=Frame(game_frame)
-    cell_grid.grid(row=1, column=1)
+    widgets.cell_grid=Frame(game_frame)
+    widgets.cell_grid.grid(row=1, column=1)
 
     if game_mode == "Classic":
         start_classic_mode(difficulty_button.cget("text"))
@@ -169,16 +169,15 @@ def start_game(game_mode):
 def start_classic_mode(difficulty):
     game.start_classic_mode(difficulty)
 
-    global mines_left_counter
-    mines_left_counter = Label(game_frame, text=str(game.mines_left), font=("Calibri", 20), width=2)
-    mines_left_counter.grid(row=0, column=0)
+    widgets.mines_left_counter = Label(game_frame, text=str(game.mines_left), font=("Calibri", 20), width=2)
+    widgets.mines_left_counter.grid(row=0, column=0)
 
     global tiles
-    tiles = [[Button(cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
+    tiles = [[Button(widgets.cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
 
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
-            tile = Button(cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
+            tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
             tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
             tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
             tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
@@ -201,10 +200,7 @@ game_frame = Frame(Minesweeper)
 game_finished_window = Frame(Minesweeper)
 
 # creating widgets to go into game-based frames
-cell_grid = Frame(game_frame)
-mines_left_counter = Label(Minesweeper)
-timer = Label(Minesweeper)
-communicator = Label(Minesweeper)
+widgets = Widget()
 
 tiles = []
 
