@@ -19,6 +19,7 @@ class GameManager:
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
         self.game_mode = "Classic"
+        self.game_has_been_won=False
         if difficulty == "Beginner":
             self.board = Board(8, 8, 2)
             self.mines_left = 10
@@ -33,6 +34,8 @@ class GameManager:
     def start_time_trial(self):
         self.game_mode = "Time Trial"
         self.board_done = False
+        self.game_has_been_won = False
+        self.board.game_over=False
         self.stage = 6
         self.stopwatch=0
         self.board = Board(self.stage,self.stage, self.board.calculate_no_of_mines(self.stage, "Easy"))
@@ -86,7 +89,14 @@ class GameManager:
         pass
 
     def next_tt_stage(self):
+        self.timer_on = False
         self.stage+=1
+        self.set_difficulty()
+        self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, self.tt_difficulty))
+        self.mines_left = self.board.calculate_no_of_mines(self.stage, self.tt_difficulty)
+        self.board_done = False
+
+    def set_difficulty(self):
         if self.stage<13:
             self.tt_difficulty = "Easy"
         elif 13<=self.stage<=19:
@@ -95,5 +105,3 @@ class GameManager:
             self.tt_difficulty = "Hard"
         elif 27<=self.stage<=33:
             self.tt_difficulty = "Very Hard"
-        self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, self.tt_difficulty))
-        self.mines_left = self.board.calculate_no_of_mines(self.stage, self.tt_difficulty)

@@ -79,8 +79,10 @@ def update_countdown_timer(minutes, seconds):
         seconds-=1
         if seconds==0 and minutes==0:
             game.board.game_over = True
-            finish_board("Time")
             widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
+            finish_board()
+            do_game_over(1800)
+            #widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
         else:
             if seconds<0:
                 seconds=59
@@ -99,41 +101,52 @@ def change_difficulty(difficulty):
 
 
 def game_state_check():
-    if game.game_mode=="Classic":
+    if game.board.game_over:
+        finish_board()
+        do_game_over()
+        game.game_started = False
+    elif game.game_mode=="Classic":
         if game.game_has_been_won:
             finish_board()
+            #do_game_over()
             widgets.communicator.config(text="Congratulations!")
             game_frame.after(500, lambda: create_game_finished_window("WIN"))
             game.game_started=False
-        elif game.board.game_over:
-            finish_board()
-            game.game_started=False
+        #elif game.board.game_over:
+        #    finish_board()
+        #    game.game_started=False
     elif game.game_mode=="Time Trial":
         if game.board_done:
-            finish_board()
+            #finish_board()
+            #do_game_over()
             widgets.communicator.config(text="Next Stage")
             next_tt_stage()
-        elif game.board.game_over:
-            finish_board()
-            game.game_started = False
+        #elif game.board.game_over:
+        #    finish_board()
+        #    game.game_started = False
 
 def next_tt_stage():
     finish_board()
     widgets.communicator.config(text="Next Stage")
     game.next_tt_stage()
-    make_tt_board()
+    game_frame.after(500, lambda: make_tt_board())
+    game.timer_on = True
+#need to fix this function (conflicts with update_ui- trying to update once board is cleared?)
 
 
-def finish_board(type_of_end=""):
+def finish_board():
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
             tiles[i][j].config(state=DISABLED)
-    if game.board.game_over:
-        widgets.communicator.config(text="GAME OVER!")
-        if type_of_end=="Time":
-            game_frame.after(1800, lambda: create_game_finished_window("LOSE"))
-        else:
-            game_frame.after(500, lambda: create_game_finished_window("LOSE"))
+
+
+def do_game_over(delay=750):
+    #if game.board.game_over:
+    widgets.communicator.config(text="GAME OVER!")
+    #game_frame.after(int(delay), lambda: create_game_finished_window("LOSE"))
+    game_frame.after(delay, lambda: create_game_finished_window("LOSE"))
+
+
 
 
    #if game.game_mode=="Classic":
@@ -159,17 +172,20 @@ def create_game_finished_window(outcome, game_over_type=""):
         elif i == 1 or i == 2:
             game_finished_window.rowconfigure(i, weight=2)
     if game.game_mode=="Classic":
-        if outcome == "WIN":
-            Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
-            username = Entry(game_finished_window, font=("Calibri", 16))
-            username.grid(row=1, column=1)
-            Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_get(username.get(), final_time)).grid(row=2, column=1)
-        elif outcome == "LOSE":
-            Label(game_finished_window, text=f"GAME OVER!\nYour time was {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
-            Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=1)
-            Button(game_finished_window, text="Close", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=3, column=1)
-    elif game.game_mode=="Time Trial":
-        tt_game_over(final_time)
+        classic_game_over_window(outcome, final_time)
+    elif game.game_mode == "Time Trial":
+        tt_game_over_window(final_time)
+
+        #if outcome == "WIN":
+        #    Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
+        #    username = Entry(game_finished_window, font=("Calibri", 16))
+        #    username.grid(row=1, column=1)
+        #    Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_get(username.get(), final_time)).grid(row=2, column=1)
+        #elif outcome == "LOSE":
+        #    Label(game_finished_window, text=f"GAME OVER!\nYour time was {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
+        #    Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=1)
+        #    Button(game_finished_window, text="Close", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=3, column=1)
+
         #Label(game_finished_window, text=f"You lasted for:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
         #username = Entry(game_finished_window, font=("Calibri", 16))
         #username.grid(row=1, column=1)
@@ -178,7 +194,19 @@ def create_game_finished_window(outcome, game_over_type=""):
         #Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=3, column=1)
 
 
-def tt_game_over(final_time):
+def classic_game_over_window(outcome, final_time):
+    if outcome == "WIN":
+        Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
+        username = Entry(game_finished_window, font=("Calibri", 16))
+        username.grid(row=1, column=1)
+        Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_get(username.get(), final_time)).grid(row=2, column=1)
+    elif outcome == "LOSE":
+        Label(game_finished_window, text=f"GAME OVER!\nYour time was {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
+        Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=1)
+        Button(game_finished_window, text="Close", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=3, column=1)
+
+
+def tt_game_over_window(final_time):
     Label(game_finished_window, text=f"You lasted for:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
     username = Entry(game_finished_window, font=("Calibri", 16))
     username.grid(row=1, column=1)
@@ -279,8 +307,8 @@ def start_time_trial():
     widgets.mines_left_counter = Label(game_frame, text=str(game.mines_left), font=("Calibri", 20), width=2)
     widgets.mines_left_counter.grid(row=0, column=0)
 
-    global tiles
-    tiles = [[Button(widgets.cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
+    #global tiles
+    #tiles = [[Button(widgets.cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
 
     make_tt_board()
 
@@ -296,8 +324,11 @@ def start_time_trial():
     #        tiles[i][j] = tile
 
 def make_tt_board():
+    game.game_started = False
     widgets.cell_grid=Frame(game_frame)
     widgets.cell_grid.grid(row=1,column=1)
+    global tiles
+    tiles = [[Button(widgets.cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
             tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
