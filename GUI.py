@@ -1,5 +1,5 @@
 from GameManager import *
-from Widget import *
+#from Widget import *
 
 
 def ui_open_cell(x, y):
@@ -10,7 +10,8 @@ def ui_open_cell(x, y):
         game.game_started = True
         if game.game_mode=="Classic":
             widgets.countup_timer.after(1000, lambda: update_countup_timer(0,0))
-        if game.game_mode=="Time Trial":
+        if game.game_mode=="Time Trial" and not game.tt_running:
+            game.tt_running = True
             widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3,0))
 
     if game.flag_difference < 0:
@@ -73,22 +74,39 @@ def update_countup_timer(minutes, seconds):
         widgets.countup_timer.config(text=f"{minutes:02}:{seconds:02}")
         widgets.countup_timer.after(1000, lambda: update_countup_timer(minutes, seconds))
 
+#def update_countdown_timer(minutes, seconds):
+#    if game.timer_on:
+#        game.stopwatch+=1
+#        seconds-=1
+#        if game.time_to_be_added:
+#            widgets.countdown_timer.config(text=game.add_time(minutes, seconds))
+#
+#        if seconds==0 and minutes==0:
+#            game.board.game_over = True
+#            widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
+#            finish_board()
+#            do_game_over(1800)
+#            #widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
+#        else:
+#            if seconds<0:
+#                seconds=59
+#                minutes-=1
+#            widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
+#            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(minutes, seconds))
+
+
 def update_countdown_timer(minutes, seconds):
-    if game.timer_on:
-        game.stopwatch+=1
-        seconds-=1
-        if seconds==0 and minutes==0:
-            game.board.game_over = True
-            widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
-            finish_board()
-            do_game_over(1800)
-            #widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
-        else:
-            if seconds<0:
-                seconds=59
-                minutes-=1
-            widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
-            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(minutes, seconds))
+    game.update_countdown_timer(minutes, seconds, widgets)
+    if game.time_change_type=="Time Added":
+        widgets.countdown_timer.config(text=game.countdown_timer)
+    elif game.time_change_type=="Time Game Over":
+        widgets.countdown_timer.config(text="00:00")
+        finish_board()
+        do_game_over(1800)
+    else:
+        widgets.countdown_timer.config(text=game.countdown_timer)
+        widgets.countdown_timer.after(1000, lambda: update_countdown_timer(minutes, seconds))
+
 
 
 def change_difficulty(difficulty):
@@ -102,6 +120,7 @@ def change_difficulty(difficulty):
 
 def game_state_check():
     if game.board.game_over:
+        game.tt_running = False
         finish_board()
         do_game_over()
         game.game_started = False
@@ -128,6 +147,8 @@ def game_state_check():
 def next_tt_stage():
     finish_board()
     widgets.communicator.config(text="Next Stage")
+    game.time_to_be_added = True
+    #widgets.countdown_timer.config(text=game.add_time(widgets.countdown_timer.cget("text")))
     game.next_tt_stage()
     game_frame.after(500, lambda: make_tt_board())
     game.timer_on = True
@@ -142,7 +163,10 @@ def finish_board():
 
 def do_game_over(delay=750):
     #if game.board.game_over:
-    widgets.communicator.config(text="GAME OVER!")
+    if widgets.countdown_timer.cget("text")=="00:00":
+        widgets.communicator.config(text="GAME OVER: Time Ran Out!")
+    else:
+        widgets.communicator.config(text="GAME OVER!")
     #game_frame.after(int(delay), lambda: create_game_finished_window("LOSE"))
     game_frame.after(delay, lambda: create_game_finished_window("LOSE"))
 
@@ -207,7 +231,8 @@ def classic_game_over_window(outcome, final_time):
 
 
 def tt_game_over_window(final_time):
-    Label(game_finished_window, text=f"You lasted for:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
+    #Label(game_finished_window, text=f"You lasted for:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
+    Label(game_finished_window, text=f"You lasted for:\n {game.stopwatch//60}:{game.stopwatch%60}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
     username = Entry(game_finished_window, font=("Calibri", 16))
     username.grid(row=1, column=1)
     confirm_button = Button(game_finished_window, text="CONFIRM NAME", font=("Calibri", 16), command=lambda: name_confirm(confirm_button, username.get(), final_time))

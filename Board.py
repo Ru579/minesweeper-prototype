@@ -86,6 +86,10 @@ class Board:
             for j in range(y - 1, y + 2):
                 if self.in_bounds(i, j) and self.grid[i][j].state == "Hidden":
                     self.grid[i][j].state = "Revealed"
+
+                    if self.grid[i][j].value=="*":
+                        self.game_over = True
+
                     self.revealed_cells += 1
                     if self.grid[i][j].value == "0":
                         self.auto_reveal(i, j)
