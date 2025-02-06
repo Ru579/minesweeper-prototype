@@ -1,6 +1,5 @@
 from Board import *
 from DatabaseHandler import *
-from Widget import *
 
 class GameManager:
     def __init__(self):
@@ -99,24 +98,41 @@ class GameManager:
                 self.board_done = True
 
 
-    def update_countdown_timer(self, minutes, seconds, widgets):
+    def update_countdown_timer(self, minutes, seconds):
+        minutes=int(minutes)
+        seconds=int(seconds)
         if self.timer_on:
             self.stopwatch+=1
             seconds-=1
-            if self.time_to_be_added:
-                total_time = int(minutes)*60 + int(seconds)
-                total_time+=self.bonus_times[self.tt_difficulty]
-                self.time_to_be_added = False
-                self.time_change_type = "Time Added"
-                self.countdown_timer = f"{total_time//60:02}:{total_time%60:02}"
+            if seconds < 0:
+                seconds = 59
+                minutes -= 1
+
+            #if self.time_to_be_added:
+            #    #total_time = int(minutes)*60 + int(seconds)
+            #    total_time = minutes * 60 + seconds
+            #    total_time+=self.bonus_times[self.tt_difficulty]
+            #    self.time_to_be_added = False
+            #    minutes = total_time//60
+            #    seconds=total_time%60
+            #    self.time_change_type = "Time Added"
+            #    self.countdown_timer = f"{total_time//60:02}:{total_time%60:02}"
             if seconds==0 and minutes==0:
                 self.board.game_over=True
                 self.time_change_type="Time Game Over"
             else:
-                if seconds<0:
-                    seconds=59
-                    minutes-=1
-                self.countdown_timer = f"{minutes:02}:{seconds:02}"
+                if self.time_to_be_added:
+                    total_time = minutes * 60 + seconds
+                    total_time += self.bonus_times[self.tt_difficulty]
+                    self.time_to_be_added = False
+                    minutes = total_time // 60
+                    seconds = total_time % 60
+                    self.time_change_type = "Time Added"
+                else:
+                    self.time_change_type = "Time Normal"
+        return minutes, seconds
+                #self.countdown_timer = f"{minutes:02}:{seconds:02}"
+
 
     def next_tt_stage(self):
         self.timer_on = False

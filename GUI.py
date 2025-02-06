@@ -1,16 +1,17 @@
 from GameManager import *
-#from Widget import *
+from Widget import *
 
 
 def ui_open_cell(x, y):
     game.open_cell(x, y)
     update_ui()
     widgets.communicator.config(text="")
-    if not game.game_started:
+    if not game.game_started and not game.tt_running:
         game.game_started = True
         if game.game_mode=="Classic":
             widgets.countup_timer.after(1000, lambda: update_countup_timer(0,0))
-        if game.game_mode=="Time Trial" and not game.tt_running:
+        #if game.game_mode=="Time Trial" and not game.tt_running:
+        if game.game_mode == "Time Trial":
             game.tt_running = True
             widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3,0))
 
@@ -96,16 +97,17 @@ def update_countup_timer(minutes, seconds):
 
 
 def update_countdown_timer(minutes, seconds):
-    game.update_countdown_timer(minutes, seconds, widgets)
-    if game.time_change_type=="Time Added":
-        widgets.countdown_timer.config(text=game.countdown_timer)
+    game.time_change_type=""
+    minutes, seconds = game.update_countdown_timer(minutes, seconds)
+    if game.time_change_type=="Time Added" or game.time_change_type=="Time Normal":
+        widgets.countdown_timer.config(text=f"{minutes:02}:{seconds:02}")
+        widgets.countdown_timer.after(1000, lambda: update_countdown_timer(minutes, seconds))
     elif game.time_change_type=="Time Game Over":
         widgets.countdown_timer.config(text="00:00")
         finish_board()
         do_game_over(1800)
-    else:
-        widgets.countdown_timer.config(text=game.countdown_timer)
-        widgets.countdown_timer.after(1000, lambda: update_countdown_timer(minutes, seconds))
+    elif game.tt_running:
+        widgets.countdown_timer.after(200, lambda: update_countdown_timer(minutes, seconds))
 
 
 
