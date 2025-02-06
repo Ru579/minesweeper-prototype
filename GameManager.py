@@ -1,6 +1,7 @@
 from Board import *
 from DatabaseHandler import *
 
+
 class GameManager:
     def __init__(self):
         self.game_started = False
@@ -8,18 +9,18 @@ class GameManager:
         self.flag_difference = 0
         self.mines_left = 0
         self.difficulty = ""
-        self.tt_difficulty = "" # difficulty for time trial
+        self.tt_difficulty = ""  # difficulty for time trial
         self.game_has_been_won = False
         self.board_done = False
         self.game_mode = ""
         self.timer_on = False
-        self.stopwatch=0
+        self.stopwatch = 0
         self.countdown_timer = ""
         self.stage = 0
         self.tt_running = False
-        self.time_to_be_added=False
-        self.time_change_type=""
-        self.bonus_times={
+        self.time_to_be_added = False
+        self.time_change_type = ""
+        self.bonus_times = {
             "Easy": 30,
             "Medium": 45,
             "Hard": 60,
@@ -29,7 +30,7 @@ class GameManager:
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
         self.game_mode = "Classic"
-        self.game_has_been_won=False
+        self.game_has_been_won = False
         if difficulty == "Beginner":
             self.board = Board(8, 8, 10)
             self.mines_left = 10
@@ -40,19 +41,16 @@ class GameManager:
             self.board = Board(16, 30, 99)
             self.mines_left = 99
 
-
     def start_time_trial(self):
         self.game_mode = "Time Trial"
-        #self.tt_running = True
         self.board_done = False
         self.game_has_been_won = False
-        self.board.game_over=False
+        self.board.game_over = False
         self.stage = 6
-        self.stopwatch=0
-        self.tt_difficulty="Easy"
-        self.board = Board(self.stage,self.stage, self.board.calculate_no_of_mines(self.stage, "Easy"))
+        self.stopwatch = 0
+        self.tt_difficulty = "Easy"
+        self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, "Easy"))
         self.mines_left = self.board.calculate_no_of_mines(self.stage, "Easy")
-
 
     def get_cell(self, x, y, info_needed):
         if info_needed == "value":
@@ -60,19 +58,14 @@ class GameManager:
         elif info_needed == "state":
             return self.board.grid[x][y].state
 
-
     def open_cell(self, x, y):
         self.board.open_cell(x, y, self.game_started)
         self.flag_difference = self.board.flag_difference
         self.board.flag_difference = 0
         if not self.game_started:
-            #self.game_started = True
             self.game_has_been_won = False
             self.timer_on = True
         self.board_done_check()
-
-        #if self.board.revealed_cells == self.board.grid_width * self.board.grid_height - self.board.no_of_mines and not self.board.game_over:
-        #    self.game_win()
 
     def flag_cell(self, x, y):
         self.board.flag_cell(x, y, self.mines_left)
@@ -92,34 +85,23 @@ class GameManager:
 
     def board_done_check(self):
         if self.board.revealed_cells == self.board.grid_width * self.board.grid_height - self.board.no_of_mines and not self.board.game_over:
-            if self.game_mode=="Classic":
+            if self.game_mode == "Classic":
                 self.game_has_been_won = True
-            elif self.game_mode=="Time Trial":
+            elif self.game_mode == "Time Trial":
                 self.board_done = True
 
-
     def update_countdown_timer(self, minutes, seconds):
-        minutes=int(minutes)
-        seconds=int(seconds)
+        minutes = int(minutes)
+        seconds = int(seconds)
         if self.timer_on:
-            self.stopwatch+=1
-            seconds-=1
+            self.stopwatch += 1
+            seconds -= 1
             if seconds < 0:
                 seconds = 59
                 minutes -= 1
-
-            #if self.time_to_be_added:
-            #    #total_time = int(minutes)*60 + int(seconds)
-            #    total_time = minutes * 60 + seconds
-            #    total_time+=self.bonus_times[self.tt_difficulty]
-            #    self.time_to_be_added = False
-            #    minutes = total_time//60
-            #    seconds=total_time%60
-            #    self.time_change_type = "Time Added"
-            #    self.countdown_timer = f"{total_time//60:02}:{total_time%60:02}"
-            if seconds==0 and minutes==0:
-                self.board.game_over=True
-                self.time_change_type="Time Game Over"
+            if seconds == 0 and minutes == 0:
+                self.board.game_over = True
+                self.time_change_type = "Time Game Over"
             else:
                 if self.time_to_be_added:
                     total_time = minutes * 60 + seconds
@@ -131,23 +113,21 @@ class GameManager:
                 else:
                     self.time_change_type = "Time Normal"
         return minutes, seconds
-                #self.countdown_timer = f"{minutes:02}:{seconds:02}"
-
 
     def next_tt_stage(self):
         self.timer_on = False
-        self.stage+=1
+        self.stage += 1
         self.set_difficulty()
         self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, self.tt_difficulty))
         self.mines_left = self.board.calculate_no_of_mines(self.stage, self.tt_difficulty)
         self.board_done = False
 
     def set_difficulty(self):
-        if self.stage<13:
+        if self.stage < 13:
             self.tt_difficulty = "Easy"
-        elif 13<=self.stage<=19:
+        elif 13 <= self.stage <= 19:
             self.tt_difficulty = "Medium"
-        elif 20<=self.stage<=26:
+        elif 20 <= self.stage <= 26:
             self.tt_difficulty = "Hard"
-        elif 27<=self.stage<=33:
+        elif 27 <= self.stage <= 33:
             self.tt_difficulty = "Very Hard"

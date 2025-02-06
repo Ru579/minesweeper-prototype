@@ -32,16 +32,15 @@ class Board:
                     self.grid[i][j].value = self.count_surroundings(i, j, lambda cell: cell.value == "*")
 
     def calculate_no_of_mines(self, stage, difficulty):
-        if difficulty=="Easy":
-            return round(0.12*(stage**2))
-            #return round(0.15625 * (stage**2))
-        elif difficulty=="Medium":
-            return round(0.175 * (stage**2))
-        elif difficulty=="Hard":
-            return round(0.206 * (stage**2))
-        elif difficulty=="Very Hard":
-            return round(0.237 * (stage**2))
-
+        if difficulty == "Easy":
+            return round(0.12 * (stage ** 2))
+            # return round(0.15625 * (stage**2))
+        elif difficulty == "Medium":
+            return round(0.175 * (stage ** 2))
+        elif difficulty == "Hard":
+            return round(0.206 * (stage ** 2))
+        elif difficulty == "Very Hard":
+            return round(0.237 * (stage ** 2))
 
     def open_cell(self, x, y, game_started):
         if self.grid[x][y].state == "Hidden":
@@ -87,7 +86,7 @@ class Board:
                 if self.in_bounds(i, j) and self.grid[i][j].state == "Hidden":
                     self.grid[i][j].state = "Revealed"
 
-                    if self.grid[i][j].value=="*":
+                    if self.grid[i][j].value == "*":
                         self.game_over = True
 
                     self.revealed_cells += 1

@@ -1,7 +1,7 @@
 import datetime
 
 scores = {}
-leaderboard={}
+leaderboard = {}
 
 
 def add_classic_user_info(username, time):  # where time is an array, 1st index is minutes, 2nd index is seconds
@@ -14,6 +14,7 @@ def add_classic_user_info(username, time):  # where time is an array, 1st index 
     with open("scores.txt", "w") as file:
         for a, b in scores.items():
             file.write(f"{a}:{b}\n")
+
 
 def add_tt_user_info(username, time):
     with open("tt_scores.txt", "r") as file:
@@ -32,23 +33,17 @@ def organise_scores():
         for line in file:
             record = line.split(":")
             scores[f"{record[0]}"] = record[1].strip("\n")
-    for name,time in scores.items():
-        leaderboard[name] = str(time[0:2])+str(time[3:5])
-        #leaderboard[name] = int(time[0:2])*60 + int(time[3:5])
+    for name, time in scores.items():
+        leaderboard[name] = str(time[0:2]) + str(time[3:5])
     sorted_list = dict(sorted(leaderboard.items(), key=lambda item: item[1]))
-    print(sorted_list) # CHECKING LINE
+    print(sorted_list)  # CHECKING LINE
 
+# TO-DO:
 
-
-#TO-DO:
-
-#finish fixing the timer!
-
-#clean up code
-    #move logic for updating countdown timer to GameManager
-#Upon completion of a stage, add 30 seconds to timer (if mode=="easy": medium=45, hard=60, very hard = 90)
-    #if seconds>60, seconds=seconds%60, minutes+=seconds//60
-#show all mines upon game over; therefore, remove view_board button
-#add "retry?" Button in game_finished_window
-#statistics option, allows you to view average time, best time, furthest level reached in time trial
-#have different files for different things e.g. average time, best time ever, top 10 or 100 times (instead of organising the entire thing?), (eventually) levels for different game modes
+# clean up code
+# Upon completion of a stage, add 30 seconds to timer (if mode=="easy": medium=45, hard=60, very hard = 90)
+# if seconds>60, seconds=seconds%60, minutes+=seconds//60
+# show all mines upon game over; therefore, remove view_board button
+# add "retry?" Button in game_finished_window
+# statistics option, allows you to view average time, best time, furthest level reached in time trial
+# have different files for different things e.g. average time, best time ever, top 10 or 100 times (instead of organising the entire thing?), (eventually) levels for different game modes

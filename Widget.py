@@ -1,5 +1,6 @@
 from tkinter import *
 
+
 class Widget:
     def __init__(self):
         self.cell_grid = Frame()
