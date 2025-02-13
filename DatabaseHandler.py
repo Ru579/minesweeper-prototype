@@ -40,10 +40,11 @@ def organise_scores():
 
 # TO-DO:
 
-# clean up code
-# Upon completion of a stage, add 30 seconds to timer (if mode=="easy": medium=45, hard=60, very hard = 90)
 # if seconds>60, seconds=seconds%60, minutes+=seconds//60
 # show all mines upon game over; therefore, remove view_board button
 # add "retry?" Button in game_finished_window
+#add powerups? eg. +minute, or cancel one mine that was clicked
+
+
 # statistics option, allows you to view average time, best time, furthest level reached in time trial
 # have different files for different things e.g. average time, best time ever, top 10 or 100 times (instead of organising the entire thing?), (eventually) levels for different game modes

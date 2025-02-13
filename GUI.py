@@ -1,5 +1,8 @@
 from GameManager import *
-from Widget import *
+#from Widget import *
+from Settings import *
+#from tkinter import *
+#from PIL import Image, ImageTk
 
 
 def ui_open_cell(x, y):
@@ -61,6 +64,16 @@ def update_ui():
                 tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
                 if game.get_cell(i, j, "value") == "*":
                     tiles[i][j].config(bg="red")
+
+
+                    #global image
+                    #image=PhotoImage(file="Minesweeper_flag_v4.png")
+                    #image = image.resize(10,10)
+                    #tiles[i][j].config(image=image)
+                    #tiles[i][j].config(image=PhotoImage(file="Minesweeper_flag.png"))
+                    #img0 = open("C:\\Users\\ShaeH\\PycharmProjects\\MinesweeperPrototype\\Minesweeper_flag.png")
+                    #img = PhotoImage(img0)
+                    #tiles[i][j].config(img)
                 if game.get_cell(i, j, "value") == "0":
                     tiles[i][j].config(text="")
 
@@ -139,6 +152,18 @@ def do_game_over(delay=750):
     else:
         widgets.communicator.config(text="GAME OVER!")
     game_frame.after(delay, lambda: create_game_finished_window("LOSE"))
+
+#def view_board():
+#    game_finished_window.destroy()
+#    game_frame.pack()
+#    for i in range(0, game.board.grid_height):
+#        for j in range(0, game.board.grid_width):
+#            tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
+#            if game.get_cell(i, j, "value") == "*":
+#                tiles[i][j].config(bg="red")
+#            if game.get_cell(i, j, "value") == "0":
+#                tiles[i][j].config(text="")
+#    Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
 
 
 def create_game_finished_window(outcome):
@@ -296,6 +321,7 @@ Minesweeper = Tk()
 Minesweeper.title("Minesweeper")
 
 game = GameManager()
+settings = Settings()
 
 # creating frames
 main_menu = Frame(Minesweeper)
@@ -307,6 +333,8 @@ game_finished_window = Frame(Minesweeper)
 widgets = Widget()
 
 tiles = []
+
+minesweeper_flag = PhotoImage(file="Minesweeper_flag.png")
 
 # CREATING MAIN MENU
 
@@ -336,11 +364,14 @@ classic_button.bind("<Button-1>", lambda event: start_game("Classic"))
 classic_label.bind("<Button-1>", lambda event: start_game("Classic"))
 classic_button.grid(row=1, column=1, pady=7)
 
+#Extra options
 game_modes = Frame(main_menu)
 game_modes.grid(row=2, column=1)
 Button(main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).grid(row=3, column=0)
 Label(main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=15).grid(row=3, column=2)
+Button(main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20, command=lambda: settings.create_settings_window(main_menu, Minesweeper)).grid(row=0,column=0)
 
+#Alternative game modes/ information
 Button(game_modes, text="Leaderboard", font=("Calibri", 24), bg="yellow", width=20, height=2, pady=8).grid(row=0, column=0, padx=5, pady=3)
 Button(game_modes, text="Time Trial", font=("Calibri", 24), bg="blue", width=20, height=2, pady=8, command=lambda: start_game("Time Trial")).grid(row=0, column=1, padx=5, pady=3)
 Button(game_modes, text="Tips", font=("Calibri", 24), bg="purple", width=20, height=2, pady=8).grid(row=1, column=0, padx=5, pady=3)
