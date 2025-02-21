@@ -42,7 +42,6 @@ def organise_scores():
 
 # TO-DO:
 
-# if seconds>60, seconds=seconds%60, minutes+=seconds//60
 # show all mines upon game over; therefore, remove view_board button
 # add "retry?" Button in game_finished_window
 #add powerups? eg. +minute, or cancel one mine that was clicked

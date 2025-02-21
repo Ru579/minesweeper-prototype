@@ -126,11 +126,15 @@ def game_state_check():
             game.game_started = False
             if settings.user_settings["create_game_finished_window"]:
                 game_frame.after(500, lambda: create_game_finished_window("WIN"))
+            else:
+                make_quick_replay_buttons()
+
 
             # add alternative quick replay for classic mode, with an option for quickly changing the difficulty
 
     elif game.game_mode == "Time Trial":
         if game.board_done:
+            game.timer_on=False # stops timer from ticking down when swapping stages (I think)
             widgets.communicator.config(text="Next Stage")
             next_tt_stage()
 
@@ -161,19 +165,32 @@ def do_game_over(delay=750):
     if settings.user_settings["create_game_finished_window"]:
         game_frame.after(delay, lambda: create_game_finished_window("LOSE"))
     else:
-        game.timer_on = False
-        retry_button = Button(game_frame, text="Retry?", bg="blue", fg="white", font=15, width=6)  # command=lambda: retry(game.game_mode))
-        retry_button.grid(row=2, column=0)
-        Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
-        if game.game_mode == "Classic":
-            # Button(game_frame, text="Change Difficulty?", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+        make_quick_replay_buttons()
+        #game.timer_on = False
+        #retry_button = Button(game_frame, text="Retry?", bg="blue", fg="white", font=15, width=6)  # command=lambda: retry(game.game_mode))
+        #retry_button.grid(row=2, column=0)
+        #Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+        #if game.game_mode == "Classic":
+        #    difficulty_changer = Label(game_frame, text="Change Difficulty?", bg="green", fg="white", font=15, width=15)
+        #    difficulty_changer.bind("<Button-1>", lambda event: change_retry_difficulty(difficulty_changer))
+        #    difficulty_changer.grid(row=3, column=0)
+        #    retry_button.bind("<Button-1>", lambda event: retry(game.game_mode, difficulty_changer))
+        #else:
+        #    retry_button.bind("<Button-1>", lambda event: retry(game.game_mode))
 
-            difficulty_changer = Label(game_frame, text="Change Difficulty?", bg="green", fg="white", font=15, width=15)
-            difficulty_changer.bind("<Button-1>", lambda event: change_retry_difficulty(difficulty_changer))
-            difficulty_changer.grid(row=3, column=0)
-            retry_button.bind("<Button-1>", lambda event: retry(game.game_mode, difficulty_changer))
-        else:
-            retry_button.bind("<Button-1>", lambda event: retry(game.game_mode))
+
+def make_quick_replay_buttons():
+    game.timer_on = False
+    retry_button = Button(game_frame, text="Retry?", bg="blue", fg="white", font=15, width=6)  # command=lambda: retry(game.game_mode))
+    retry_button.grid(row=2, column=0)
+    Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+    if game.game_mode == "Classic":
+        difficulty_changer = Label(game_frame, text="Change Difficulty?", bg="green", fg="white", font=15, width=15)
+        difficulty_changer.bind("<Button-1>", lambda event: change_retry_difficulty(difficulty_changer))
+        difficulty_changer.grid(row=3, column=0)
+        retry_button.bind("<Button-1>", lambda event: retry(game.game_mode, difficulty_changer))
+    else:
+        retry_button.bind("<Button-1>", lambda event: retry(game.game_mode))
 
 
 def change_retry_difficulty(button):
