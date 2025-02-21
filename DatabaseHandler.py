@@ -15,6 +15,8 @@ def add_classic_user_info(username, time):  # where time is an array, 1st index 
         for a, b in scores.items():
             file.write(f"{a}:{b}\n")
 
+#for the future, could keep track of what records are new, and then open the file using "a" instead of "w"
+# to append the new records to the end of the file instead of writing the whole file again
 
 def add_tt_user_info(username, time):
     with open("tt_scores.txt", "r") as file:

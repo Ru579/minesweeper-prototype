@@ -1,8 +1,11 @@
 from GameManager import *
-#from Widget import *
+# from Widget import *
 from Settings import *
-#from tkinter import *
-#from PIL import Image, ImageTk
+from Tester import Minesweeper
+
+
+# from tkinter import *
+# from PIL import Image, ImageTk
 
 
 def ui_open_cell(x, y):
@@ -65,15 +68,14 @@ def update_ui():
                 if game.get_cell(i, j, "value") == "*":
                     tiles[i][j].config(bg="red")
 
-
-                    #global image
-                    #image=PhotoImage(file="Minesweeper_flag_v4.png")
-                    #image = image.resize(10,10)
-                    #tiles[i][j].config(image=image)
-                    #tiles[i][j].config(image=PhotoImage(file="Minesweeper_flag.png"))
-                    #img0 = open("C:\\Users\\ShaeH\\PycharmProjects\\MinesweeperPrototype\\Minesweeper_flag.png")
-                    #img = PhotoImage(img0)
-                    #tiles[i][j].config(img)
+                    # global image
+                    # image=PhotoImage(file="Minesweeper_flag_v4.png")
+                    # image = image.resize(10,10)
+                    # tiles[i][j].config(image=image)
+                    # tiles[i][j].config(image=PhotoImage(file="Minesweeper_flag.png"))
+                    # img0 = open("C:\\Users\\ShaeH\\PycharmProjects\\MinesweeperPrototype\\Minesweeper_flag.png")
+                    # img = PhotoImage(img0)
+                    # tiles[i][j].config(img)
                 if game.get_cell(i, j, "value") == "0":
                     tiles[i][j].config(text="")
 
@@ -121,8 +123,12 @@ def game_state_check():
         if game.game_has_been_won:
             finish_board()
             widgets.communicator.config(text="Congratulations!")
-            game_frame.after(500, lambda: create_game_finished_window("WIN"))
             game.game_started = False
+            if settings.user_settings["create_game_finished_window"]:
+                game_frame.after(500, lambda: create_game_finished_window("WIN"))
+
+            # add alternative quick replay for classic mode, with an option for quickly changing the difficulty
+
     elif game.game_mode == "Time Trial":
         if game.board_done:
             widgets.communicator.config(text="Next Stage")
@@ -147,23 +153,60 @@ def finish_board():
 
 
 def do_game_over(delay=750):
-    if widgets.countdown_timer.cget("text") == "00:00":
+    if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         widgets.communicator.config(text="GAME OVER: Time Ran Out!")
     else:
         widgets.communicator.config(text="GAME OVER!")
-    game_frame.after(delay, lambda: create_game_finished_window("LOSE"))
 
-#def view_board():
-#    game_finished_window.destroy()
-#    game_frame.pack()
-#    for i in range(0, game.board.grid_height):
-#        for j in range(0, game.board.grid_width):
-#            tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
-#            if game.get_cell(i, j, "value") == "*":
-#                tiles[i][j].config(bg="red")
-#            if game.get_cell(i, j, "value") == "0":
-#                tiles[i][j].config(text="")
-#    Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+    if settings.user_settings["create_game_finished_window"]:
+        game_frame.after(delay, lambda: create_game_finished_window("LOSE"))
+    else:
+        game.timer_on = False
+        retry_button = Button(game_frame, text="Retry?", bg="blue", fg="white", font=15, width=6)  # command=lambda: retry(game.game_mode))
+        retry_button.grid(row=2, column=0)
+        Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+        if game.game_mode == "Classic":
+            # Button(game_frame, text="Change Difficulty?", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+
+            difficulty_changer = Label(game_frame, text="Change Difficulty?", bg="green", fg="white", font=15, width=15)
+            difficulty_changer.bind("<Button-1>", lambda event: change_retry_difficulty(difficulty_changer))
+            difficulty_changer.grid(row=3, column=0)
+            retry_button.bind("<Button-1>", lambda event: retry(game.game_mode, difficulty_changer))
+        else:
+            retry_button.bind("<Button-1>", lambda event: retry(game.game_mode))
+
+
+def change_retry_difficulty(button):
+    difficulties = Menu(game_frame, tearoff=False)
+    difficulties.add_command(label="Beginner", command=lambda: button.config(text="Beginner"))
+    difficulties.add_command(label="Intermediate", command=lambda: button.config(text="Intermediate"))
+    difficulties.add_command(label="Expert", command=lambda: button.config(text="Expert"))
+    try:
+        x = button.winfo_rootx()
+        y = button.winfo_rooty()
+        difficulties.tk_popup(x, y)
+    finally:
+        difficulties.grab_release()
+
+
+#def retry(a,b):
+#    pass
+
+def retry(game_mode, label=Label(Minesweeper)):
+    if game.game_mode == "Classic":
+        pass
+        text = label.cget("text")
+        if text == "Change Difficulty?":
+            difficulty = game.difficulty
+        else:
+            difficulty = text
+        game_frame.destroy()
+        start_game(game_mode, difficulty)
+
+    else:
+        game_frame.destroy()
+        start_game(game_mode)
+        pass
 
 
 def create_game_finished_window(outcome):
@@ -242,9 +285,15 @@ def view_board():
     Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
 
 
-def start_game(game_mode):
+def start_game(game_mode, difficulty=""):
     main_menu.forget()
     global game_frame
+    # game_frame.destroy()
+    # try:
+    #    game_frame.destroy()
+    # except SyntaxError:
+    #    print("Error occurred")
+    #    pass
     game_frame = Frame(Minesweeper)
     game_frame.pack()
 
@@ -258,7 +307,10 @@ def start_game(game_mode):
     widgets.cell_grid.grid(row=1, column=1)
 
     if game_mode == "Classic":
-        start_classic_mode(difficulty_button.cget("text"))
+        if not difficulty:  # if this is our first time, and difficulty==""
+            start_classic_mode(difficulty_button.cget("text"))
+        else:
+            start_classic_mode(difficulty)
     if game_mode == "Time Trial":
         start_time_trial()
 
@@ -317,11 +369,24 @@ def make_tt_board():
             tiles[i][j] = tile
 
 
+# def view_board():
+#    game_finished_window.destroy()
+#    game_frame.pack()
+#    for i in range(0, game.board.grid_height):
+#        for j in range(0, game.board.grid_width):
+#            tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
+#            if game.get_cell(i, j, "value") == "*":
+#                tiles[i][j].config(bg="red")
+#            if game.get_cell(i, j, "value") == "0":
+#                tiles[i][j].config(text="")
+#    Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+
+
 Minesweeper = Tk()
 Minesweeper.title("Minesweeper")
 
 game = GameManager()
-settings = Settings()
+settings = Settings(Minesweeper)
 
 # creating frames
 main_menu = Frame(Minesweeper)
@@ -364,14 +429,15 @@ classic_button.bind("<Button-1>", lambda event: start_game("Classic"))
 classic_label.bind("<Button-1>", lambda event: start_game("Classic"))
 classic_button.grid(row=1, column=1, pady=7)
 
-#Extra options
+# Extra options
 game_modes = Frame(main_menu)
 game_modes.grid(row=2, column=1)
 Button(main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).grid(row=3, column=0)
 Label(main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=15).grid(row=3, column=2)
-Button(main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20, command=lambda: settings.create_settings_window(main_menu, Minesweeper)).grid(row=0,column=0)
+Button(main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20, command=lambda: settings.create_settings_window(main_menu, Minesweeper)).grid(row=0,
+                                                                                                                                                                                           column=0)
 
-#Alternative game modes/ information
+# Alternative game modes/ information
 Button(game_modes, text="Leaderboard", font=("Calibri", 24), bg="yellow", width=20, height=2, pady=8).grid(row=0, column=0, padx=5, pady=3)
 Button(game_modes, text="Time Trial", font=("Calibri", 24), bg="blue", width=20, height=2, pady=8, command=lambda: start_game("Time Trial")).grid(row=0, column=1, padx=5, pady=3)
 Button(game_modes, text="Tips", font=("Calibri", 24), bg="purple", width=20, height=2, pady=8).grid(row=1, column=0, padx=5, pady=3)

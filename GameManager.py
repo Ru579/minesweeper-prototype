@@ -40,6 +40,8 @@ class GameManager:
         elif difficulty == "Expert":
             self.board = Board(16, 30, 99)
             self.mines_left = 99
+        else:
+            print("Not a proper difficulty given")#CHECKING LINE
 
     def start_time_trial(self):
         self.game_mode = "Time Trial"
