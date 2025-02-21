@@ -129,9 +129,6 @@ def game_state_check():
             else:
                 make_quick_replay_buttons()
 
-
-            # add alternative quick replay for classic mode, with an option for quickly changing the difficulty
-
     elif game.game_mode == "Time Trial":
         if game.board_done:
             game.timer_on=False # stops timer from ticking down when swapping stages (I think)
@@ -209,7 +206,7 @@ def change_retry_difficulty(button):
 #def retry(a,b):
 #    pass
 
-def retry(game_mode, label=None):
+def retry(game_mode, label=None, destroy_window=False):
     if game.game_mode == "Classic":
         text = label.cget("text")
         if text == "Change Difficulty?":
@@ -222,6 +219,8 @@ def retry(game_mode, label=None):
     else:
         game_frame.destroy()
         start_game(game_mode)
+    if destroy_window:
+        game_finished_window.destroy()
 
 
 def create_game_finished_window(outcome):
@@ -241,6 +240,7 @@ def create_game_finished_window(outcome):
             game_finished_window.rowconfigure(i, weight=3)
         elif i == 1 or i == 2:
             game_finished_window.rowconfigure(i, weight=2)
+    game_finished_window.rowconfigure(0, weight=3)
     if game.game_mode == "Classic":
         classic_game_over_window(outcome, final_time)
     elif game.game_mode == "Time Trial":
@@ -249,22 +249,39 @@ def create_game_finished_window(outcome):
 
 def classic_game_over_window(outcome, final_time):
     if outcome == "WIN":
-        Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
-        username = Entry(game_finished_window, font=("Calibri", 16))
-        username.grid(row=1, column=1)
-        Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_get(username.get(), final_time)).grid(row=2, column=1)
+        Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
+        #Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
+        #username = Entry(game_finished_window, font=("Calibri", 16))
+        #username.grid(row=1, column=1)
+        #Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_get(username.get(), final_time)).grid(row=2, column=1)
     elif outcome == "LOSE":
         Label(game_finished_window, text=f"GAME OVER!\nYour time was {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
-        Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=1)
-        Button(game_finished_window, text="Close", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=3, column=1)
+
+    game_finished_options = Frame(game_finished_window)
+    retry_button = Button(game_finished_options, text="Retry?", bg="blue", fg="white", font=("Calibri", 16), width=15, command=lambda: retry(game.game_mode, difficulty_changer, destroy_window=True))
+    retry_button.grid(row=0, column=0)
+    difficulty_changer = Button(game_finished_options, text="Change Difficulty?", bg="green", fg="white", font=("Calibri", 16), width=15)
+    difficulty_changer.bind("<Button-1>", lambda event: change_retry_difficulty(difficulty_changer))
+    difficulty_changer.grid(row=0, column=1)
+    Button(game_finished_options, text="View Board?", font=("Calibri", 16), width=15, command=lambda: view_board()).grid(row=1, column=0)
+    Button(game_finished_options, text="Close", font=("Calibri", 16), width=15, command=lambda: return_to_menu(game_finished_window)).grid(row=1, column=1)
+    game_finished_options.grid(row=1, column=1)
 
 
 def tt_game_over_window(final_time):
-    Label(game_finished_window, text=f"You lasted for:\n {game.stopwatch // 60:02}:{game.stopwatch % 60:02}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
-    username = Entry(game_finished_window, font=("Calibri", 16))
-    username.grid(row=1, column=1)
-    confirm_button = Button(game_finished_window, text="CONFIRM NAME", font=("Calibri", 16), command=lambda: name_confirm(confirm_button, username.get(), final_time))
-    confirm_button.grid(row=2, column=1)
+    Label(game_finished_window, text=f"You got to stage {game.stage - 5}\nYou lasted for:\n {game.stopwatch // 60:02}:{game.stopwatch % 60:02}", font=("Calibri", 16)).grid(row=0, column=1)
+    retry_button = Button(game_finished_window, text="Retry?", bg="blue", fg="white", font=15, width=6, command=lambda: retry(game.game_mode, destroy_window=True))
+    retry_button.grid(row=1, column=1)
+    Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=1)
+    Button(game_finished_window, text="Close", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=3, column=1)
+
+
+
+    #Label(game_finished_window, text=f"You lasted for:\n {game.stopwatch // 60:02}:{game.stopwatch % 60:02}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
+    #username = Entry(game_finished_window, font=("Calibri", 16))
+    #username.grid(row=1, column=1)
+    #confirm_button = Button(game_finished_window, text="CONFIRM NAME", font=("Calibri", 16), command=lambda: name_confirm(confirm_button, username.get(), final_time))
+    #confirm_button.grid(row=2, column=1)
 
 
 def name_confirm(button, username, time):
