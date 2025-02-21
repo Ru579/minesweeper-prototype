@@ -1,7 +1,7 @@
 from GameManager import *
 # from Widget import *
 from Settings import *
-from Tester import Minesweeper
+#from Tester import Minesweeper
 
 
 # from tkinter import *
@@ -192,9 +192,8 @@ def change_retry_difficulty(button):
 #def retry(a,b):
 #    pass
 
-def retry(game_mode, label=Label(Minesweeper)):
+def retry(game_mode, label=None):
     if game.game_mode == "Classic":
-        pass
         text = label.cget("text")
         if text == "Change Difficulty?":
             difficulty = game.difficulty
@@ -206,7 +205,6 @@ def retry(game_mode, label=Label(Minesweeper)):
     else:
         game_frame.destroy()
         start_game(game_mode)
-        pass
 
 
 def create_game_finished_window(outcome):
