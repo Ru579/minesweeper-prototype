@@ -18,7 +18,7 @@ def ui_open_cell(x, y):
             widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
         if game.game_mode == "Time Trial" and not game.tt_running:
             game.tt_running = True
-            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(0, 10))
+            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
 
     if game.flag_difference < 0:
         for i in range(x - 1, x + 2):
@@ -121,6 +121,9 @@ def game_state_check():
         game.game_started = False
     elif game.game_mode == "Classic":
         if game.game_has_been_won:
+            #not 100% sure about the following line
+            game.timer_on = False
+
             finish_board()
             widgets.communicator.config(text="Congratulations!")
             game.game_started = False
@@ -145,6 +148,9 @@ def next_tt_stage():
     widgets.mines_left_counter.config(text=game.mines_left)
     game_frame.after(500, lambda: make_tt_board())
     game.timer_on = True
+
+    #SHOULD BE SET TO FALSE??
+
 
 
 def finish_board():

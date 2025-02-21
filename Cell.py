@@ -1,4 +1,4 @@
 class Cell:
-    def __init__(self):
-        self.value: str = "0"
+    def __init__(self, value="0"):
+        self.value: str = value
         self.state: str = "Hidden"
