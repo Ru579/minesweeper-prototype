@@ -141,7 +141,7 @@ class GameManager:
         self.stage += 1
         self.set_difficulty()
         self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, self.tt_difficulty))
-        print(f"Dimensions of board: {self.stage}x{self.stage}.\nStage: {self.stage - 5}.\nDifficulty: {self.tt_difficulty}")
+        #print(f"Dimensions of board: {self.stage}x{self.stage}.\nStage: {self.stage - 5}.\nDifficulty: {self.tt_difficulty}")
         self.mines_left = self.board.calculate_no_of_mines(self.stage, self.tt_difficulty)
         self.board_done = False
 

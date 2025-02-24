@@ -1,5 +1,3 @@
-from symbol import pass_stmt
-
 from GameManager import *
 # from Widget import *
 from Settings import *
@@ -215,6 +213,7 @@ def make_quick_replay_buttons():
         retry_button.bind("<Button-1>", lambda event: retry(game.game_mode, difficulty_changer))
     else:
         retry_button.bind("<Button-1>", lambda event: retry(game.game_mode))
+        Label(game_frame, text=f"Stage: {game.stage-5}", font=("Calibri Bold", 15), bg="dark grey", fg="green").grid(row=3, column=1)
 
 
 def change_retry_difficulty(button):
