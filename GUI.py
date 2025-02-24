@@ -18,7 +18,7 @@ def ui_open_cell(x, y):
             widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
         if game.game_mode == "Time Trial" and not game.tt_running:
             game.tt_running = True
-            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(0, 5))
+            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
 
     if game.flag_difference < 0:
         for i in range(x - 1, x + 2):
@@ -177,8 +177,9 @@ def do_game_over(delay=1250):
     game.timer_on=False
     if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         widgets.communicator.config(text="GAME OVER: Time Ran Out!")
-        view_mines_button = Button(game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: reveal_all_mines(view_mines_button))
-        view_mines_button.grid(row=3,column=2)
+        if not settings.user_settings["create_game_finished_window"]:
+            view_mines_button = Button(game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: reveal_all_mines(view_mines_button))
+            view_mines_button.grid(row=3,column=2)
     else:
         widgets.communicator.config(text="GAME OVER!")
         reveal_all_mines()
@@ -200,7 +201,8 @@ def reveal_all_mines(button=None):
                         tiles[i][j].config(text="*/F", bg="purple")
                 elif game.get_cell(i,j,"state")=="Flagged": #is a flagged cell and was not a mine (the previous if statement's condition was not met)
                     tiles[i][j].config(fg="red", text="X")
-        if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
+        #if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
+        if button != None:
             button.config(text="Hide Mines")
         game.mines_revealed=True
     else:
@@ -273,7 +275,7 @@ def create_game_finished_window(outcome):
     global game_finished_window
     game_finished_window = Frame(Minesweeper)
     game_finished_window.pack()
-    for i in range(3):
+    for i in range(4):
         game_finished_window.columnconfigure(i, weight=1)
         if i == 0 or i == 3:
             game_finished_window.rowconfigure(i, weight=3)
@@ -343,28 +345,28 @@ def return_to_menu(frame):
     main_menu.after(500, lambda: main_menu.pack())
 
 
+#use reveal all mines function if in time trial and countdown timer = "00:00", because mines wouldn't have been revealed
+
 def view_board():
     game_finished_window.destroy()
     game_frame.pack()
-    for i in range(0, game.board.grid_height):
-        for j in range(0, game.board.grid_width):
-            tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
-            if game.get_cell(i, j, "value") == "*":
-                tiles[i][j].config(bg="red")
-            if game.get_cell(i, j, "value") == "0":
-                tiles[i][j].config(text="")
-    Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+    #for i in range(0, game.board.grid_height):
+    #    for j in range(0, game.board.grid_width):
+    #        tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
+    #        if game.get_cell(i, j, "value") == "*":
+    #            tiles[i][j].config(bg="red")
+    #        if game.get_cell(i, j, "value") == "0":
+    #            tiles[i][j].config(text="")
+    if game.game_mode=="Time Trial" and widgets.countdown_timer.cget("text")=="00:00":
+        reveal_all_mines()
+    Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=10, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
+    view_mines_button = Button(game_frame, text="Hide Mines", bg="yellow", font=("Calibri", 15), width=10, command=lambda: reveal_all_mines(view_mines_button))
+    view_mines_button.grid(row=3,column=2)
 
 
 def start_game(game_mode, difficulty=""):
     main_menu.forget()
     global game_frame
-    # game_frame.destroy()
-    # try:
-    #    game_frame.destroy()
-    # except SyntaxError:
-    #    print("Error occurred")
-    #    pass
     game_frame = Frame(Minesweeper)
     game_frame.pack()
 
