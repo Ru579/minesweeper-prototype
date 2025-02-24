@@ -1,3 +1,5 @@
+from symbol import pass_stmt
+
 from GameManager import *
 # from Widget import *
 from Settings import *
@@ -25,17 +27,31 @@ def ui_open_cell(x, y):
             for j in range(y - 1, y + 2):
                 if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Hidden":
                     tiles[i][j].config(bg="purple")
-                    tiles[i][j].after(500, lambda row=i, column=j: tiles[row][column].config(bg="#d8d8d8"))
+                    return_cell_to_normal(i,j,"#d8d8d8")
+                    #tiles[i][j].after(500, lambda row=i, column=j: tiles[row][column].config(bg="#d8d8d8"))
         widgets.communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
     if game.flag_difference > 0:
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Flagged":
                     tiles[i][j].config(bg="purple")
-                    tiles[i][j].after(500, lambda row=i, column=j: tiles[row][column].config(bg="blue"))
+                    return_cell_to_normal(i,j,"blue")
+                    #tiles[i][j].after(500, lambda row=i, column=j: tiles[row][column].config(bg="blue"))
         widgets.communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
 
     game_state_check()
+
+
+def return_cell_to_normal(row,column, colour):
+    tiles[row][column].after(500,lambda x=row, y=column: fix_cell_colour(x,y, colour))
+
+
+def fix_cell_colour(row,column, colour):
+    state = game.get_cell(row, column, "state")
+    if colour=="#d8d8d8" and state=="Hidden":
+        tiles[row][column].config(bg=colour)
+    elif colour=="blue" and state=="Flagged":
+        tiles[row][column].config(bg=colour)
 
 
 def ui_flag_cell(x, y):
