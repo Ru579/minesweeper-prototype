@@ -202,7 +202,7 @@ def reveal_all_mines(button=None):
                 elif game.get_cell(i,j,"state")=="Flagged": #is a flagged cell and was not a mine (the previous if statement's condition was not met)
                     tiles[i][j].config(fg="red", text="X")
         #if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
-        if button != None:
+        if button is not None:
             button.config(text="Hide Mines")
         game.mines_revealed=True
     else:
@@ -509,6 +509,8 @@ Button(main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).g
 Label(main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=15).grid(row=3, column=2)
 Button(main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20, command=lambda: settings.create_settings_window(main_menu, Minesweeper)).grid(row=0,
                                                                                                                                                                                            column=0)
+log_in_button = Button(main_menu, text="Log In", font=("Calibri", 15), bg="dark grey", fg="white", height=2, width=10, command=lambda: log_in())
+log_in_button.grid(row=0, column=2)
 
 # Alternative game modes/ information
 Button(game_modes, text="Leaderboard", font=("Calibri", 24), bg="yellow", width=20, height=2, pady=8).grid(row=0, column=0, padx=5, pady=3)

@@ -40,6 +40,10 @@ def organise_scores():
     sorted_list = dict(sorted(leaderboard.items(), key=lambda item: item[1]))
     print(sorted_list)  # CHECKING LINE
 
+
+def log_in():
+    pass
+
 # TO-DO:
 
 # show all mines upon game over; therefore, remove view_board button
