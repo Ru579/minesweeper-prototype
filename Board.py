@@ -91,7 +91,9 @@ class Board:
 
     def calculate_no_of_mines(self, stage, difficulty):
         if difficulty == "Easy":
-            return round(0.12 * (stage ** 2))
+            return round(0.13 * (stage**2))
+            #return round(0.134 * (stage**2))
+            #return round(0.12 * (stage ** 2))
             # return round(0.15625 * (stage**2))
         elif difficulty == "Medium":
             return round(0.175 * (stage ** 2))

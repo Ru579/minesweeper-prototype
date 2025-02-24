@@ -95,6 +95,26 @@ class GameManager:
     def update_countdown_timer(self, minutes, seconds):
         minutes = int(minutes)
         seconds = int(seconds)
+        #if self.timer_on:
+        #    self.stopwatch += 1
+        #    seconds -= 1
+        #    if seconds < 0:
+        #        seconds = 59
+        #        minutes -= 1
+        #    if seconds == 0 and minutes == 0:
+        #        self.board.game_over = True
+        #        self.time_change_type = "Time Game Over"
+        #    else:
+        #        if self.time_to_be_added:
+        #            total_time = minutes * 60 + seconds
+        #            total_time += self.bonus_times[self.tt_difficulty]
+        #            self.time_to_be_added = False
+        #            minutes = total_time // 60
+        #            seconds = total_time % 60
+        #            self.time_change_type = "Time Added"
+        #        else:
+        #            self.time_change_type = "Time Normal"
+        #return minutes, seconds
         if self.timer_on:
             self.stopwatch += 1
             seconds -= 1
@@ -105,15 +125,15 @@ class GameManager:
                 self.board.game_over = True
                 self.time_change_type = "Time Game Over"
             else:
-                if self.time_to_be_added:
-                    total_time = minutes * 60 + seconds
-                    total_time += self.bonus_times[self.tt_difficulty]
-                    self.time_to_be_added = False
-                    minutes = total_time // 60
-                    seconds = total_time % 60
-                    self.time_change_type = "Time Added"
-                else:
-                    self.time_change_type = "Time Normal"
+                self.time_change_type = "Time Normal"
+        else:
+            if self.time_to_be_added:
+                total_time = minutes * 60 + seconds
+                total_time += self.bonus_times[self.tt_difficulty]
+                self.time_to_be_added = False
+                minutes = total_time // 60
+                seconds = total_time % 60
+                self.time_change_type = "Time Added"
         return minutes, seconds
 
     def next_tt_stage(self):
@@ -121,15 +141,28 @@ class GameManager:
         self.stage += 1
         self.set_difficulty()
         self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, self.tt_difficulty))
+        print(f"Dimensions of board: {self.stage}x{self.stage}.\nStage: {self.stage - 5}.\nDifficulty: {self.tt_difficulty}")
         self.mines_left = self.board.calculate_no_of_mines(self.stage, self.tt_difficulty)
         self.board_done = False
 
     def set_difficulty(self):
-        if self.stage < 13:
+        #NOTE: the first stage is stage 6, as it is a 6x6 board
+        #Testing new difficulties
+        if self.stage < 10:
             self.tt_difficulty = "Easy"
-        elif 13 <= self.stage <= 19:
+        elif 10 <= self.stage <= 16:
             self.tt_difficulty = "Medium"
-        elif 20 <= self.stage <= 26:
+        elif 17 <= self.stage <= 23:
             self.tt_difficulty = "Hard"
-        elif 27 <= self.stage <= 33:
+        elif 24 <= self.stage <= 30:
             self.tt_difficulty = "Very Hard"
+
+        #Old stage-difficulty conversions
+        #if self.stage < 13:
+        #    self.tt_difficulty = "Easy"
+        #elif 13 <= self.stage <= 19:
+        #    self.tt_difficulty = "Medium"
+        #elif 20 <= self.stage <= 26:
+        #    self.tt_difficulty = "Hard"
+        #elif 27 <= self.stage <= 33:
+        #    self.tt_difficulty = "Very Hard"

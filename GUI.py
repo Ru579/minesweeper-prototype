@@ -145,9 +145,10 @@ def next_tt_stage():
     game.time_to_be_added = True
     # widgets.countdown_timer.config(text=game.add_time(widgets.countdown_timer.cget("text")))
     game.next_tt_stage()
+    game.timer_on = False
     widgets.mines_left_counter.config(text=game.mines_left)
     game_frame.after(500, lambda: make_tt_board())
-    game.timer_on = True
+    #game.timer_on = True
 
     #SHOULD BE SET TO FALSE??
 
