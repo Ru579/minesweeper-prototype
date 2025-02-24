@@ -8,6 +8,7 @@ class GameManager:
         self.board = Board()
         self.flag_difference = 0
         self.mines_left = 0
+        self.mines_revealed = False
         self.difficulty = ""
         self.tt_difficulty = ""  # difficulty for time trial
         self.game_has_been_won = False
@@ -31,6 +32,7 @@ class GameManager:
         self.difficulty = difficulty
         self.game_mode = "Classic"
         self.game_has_been_won = False
+        self.mines_revealed=False
         if difficulty == "Beginner":
             self.board = Board(8, 8, 10)
             self.mines_left = 10
@@ -48,6 +50,7 @@ class GameManager:
         self.board_done = False
         self.game_has_been_won = False
         self.board.game_over = False
+        self.mines_revealed = False
         self.stage = 6
         self.stopwatch = 0
         self.tt_difficulty = "Easy"

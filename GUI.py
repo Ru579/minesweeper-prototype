@@ -18,7 +18,7 @@ def ui_open_cell(x, y):
             widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
         if game.game_mode == "Time Trial" and not game.tt_running:
             game.tt_running = True
-            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
+            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(0, 5))
 
     if game.flag_difference < 0:
         for i in range(x - 1, x + 2):
@@ -87,7 +87,6 @@ def update_ui():
                     # image = image.resize(10,10)
                     # tiles[i][j].config(image=image)
                     # tiles[i][j].config(image=PhotoImage(file="Minesweeper_flag.png"))
-                    # img0 = open("C:\\Users\\ShaeH\\PycharmProjects\\MinesweeperPrototype\\Minesweeper_flag.png")
                     # img = PhotoImage(img0)
                     # tiles[i][j].config(img)
                 if game.get_cell(i, j, "value") == "0":
@@ -178,7 +177,8 @@ def do_game_over(delay=1250):
     game.timer_on=False
     if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         widgets.communicator.config(text="GAME OVER: Time Ran Out!")
-        Button(game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: reveal_all_mines()).grid(row=3,column=2)
+        view_mines_button = Button(game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: reveal_all_mines(view_mines_button))
+        view_mines_button.grid(row=3,column=2)
     else:
         widgets.communicator.config(text="GAME OVER!")
         reveal_all_mines()
@@ -190,15 +190,28 @@ def do_game_over(delay=1250):
         #code for make_quick_replay_buttons
 
 
-def reveal_all_mines():
-    for i in range(game.board.grid_height):
-        for j in range(game.board.grid_width):
-            if game.get_cell(i,j,"value")=="*":
-                tiles[i][j].config(text="*", bg="red")
-                if game.get_cell(i,j,"state")=="Flagged":
-                    tiles[i][j].config(text="*/F", bg="purple")
-            elif game.get_cell(i,j,"state")=="Flagged":
-                tiles[i][j].config(fg="red", text="X")
+def reveal_all_mines(button=None):
+    if not game.mines_revealed:
+        for i in range(game.board.grid_height):
+            for j in range(game.board.grid_width):
+                if game.get_cell(i,j,"value")=="*":
+                    tiles[i][j].config(text="*", bg="red")
+                    if game.get_cell(i,j,"state")=="Flagged":
+                        tiles[i][j].config(text="*/F", bg="purple")
+                elif game.get_cell(i,j,"state")=="Flagged": #is a flagged cell and was not a mine (the previous if statement's condition was not met)
+                    tiles[i][j].config(fg="red", text="X")
+        if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
+            button.config(text="Hide Mines")
+        game.mines_revealed=True
+    else:
+        for i in range(game.board.grid_height):
+            for j in range(game.board.grid_width):
+                if tiles[i][j].cget("text")=="*/F" or tiles[i][j].cget("text")=="X":
+                    tiles[i][j].config(text="", bg="blue")
+                elif tiles[i][j].cget("text")=="*":
+                    tiles[i][j].config(text="", bg="#d8d8d8")
+        button.config(text="View Mines")
+        game.mines_revealed=False
 
 
 def make_quick_replay_buttons():
@@ -213,7 +226,7 @@ def make_quick_replay_buttons():
         retry_button.bind("<Button-1>", lambda event: retry(game.game_mode, difficulty_changer))
     else:
         retry_button.bind("<Button-1>", lambda event: retry(game.game_mode))
-        Label(game_frame, text=f"Stage: {game.stage-5}", font=("Calibri Bold", 15), bg="dark grey", fg="green").grid(row=3, column=1)
+        Label(game_frame, text=f"Stage: {game.stage-5}\nYou lasted for- {game.stopwatch//60:02}:{game.stopwatch%60:02}", font=("Calibri Bold", 15), bg="dark grey", fg="green").grid(row=3, column=1)
 
 
 def change_retry_difficulty(button):
