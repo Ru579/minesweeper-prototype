@@ -1,4 +1,5 @@
 from Widget import *
+from PIL import Image, ImageTk
 
 class Settings:
     def __init__(self, minesweeper_window):
@@ -6,8 +7,14 @@ class Settings:
         self.fifty_fifty_on = False
         #self.create_game_finished_window = True
         self.settings_window = Frame(minesweeper_window)
-        self.on = PhotoImage(file="on_switch.png", master=self.settings_window)
-        self.off = PhotoImage(file="off_switch.png", master=self.settings_window)
+        #self.on = PhotoImage(file="on_switch.png", master=self.settings_window)
+        #self.off = PhotoImage(file="off_switch.png", master=self.settings_window)
+        self.on = Image.open("on_switch.png")
+        self.on = self.on.resize((80, 20))
+        self.on = ImageTk.PhotoImage(self.on)
+        self.off = Image.open("off_switch.png")
+        self.off = self.off.resize((80, 20))
+        self.off = ImageTk.PhotoImage(self.off)
         self.user_settings={}
         with open("user_settings.txt", "r") as file:
             for line in file:
@@ -33,11 +40,26 @@ class Settings:
         settings_options.grid(row=1,column=1)
 
         #creating options in settings_options window
+        #create_gfw_button = Button(settings_options,
+        #                           image=self.get_switch_status("create_game_finished_window"),
+        #                           command=lambda: self.switch(create_gfw_button,
+        #                                                       self.user_settings["create_game_finished_window"],
+        #                                                       "create_game_finished_window"))
+
+        #img = Image.open("on_switch.png")
+        #new_image = PhotoImage(ImageTk.PhotoImage(img))
+        #create_gfw_button = Button(settings_options,
+        #                           command=lambda: self.switch(create_gfw_button,
+        #                                                       self.user_settings["create_game_finished_window"],
+        #                                                       "create_game_finished_window"))
+        #create_gfw_button.config(image=new_image)
+
         create_gfw_button = Button(settings_options,
                                    image=self.get_switch_status("create_game_finished_window"),
                                    command=lambda: self.switch(create_gfw_button,
                                                                self.user_settings["create_game_finished_window"],
                                                                "create_game_finished_window"))
+
         if create_gfw_button.cget("image")==self.on:
             print("Button is on")
         elif create_gfw_button.cget("image")==self.off:

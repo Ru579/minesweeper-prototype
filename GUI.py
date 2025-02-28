@@ -3,9 +3,7 @@ from GameManager import *
 from Settings import *
 #from Tester import Minesweeper
 
-
-# from tkinter import *
-# from PIL import Image, ImageTk
+#from PIL import Image, ImageTk
 
 
 def ui_open_cell(x, y):
@@ -55,9 +53,11 @@ def fix_cell_colour(row,column, colour):
 def ui_flag_cell(x, y):
     game.flag_cell(x, y)
     if game.get_cell(x, y, "state") == "Flagged":
-        tiles[x][y].config(bg="blue", text="")
+        #tiles[x][y].config(bg="blue", text="")
+        tiles[x][y].config(image=flag_image)
     elif game.get_cell(x, y, "state") == "Hidden":
-        tiles[x][y].config(bg="#d8d8d8", text="")
+        #tiles[x][y].config(bg="#d8d8d8", text="")
+        tiles[x][y].config(image=hidden_cell_image)
         if game.board.not_enough_flags:
             widgets.communicator.config(text="Not enough flags")
             widgets.communicator.after(500, lambda: widgets.communicator.config(text=""))
@@ -68,9 +68,11 @@ def ui_flag_cell(x, y):
 def ui_confuse_cell(x, y):
     game.confuse_cell(x, y)
     if game.get_cell(x, y, "state") == "Confused":
-        tiles[x][y].config(bg="green", text="?")
+        #tiles[x][y].config(bg="green", text="?")
+        tiles[x][y].config(image=confused_cell_image)
     if game.get_cell(x, y, "state") == "Hidden":
-        tiles[x][y].config(bg="#d8d8d8", text="")
+        #tiles[x][y].config(bg="#d8d8d8", text="")
+        tiles[x][y].config(image=hidden_cell_image)
     widgets.mines_left_counter.config(text=str(game.mines_left))
 
 
@@ -78,19 +80,18 @@ def update_ui():
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
             if game.get_cell(i, j, "state") == "Revealed":
-                tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
-                if game.get_cell(i, j, "value") == "*":
-                    tiles[i][j].config(bg="red")
+                #tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
+                #if game.get_cell(i, j, "value") == "*":
+                #    tiles[i][j].config(bg="red")
+                #if game.get_cell(i, j, "value") == "0":
+                #    tiles[i][j].config(text="")
 
-                    # global image
-                    # image=PhotoImage(file="Minesweeper_flag_v4.png")
-                    # image = image.resize(10,10)
-                    # tiles[i][j].config(image=image)
-                    # tiles[i][j].config(image=PhotoImage(file="Minesweeper_flag.png"))
-                    # img = PhotoImage(img0)
-                    # tiles[i][j].config(img)
-                if game.get_cell(i, j, "value") == "0":
-                    tiles[i][j].config(text="")
+                if game.get_cell(i,j,"value")=="*":
+                    tiles[i][j].config(image=mine_image)
+                elif game.get_cell(i,j,"value")=="0":
+                    tiles[i][j].config(image=cell_images[0])
+                else:
+                    tiles[i][j].config(image=cell_images[int(game.get_cell(i,j,"value"))])
 
 
 def update_countup_timer(minutes, seconds):
@@ -170,7 +171,8 @@ def next_tt_stage():
 def finish_board():
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
-            tiles[i][j].config(state=DISABLED)
+            #tiles[i][j].config(state=DISABLED)
+            pass
 
 
 def do_game_over(delay=1250):
@@ -196,11 +198,16 @@ def reveal_all_mines(button=None):
         for i in range(game.board.grid_height):
             for j in range(game.board.grid_width):
                 if game.get_cell(i,j,"value")=="*":
-                    tiles[i][j].config(text="*", bg="red")
-                    if game.get_cell(i,j,"state")=="Flagged":
-                        tiles[i][j].config(text="*/F", bg="purple")
+                    #tiles[i][j].config(text="*", bg="red")
+                    #tiles[i][j].config(image=mine_image)
+                    tiles[i][j].config(image=mine_image)
+
+                    #BELOW IS FOR THE CELLS WHERE THE PLAYER CORRECTLY PLACED A FLAG
+                    #if game.get_cell(i,j,"state")=="Flagged":
+                    #    tiles[i][j].config(text="*/F", bg="purple")
                 elif game.get_cell(i,j,"state")=="Flagged": #is a flagged cell and was not a mine (the previous if statement's condition was not met)
-                    tiles[i][j].config(fg="red", text="X")
+                    #tiles[i][j].config(fg="red", text="X")
+                    tiles[i][j].config(image=incorrect_flag_image)
         #if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         if button is not None:
             button.config(text="Hide Mines")
@@ -208,6 +215,9 @@ def reveal_all_mines(button=None):
     else:
         for i in range(game.board.grid_height):
             for j in range(game.board.grid_width):
+
+                #The following code needs to be able to know what the original states of the cells were (not sure if you can check what the image currently is using .cget())
+
                 if tiles[i][j].cget("text")=="*/F" or tiles[i][j].cget("text")=="X":
                     tiles[i][j].config(text="", bg="blue")
                 elif tiles[i][j].cget("text")=="*":
@@ -402,12 +412,14 @@ def start_classic_mode(difficulty):
 
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
-            tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
+            #tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
+            tile = Button(widgets.cell_grid, image=hidden_cell_image, width=60, height=60)
             tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
             tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
             tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
             if game.difficulty == "Intermediate" or game.difficulty == "Expert":
-                tile.config(width=4, height=2, font=("Segoe UI", 9))
+                #tile.config(width=4, height=2, font=("Segoe UI", 9))
+                tile.config(width=40, height=40)
             tile.grid(row=i + 1, column=j + 1)
             tiles[i][j] = tile
 
@@ -472,7 +484,31 @@ widgets = Widget()
 
 tiles = []
 
-minesweeper_flag = PhotoImage(file="Minesweeper_flag.png")
+#getting images
+cell_images = []
+hidden_cell_image = Image.open("hidden_cell.png")
+hidden_cell_image = hidden_cell_image.resize((60,60))
+hidden_cell_image = ImageTk.PhotoImage(hidden_cell_image)
+mine_image = Image.open("mine_cell_red.png")
+mine_image.resize((60,60))
+mine_image = ImageTk.PhotoImage(mine_image)
+flag_image = Image.open("Minesweeper_flag.png")
+flag_image = flag_image.resize((60,60))
+flag_image = ImageTk.PhotoImage(flag_image)
+incorrect_flag_image = Image.open("incorrect_flag.png")
+incorrect_flag_image = incorrect_flag_image.resize((60,60))
+incorrect_flag_image = ImageTk.PhotoImage(incorrect_flag_image)
+confused_cell_image = Image.open("confuse_cell.png")
+confused_cell_image = confused_cell_image.resize((60,60))
+confused_cell_image = ImageTk.PhotoImage(confused_cell_image)
+
+for i in range(9):
+    cell_image = Image.open(f"{i}_cell.png")
+    cell_image = cell_image.resize((60,60))
+    cell_image = ImageTk.PhotoImage(cell_image)
+    cell_images.append(cell_image)
+
+
 
 # CREATING MAIN MENU
 

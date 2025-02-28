@@ -1,1 +1,1 @@
-create_game_finished_window:True
+create_game_finished_window:False
