@@ -54,10 +54,10 @@ def ui_flag_cell(x, y):
     game.flag_cell(x, y)
     if game.get_cell(x, y, "state") == "Flagged":
         #tiles[x][y].config(bg="blue", text="")
-        tiles[x][y].config(image=flag_image)
+        tiles[x][y].config(image=current_cell_images["flag_image"])
     elif game.get_cell(x, y, "state") == "Hidden":
         #tiles[x][y].config(bg="#d8d8d8", text="")
-        tiles[x][y].config(image=hidden_cell_image)
+        tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
         if game.board.not_enough_flags:
             widgets.communicator.config(text="Not enough flags")
             widgets.communicator.after(500, lambda: widgets.communicator.config(text=""))
@@ -69,10 +69,10 @@ def ui_confuse_cell(x, y):
     game.confuse_cell(x, y)
     if game.get_cell(x, y, "state") == "Confused":
         #tiles[x][y].config(bg="green", text="?")
-        tiles[x][y].config(image=confused_cell_image)
+        tiles[x][y].config(image=current_cell_images["confused_cell_image"])
     if game.get_cell(x, y, "state") == "Hidden":
         #tiles[x][y].config(bg="#d8d8d8", text="")
-        tiles[x][y].config(image=hidden_cell_image)
+        tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
     widgets.mines_left_counter.config(text=str(game.mines_left))
 
 
@@ -87,11 +87,11 @@ def update_ui():
                 #    tiles[i][j].config(text="")
 
                 if game.get_cell(i,j,"value")=="*":
-                    tiles[i][j].config(image=mine_image)
+                    tiles[i][j].config(image=current_cell_images["mine_image"])
                 elif game.get_cell(i,j,"value")=="0":
-                    tiles[i][j].config(image=cell_images[0])
+                    tiles[i][j].config(image=current_number_images[0])
                 else:
-                    tiles[i][j].config(image=cell_images[int(game.get_cell(i,j,"value"))])
+                    tiles[i][j].config(image=current_number_images[int(game.get_cell(i,j,"value"))])
 
 
 def update_countup_timer(minutes, seconds):
@@ -200,14 +200,14 @@ def reveal_all_mines(button=None):
                 if game.get_cell(i,j,"value")=="*":
                     #tiles[i][j].config(text="*", bg="red")
                     #tiles[i][j].config(image=mine_image)
-                    tiles[i][j].config(image=mine_image)
+                    tiles[i][j].config(image=current_cell_images["mine_image"])
 
                     #BELOW IS FOR THE CELLS WHERE THE PLAYER CORRECTLY PLACED A FLAG
                     #if game.get_cell(i,j,"state")=="Flagged":
                     #    tiles[i][j].config(text="*/F", bg="purple")
                 elif game.get_cell(i,j,"state")=="Flagged": #is a flagged cell and was not a mine (the previous if statement's condition was not met)
                     #tiles[i][j].config(fg="red", text="X")
-                    tiles[i][j].config(image=incorrect_flag_image)
+                    tiles[i][j].config(image=current_cell_images["incorrect_flag_image"])
         #if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         if button is not None:
             button.config(text="Hide Mines")
@@ -407,19 +407,65 @@ def start_classic_mode(difficulty):
     widgets.mines_left_counter = Label(game_frame, text=str(game.mines_left), font=("Calibri", 20), width=2)
     widgets.mines_left_counter.grid(row=0, column=0)
 
+    #resizing and formatting images
+    #current_cell_images = {}
+    #current_number_images = []
+
+    global current_number_images
+    if current_number_images:
+        current_number_images=[]
+
+    if game.difficulty == "Beginner":
+        cell_length = 60
+    else:
+        print(f"Difficulty = {game.difficulty}")
+        cell_length = 40
+    for image in cell_images:
+        current_cell_images[image] = cell_images[image].resize((cell_length, cell_length))
+        current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
+    for number in range(9):
+        temp_number_image = cell_number_images[number].resize((cell_length, cell_length))
+        temp_number_image = ImageTk.PhotoImage(temp_number_image)
+        current_number_images.append(temp_number_image)
+
+
+    #if game.difficulty == "Beginner":
+    #    for image in cell_images:
+    #        #temp_image = cell_images[image].resize((60, 60))
+    #        current_cell_images[image] = cell_images[image].resize((60, 60))
+    #        current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
+    #    for number in range(9):
+    #        temp_number_image = cell_number_images[number].resize((60, 60))
+    #        temp_number_image = ImageTk.PhotoImage(temp_number_image)
+    #        current_number_images.append(temp_number_image)
+    #else:
+    #    for image in cell_images:
+    #        current_cell_images[image] = cell_images[image].resize((40, 40))
+    #        current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
+    #    for number in range(9):
+    #        temp_number_image = cell_number_images[number].resize((40, 40))
+    #        temp_number_image = ImageTk.PhotoImage(temp_number_image)
+    #        current_number_images.append(temp_number_image)
+
+
+    #making all GUI buttons
     global tiles
     tiles = [[Button(widgets.cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
 
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
             #tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
-            tile = Button(widgets.cell_grid, image=hidden_cell_image, width=60, height=60)
+            #tile = Button(widgets.cell_grid, image=cell_images["hidden_cell_image"], width=60, height=60)
+            tile = Button(widgets.cell_grid)
             tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
             tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
             tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
-            if game.difficulty == "Intermediate" or game.difficulty == "Expert":
-                #tile.config(width=4, height=2, font=("Segoe UI", 9))
-                tile.config(width=40, height=40)
+
+            if game.difficulty=="Beginner":
+                tile.config(image=current_cell_images["hidden_cell_image"], width=60, height=60)
+            elif game.difficulty == "Intermediate" or game.difficulty == "Expert":
+                tile.config(image=current_cell_images["hidden_cell_image"], width=40, height=40)
+
             tile.grid(row=i + 1, column=j + 1)
             tiles[i][j] = tile
 
@@ -442,6 +488,9 @@ def make_tt_board():
     widgets.cell_grid.grid(row=1, column=1)
     global tiles
     tiles = [[Button(widgets.cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
+
+    #add resizing section, possibly using another function to calculate what the cell size should be
+
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
             tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
@@ -485,28 +534,47 @@ widgets = Widget()
 tiles = []
 
 #getting images
-cell_images = []
-hidden_cell_image = Image.open("hidden_cell.png")
-hidden_cell_image = hidden_cell_image.resize((60,60))
-hidden_cell_image = ImageTk.PhotoImage(hidden_cell_image)
-mine_image = Image.open("mine_cell_red.png")
-mine_image.resize((60,60))
-mine_image = ImageTk.PhotoImage(mine_image)
-flag_image = Image.open("Minesweeper_flag.png")
-flag_image = flag_image.resize((60,60))
-flag_image = ImageTk.PhotoImage(flag_image)
-incorrect_flag_image = Image.open("incorrect_flag.png")
-incorrect_flag_image = incorrect_flag_image.resize((60,60))
-incorrect_flag_image = ImageTk.PhotoImage(incorrect_flag_image)
-confused_cell_image = Image.open("confuse_cell.png")
-confused_cell_image = confused_cell_image.resize((60,60))
-confused_cell_image = ImageTk.PhotoImage(confused_cell_image)
+cell_images = {
+    "hidden_cell_image" : Image.open("hidden_cell.png"),
+    "mine_image" : Image.open("mine_cell_red.png"),
+    "flag_image": Image.open("Minesweeper_flag.png"),
+    "incorrect_flag_image": Image.open("incorrect_flag.png"),
+    "confused_cell_image": Image.open("confuse_cell.png")
+}
+current_cell_images = {}
 
+cell_number_images=[]
 for i in range(9):
-    cell_image = Image.open(f"{i}_cell.png")
-    cell_image = cell_image.resize((60,60))
-    cell_image = ImageTk.PhotoImage(cell_image)
-    cell_images.append(cell_image)
+    current_image = Image.open(f"{i}_cell.png")
+    cell_number_images.append(current_image)
+current_number_images = []
+
+#for image in cell_images:
+#    cell_images[image] = cell_images[image].resize((60,60))
+#    cell_images[image] = ImageTk.PhotoImage(cell_images[image])
+
+#hidden_cell_image = Image.open("hidden_cell.png")
+#hidden_cell_image = hidden_cell_image.resize((60,60))
+#hidden_cell_image = ImageTk.PhotoImage(hidden_cell_image)
+#mine_image = Image.open("mine_cell_red.png")
+#mine_image = mine_image.resize((60,60))
+#mine_image = ImageTk.PhotoImage(mine_image)
+#flag_image = Image.open("Minesweeper_flag.png")
+#flag_image = flag_image.resize((60,60))
+#flag_image = ImageTk.PhotoImage(flag_image)
+#incorrect_flag_image = Image.open("incorrect_flag.png")
+#incorrect_flag_image = incorrect_flag_image.resize((60,60))
+#incorrect_flag_image = ImageTk.PhotoImage(incorrect_flag_image)
+#confused_cell_image = Image.open("confuse_cell.png")
+#confused_cell_image = confused_cell_image.resize((60,60))
+#confused_cell_image = ImageTk.PhotoImage(confused_cell_image)
+
+#cell_number_images=[]
+#for i in range(9):
+#    current_image = Image.open(f"{i}_cell.png")
+#    #cell_number_image = cell_number_image.resize((60,60))
+#    #cell_number_image = ImageTk.PhotoImage(cell_number_image)
+#    cell_number_images.append(current_image)
 
 
 

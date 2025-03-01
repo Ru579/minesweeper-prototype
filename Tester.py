@@ -31,7 +31,7 @@ root = Tk()
 ## Run the window's main loop
 
 img = Image.open("mine_cell_red.png")
-img.resize((100,100))
+img = img.resize((100,100))
 img = ImageTk.PhotoImage(img)
 
 Label(root, image=img).pack()
