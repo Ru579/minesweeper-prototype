@@ -13,23 +13,23 @@ def ui_open_cell(x, y):
                 widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
             if game.game_mode == "Time Trial" and not game.tt_running:
                 game.tt_running = True
-                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(0, 10))
+                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
 
         if game.flag_difference < 0:
             for i in range(x - 1, x + 2):
                 for j in range(y - 1, y + 2):
                     if game.board.in_bounds(i, j):
                         state = game.get_cell(i, j, "state")
-                        if state=="Hidden" or state=="Confused":
+                        if state == "Hidden" or state == "Confused":
                             tiles[i][j].config(image=current_cell_images[f"highlighted_{state.lower()}_cell_image"])
-                            return_cell_to_normal(i,j, normal_state=state)
+                            return_cell_to_normal(i, j, normal_state=state)
             widgets.communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
         if game.flag_difference > 0:
             for i in range(x - 1, x + 2):
                 for j in range(y - 1, y + 2):
                     if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Flagged":
                         tiles[i][j].config(image=current_cell_images["highlighted_flag_image"])
-                        return_cell_to_normal(i,j, normal_state="Flagged")
+                        return_cell_to_normal(i, j, normal_state="Flagged")
             widgets.communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
 
         game_state_check()
@@ -45,7 +45,7 @@ def fix_cell_colour(row, column, normal_state):
         tiles[row][column].config(image=current_cell_images["hidden_cell_image"])
     elif normal_state == "Flagged" and state == "Flagged":
         tiles[row][column].config(image=current_cell_images["flag_image"])
-    elif normal_state=="Confused" and state=="Confused":
+    elif normal_state == "Confused" and state == "Confused":
         tiles[row][column].config(image=current_cell_images["confused_cell_image"])
 
 
@@ -103,7 +103,6 @@ def update_countdown_timer(minutes, seconds):
         widgets.countdown_timer.after(1000, lambda: update_countdown_timer(minutes, seconds))
     elif game.time_change_type == "Time Game Over":
         widgets.countdown_timer.config(text="00:00")
-        #finish_board()
         do_game_over(1800)
     elif game.tt_running:
         widgets.countdown_timer.after(200, lambda: update_countdown_timer(minutes, seconds))
@@ -122,7 +121,6 @@ def game_state_check():
     if game.board.game_over:
         game.user_can_interact = False
         game.tt_running = False
-        #finish_board()
         do_game_over()
         game.game_started = False
     elif game.game_mode == "Classic":
@@ -130,7 +128,6 @@ def game_state_check():
             # not 100% sure about the following line
             game.timer_on = False
 
-            #finish_board()
             widgets.communicator.config(text="Congratulations!")
             game.game_started = False
             if settings.user_settings["create_game_finished_window"]:
@@ -146,7 +143,6 @@ def game_state_check():
 
 
 def next_tt_stage():
-    #finish_board()
     widgets.communicator.config(text="Next Stage")
     game.time_to_be_added = True
     swapped_to_hard = game.next_tt_stage()
@@ -158,17 +154,10 @@ def next_tt_stage():
     # SHOULD BE SET TO FALSE??
 
 
-#def finish_board():
-#    for i in range(0, game.board.grid_height):
-#        for j in range(0, game.board.grid_width):
-#            # tiles[i][j].config(state=DISABLED)
-#            pass
-
-
 def do_game_over(delay=1250):
     game.timer_on = False
     if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
-        game.user_can_interact=False
+        game.user_can_interact = False
         widgets.communicator.config(text="GAME OVER: Time Ran Out!")
         if not settings.user_settings["create_game_finished_window"]:
             view_mines_button = Button(game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: reveal_all_mines(view_mines_button))
@@ -188,9 +177,9 @@ def reveal_all_mines(button=None):
     if not game.mines_revealed:
         for i in range(game.board.grid_height):
             for j in range(game.board.grid_width):
-                if game.get_cell(i, j, "value") == "*" and game.get_cell(i,j,"state")!="Flagged": #is a mine that was not flagged
+                if game.get_cell(i, j, "value") == "*" and game.get_cell(i, j, "state") != "Flagged":  # is a mine that was not flagged
                     tiles[i][j].config(image=current_cell_images["mine_image"])
-                elif game.get_cell(i,j,"value")!="*" and game.get_cell(i, j, "state") == "Flagged":  # is a flagged cell and was not a mine
+                elif game.get_cell(i, j, "value") != "*" and game.get_cell(i, j, "state") == "Flagged":  # is a flagged cell and was not a mine
                     tiles[i][j].config(image=current_cell_images["incorrect_flag_image"])
         # if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         if button is not None:
@@ -201,13 +190,13 @@ def reveal_all_mines(button=None):
             for j in range(game.board.grid_width):
 
                 # The following code needs to be able to know what the original states of the cells were (not sure if you can check what the image currently is using .cget())
-                #if tiles[i][j].cget("text") == "*/F" or tiles[i][j].cget("text") == "X":
+                # if tiles[i][j].cget("text") == "*/F" or tiles[i][j].cget("text") == "X":
                 #    tiles[i][j].config(text="", bg="blue")
-                #elif tiles[i][j].cget("text") == "*":
+                # elif tiles[i][j].cget("text") == "*":
                 #    tiles[i][j].config(text="", bg="#d8d8d8")
-                if game.get_cell(i,j,"value")!="*" and game.get_cell(i,j,"state")=="Flagged": #a cell has been shown to have been incorrectly flagged
+                if game.get_cell(i, j, "value") != "*" and game.get_cell(i, j, "state") == "Flagged":  # a cell has been shown to have been incorrectly flagged
                     tiles[i][j].config(image=current_cell_images["flag_image"])
-                elif game.get_cell(i,j,"value")=="*" and game.get_cell(i,j,"state")!="Flagged":
+                elif game.get_cell(i, j, "value") == "*" and game.get_cell(i, j, "state") != "Flagged":
                     tiles[i][j].config(image=current_cell_images["hidden_cell_image"])
         button.config(text="View Mines")
         game.mines_revealed = False
@@ -438,36 +427,34 @@ def start_time_trial():
     make_tt_board()
 
 
-def make_tt_board(swapped_to_hard = False):
+def make_tt_board(swapped_to_hard=False):
     game.game_started = False
     widgets.cell_grid = Frame(game_frame)
     widgets.cell_grid.grid(row=1, column=1)
     global tiles
     tiles = [[Button(widgets.cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
 
-    # add resizing section, possibly using another function to calculate what the cell size should be
+    if swapped_to_hard:
+        global current_number_images
+        if current_number_images:
+            current_number_images = []
+        for image in cell_images:
+            current_cell_images[image] = cell_images[image].resize((42, 42))
+            current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
+        for number in range(9):
+            temp_number_image = cell_number_images[number].resize((42, 42))
+            temp_number_image = ImageTk.PhotoImage(temp_number_image)
+            current_number_images.append(temp_number_image)
 
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
-            #tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
-            tile=Button(widgets.cell_grid)
+            tile = Button(widgets.cell_grid)
             tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
             tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
             tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
-            if game.tt_difficulty=="Easy" or game.tt_difficulty=="Medium":
-                tile.config(image=current_cell_images["hidden_cell_image"],width=60, height=60)
+            if game.tt_difficulty == "Easy" or game.tt_difficulty == "Medium":
+                tile.config(image=current_cell_images["hidden_cell_image"], width=60, height=60)
             else:
-                if game.swapped_to_hard_tt:
-                    global current_number_images
-                    if current_number_images:
-                        current_number_images = []
-                    for image in cell_images:
-                        current_cell_images[image] = cell_images[image].resize((42, 42))
-                        current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
-                    for number in range(9):
-                        temp_number_image = cell_number_images[number].resize((42, 42))
-                        temp_number_image = ImageTk.PhotoImage(temp_number_image)
-                        current_number_images.append(temp_number_image)
                 tile.config(image=current_cell_images["hidden_cell_image"], width=40, height=40)
             tile.grid(row=i + 1, column=j + 1)
             tiles[i][j] = tile
@@ -509,7 +496,6 @@ for i in range(9):
     current_image = Image.open(f"{i}_cell_new.png")
     cell_number_images.append(current_image)
 current_number_images = []
-
 
 # CREATING MAIN MENU
 
