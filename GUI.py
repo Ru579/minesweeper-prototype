@@ -18,9 +18,11 @@ def ui_open_cell(x, y):
         if game.flag_difference < 0:
             for i in range(x - 1, x + 2):
                 for j in range(y - 1, y + 2):
-                    if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Hidden":
-                        tiles[i][j].config(image=current_cell_images["highlighted_hidden_cell_image"])
-                        return_cell_to_normal(i,j, normal_state="Hidden")
+                    if game.board.in_bounds(i, j):
+                        state = game.get_cell(i, j, "state")
+                        if state=="Hidden" or state=="Confused":
+                            tiles[i][j].config(image=current_cell_images[f"highlighted_{state.lower()}_cell_image"])
+                            return_cell_to_normal(i,j, normal_state=state)
             widgets.communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
         if game.flag_difference > 0:
             for i in range(x - 1, x + 2):
@@ -43,6 +45,8 @@ def fix_cell_colour(row, column, normal_state):
         tiles[row][column].config(image=current_cell_images["hidden_cell_image"])
     elif normal_state == "Flagged" and state == "Flagged":
         tiles[row][column].config(image=current_cell_images["flag_image"])
+    elif normal_state=="Confused" and state=="Confused":
+        tiles[row][column].config(image=current_cell_images["confused_cell_image"])
 
 
 def ui_flag_cell(x, y):
@@ -472,18 +476,6 @@ def make_tt_board(swapped_to_hard = False):
             tiles[i][j] = tile
     game.user_can_interact = True
 
-    #for i in range(0, game.board.grid_height):
-    #    for j in range(0, game.board.grid_width):
-    #        tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
-    #        tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
-    #        tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
-    #        tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
-    #        if game.tt_difficulty == "Hard" or game.tt_difficulty == "Very Hard":
-    #            tile.config(width=4, height=2, font=("Segoe UI", 9))
-    #        tile.grid(row=i + 1, column=j + 1)
-    #        tiles[i][j] = tile
-    #game.user_can_interact = True
-
 
 Minesweeper = Tk()
 Minesweeper.title("Minesweeper")
@@ -508,9 +500,10 @@ cell_images = {
     "mine_image": Image.open("mine_cell_red.png"),
     "flag_image": Image.open("minesweeper_flag.png"),
     "incorrect_flag_image": Image.open("incorrect_flag_new.png"),
-    "confused_cell_image": Image.open("confuse_cell.png"),
+    "confused_cell_image": Image.open("confuse_cell_v3_green.png"),
     "highlighted_hidden_cell_image": Image.open("highlighted_hidden_cell.png"),
-    "highlighted_flag_image": Image.open("highlighted_minesweeper_flag.png")
+    "highlighted_flag_image": Image.open("highlighted_minesweeper_flag.png"),
+    "highlighted_confused_cell_image": Image.open("highlighted_confuse_cell_v3_green.png")
 }
 current_cell_images = {}
 
