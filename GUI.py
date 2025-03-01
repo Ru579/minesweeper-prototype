@@ -13,7 +13,7 @@ def ui_open_cell(x, y):
                 widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
             if game.game_mode == "Time Trial" and not game.tt_running:
                 game.tt_running = True
-                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
+                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(0, 10))
 
         if game.flag_difference < 0:
             for i in range(x - 1, x + 2):
@@ -103,7 +103,7 @@ def update_countdown_timer(minutes, seconds):
         widgets.countdown_timer.after(1000, lambda: update_countdown_timer(minutes, seconds))
     elif game.time_change_type == "Time Game Over":
         widgets.countdown_timer.config(text="00:00")
-        finish_board()
+        #finish_board()
         do_game_over(1800)
     elif game.tt_running:
         widgets.countdown_timer.after(200, lambda: update_countdown_timer(minutes, seconds))
@@ -122,7 +122,7 @@ def game_state_check():
     if game.board.game_over:
         game.user_can_interact = False
         game.tt_running = False
-        finish_board()
+        #finish_board()
         do_game_over()
         game.game_started = False
     elif game.game_mode == "Classic":
@@ -130,7 +130,7 @@ def game_state_check():
             # not 100% sure about the following line
             game.timer_on = False
 
-            finish_board()
+            #finish_board()
             widgets.communicator.config(text="Congratulations!")
             game.game_started = False
             if settings.user_settings["create_game_finished_window"]:
@@ -146,7 +146,7 @@ def game_state_check():
 
 
 def next_tt_stage():
-    finish_board()
+    #finish_board()
     widgets.communicator.config(text="Next Stage")
     game.time_to_be_added = True
     swapped_to_hard = game.next_tt_stage()
@@ -158,16 +158,17 @@ def next_tt_stage():
     # SHOULD BE SET TO FALSE??
 
 
-def finish_board():
-    for i in range(0, game.board.grid_height):
-        for j in range(0, game.board.grid_width):
-            # tiles[i][j].config(state=DISABLED)
-            pass
+#def finish_board():
+#    for i in range(0, game.board.grid_height):
+#        for j in range(0, game.board.grid_width):
+#            # tiles[i][j].config(state=DISABLED)
+#            pass
 
 
 def do_game_over(delay=1250):
     game.timer_on = False
     if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
+        game.user_can_interact=False
         widgets.communicator.config(text="GAME OVER: Time Ran Out!")
         if not settings.user_settings["create_game_finished_window"]:
             view_mines_button = Button(game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: reveal_all_mines(view_mines_button))
@@ -187,16 +188,9 @@ def reveal_all_mines(button=None):
     if not game.mines_revealed:
         for i in range(game.board.grid_height):
             for j in range(game.board.grid_width):
-                if game.get_cell(i, j, "value") == "*":
+                if game.get_cell(i, j, "value") == "*" and game.get_cell(i,j,"state")!="Flagged": #is a mine that was not flagged
                     tiles[i][j].config(image=current_cell_images["mine_image"])
-
-                    # BELOW IS FOR THE CELLS WHERE THE PLAYER CORRECTLY PLACED A FLAG
-                    # if game.get_cell(i,j,"state")=="Flagged":
-                    #    tiles[i][j].config(text="*/F", bg="purple")
-
-                    # THE CODE ABOVE STOPS ALL CORRECTLY PLACED FLAGS FROM BEING REPLACED WITH MINES
-
-                elif game.get_cell(i, j, "state") == "Flagged":  # is a flagged cell and was not a mine (the previous if statement's condition was not met)
+                elif game.get_cell(i,j,"value")!="*" and game.get_cell(i, j, "state") == "Flagged":  # is a flagged cell and was not a mine
                     tiles[i][j].config(image=current_cell_images["incorrect_flag_image"])
         # if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         if button is not None:
@@ -207,11 +201,14 @@ def reveal_all_mines(button=None):
             for j in range(game.board.grid_width):
 
                 # The following code needs to be able to know what the original states of the cells were (not sure if you can check what the image currently is using .cget())
-
-                if tiles[i][j].cget("text") == "*/F" or tiles[i][j].cget("text") == "X":
-                    tiles[i][j].config(text="", bg="blue")
-                elif tiles[i][j].cget("text") == "*":
-                    tiles[i][j].config(text="", bg="#d8d8d8")
+                #if tiles[i][j].cget("text") == "*/F" or tiles[i][j].cget("text") == "X":
+                #    tiles[i][j].config(text="", bg="blue")
+                #elif tiles[i][j].cget("text") == "*":
+                #    tiles[i][j].config(text="", bg="#d8d8d8")
+                if game.get_cell(i,j,"value")!="*" and game.get_cell(i,j,"state")=="Flagged": #a cell has been shown to have been incorrectly flagged
+                    tiles[i][j].config(image=current_cell_images["flag_image"])
+                elif game.get_cell(i,j,"value")=="*" and game.get_cell(i,j,"state")!="Flagged":
+                    tiles[i][j].config(image=current_cell_images["hidden_cell_image"])
         button.config(text="View Mines")
         game.mines_revealed = False
 
@@ -390,7 +387,7 @@ def start_classic_mode(difficulty):
         cell_length = 42
         # could change to 45
     for image in cell_images:
-        current_cell_images[image] = cell_images[image].resize((cell_length + 5, cell_length + 5))
+        current_cell_images[image] = cell_images[image].resize((cell_length, cell_length))
         current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
     for number in range(9):
         temp_number_image = cell_number_images[number].resize((cell_length, cell_length))
@@ -431,7 +428,7 @@ def start_time_trial():
     if current_number_images:
         current_number_images = []
     for image in cell_images:
-        current_cell_images[image] = cell_images[image].resize((67, 67))
+        current_cell_images[image] = cell_images[image].resize((62, 62))
         current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
     for number in range(9):
         temp_number_image = cell_number_images[number].resize((62, 62))
@@ -465,7 +462,7 @@ def make_tt_board(swapped_to_hard = False):
                     if current_number_images:
                         current_number_images = []
                     for image in cell_images:
-                        current_cell_images[image] = cell_images[image].resize((47, 47))
+                        current_cell_images[image] = cell_images[image].resize((42, 42))
                         current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
                     for number in range(9):
                         temp_number_image = cell_number_images[number].resize((42, 42))
@@ -496,7 +493,7 @@ tiles = []
 
 # getting images
 cell_images = {
-    "hidden_cell_image": Image.open("hidden_cell.png"),
+    "hidden_cell_image": Image.open("hidden_cell_darker.png"),
     "mine_image": Image.open("mine_cell_red.png"),
     "flag_image": Image.open("minesweeper_flag.png"),
     "incorrect_flag_image": Image.open("incorrect_flag_new.png"),
