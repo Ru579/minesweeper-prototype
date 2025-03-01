@@ -1,11 +1,5 @@
 from GameManager import *
-# from Widget import *
 from Settings import *
-
-
-# from Tester import Minesweeper
-
-# from PIL import Image, ImageTk
 
 
 def ui_open_cell(x, y):
@@ -24,8 +18,6 @@ def ui_open_cell(x, y):
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Hidden":
-                    # tiles[i][j].config(bg="purple")
-                    # return_cell_to_normal(i,j,"#d8d8d8")
                     tiles[i][j].config(image=current_cell_images["highlighted_hidden_cell_image"])
                     return_cell_to_normal(i,j, normal_state="Hidden")
         widgets.communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
@@ -33,8 +25,6 @@ def ui_open_cell(x, y):
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Flagged":
-                    # tiles[i][j].config(bg="purple")
-                    # return_cell_to_normal(i,j,"blue")
                     tiles[i][j].config(image=current_cell_images["highlighted_flag_image"])
                     return_cell_to_normal(i,j, normal_state="Flagged")
         widgets.communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
@@ -42,19 +32,9 @@ def ui_open_cell(x, y):
     game_state_check()
 
 
-# def return_cell_to_normal(row,column, colour):
-#    tiles[row][column].after(500,lambda x=row, y=column: fix_cell_colour(x,y, colour))
-
 def return_cell_to_normal(row, column, normal_state):
     tiles[row][column].after(500, lambda x=row, y=column: fix_cell_colour(x, y, normal_state))
 
-
-#def fix_cell_colour(row, column, colour):
-#    state = game.get_cell(row, column, "state")
-#    if colour == "#d8d8d8" and state == "Hidden":
-#        tiles[row][column].config(bg=colour)
-#    elif colour == "blue" and state == "Flagged":
-#        tiles[row][column].config(bg=colour)
 
 def fix_cell_colour(row, column, normal_state):
     state = game.get_cell(row, column, "state")
@@ -67,10 +47,8 @@ def fix_cell_colour(row, column, normal_state):
 def ui_flag_cell(x, y):
     game.flag_cell(x, y)
     if game.get_cell(x, y, "state") == "Flagged":
-        # tiles[x][y].config(bg="blue", text="")
         tiles[x][y].config(image=current_cell_images["flag_image"])
     elif game.get_cell(x, y, "state") == "Hidden":
-        # tiles[x][y].config(bg="#d8d8d8", text="")
         tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
         if game.board.not_enough_flags:
             widgets.communicator.config(text="Not enough flags")
@@ -82,10 +60,8 @@ def ui_flag_cell(x, y):
 def ui_confuse_cell(x, y):
     game.confuse_cell(x, y)
     if game.get_cell(x, y, "state") == "Confused":
-        # tiles[x][y].config(bg="green", text="?")
         tiles[x][y].config(image=current_cell_images["confused_cell_image"])
     if game.get_cell(x, y, "state") == "Hidden":
-        # tiles[x][y].config(bg="#d8d8d8", text="")
         tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
     widgets.mines_left_counter.config(text=str(game.mines_left))
 
@@ -165,7 +141,6 @@ def next_tt_stage():
     finish_board()
     widgets.communicator.config(text="Next Stage")
     game.time_to_be_added = True
-    # widgets.countdown_timer.config(text=game.add_time(widgets.countdown_timer.cget("text")))
     game.next_tt_stage()
     game.timer_on = False
     widgets.mines_left_counter.config(text=game.mines_left)
@@ -205,8 +180,6 @@ def reveal_all_mines(button=None):
         for i in range(game.board.grid_height):
             for j in range(game.board.grid_width):
                 if game.get_cell(i, j, "value") == "*":
-                    # tiles[i][j].config(text="*", bg="red")
-                    # tiles[i][j].config(image=mine_image)
                     tiles[i][j].config(image=current_cell_images["mine_image"])
 
                     # BELOW IS FOR THE CELLS WHERE THE PLAYER CORRECTLY PLACED A FLAG
@@ -216,7 +189,6 @@ def reveal_all_mines(button=None):
                     # THE CODE ABOVE STOPS ALL CORRECTLY PLACED FLAGS FROM BEING REPLACED WITH MINES
 
                 elif game.get_cell(i, j, "state") == "Flagged":  # is a flagged cell and was not a mine (the previous if statement's condition was not met)
-                    # tiles[i][j].config(fg="red", text="X")
                     tiles[i][j].config(image=current_cell_images["incorrect_flag_image"])
         # if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         if button is not None:
@@ -237,7 +209,6 @@ def reveal_all_mines(button=None):
 
 
 def make_quick_replay_buttons():
-    # game.timer_on = False
     retry_button = Button(game_frame, text="Retry?", bg="blue", fg="white", font=15, width=10)  # command=lambda: retry(game.game_mode))
     retry_button.grid(row=2, column=0)
     Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=10, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
@@ -309,10 +280,6 @@ def create_game_finished_window(outcome):
 def classic_game_over_window(outcome, final_time):
     if outcome == "WIN":
         Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
-        # Label(game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
-        # username = Entry(game_finished_window, font=("Calibri", 16))
-        # username.grid(row=1, column=1)
-        # Button(game_finished_window, text="CONFIRM", font=("Calibri", 16), command=lambda: user_info_get(username.get(), final_time)).grid(row=2, column=1)
     elif outcome == "LOSE":
         Label(game_finished_window, text=f"GAME OVER!\nYour time was {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
 
@@ -333,12 +300,6 @@ def tt_game_over_window(final_time):
     retry_button.grid(row=1, column=1)
     Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=1)
     Button(game_finished_window, text="Close", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=3, column=1)
-
-    # Label(game_finished_window, text=f"You lasted for:\n {game.stopwatch // 60:02}:{game.stopwatch % 60:02}\nPlease enter your username below", font=("Calibri", 16)).grid(row=0, column=1)
-    # username = Entry(game_finished_window, font=("Calibri", 16))
-    # username.grid(row=1, column=1)
-    # confirm_button = Button(game_finished_window, text="CONFIRM NAME", font=("Calibri", 16), command=lambda: name_confirm(confirm_button, username.get(), final_time))
-    # confirm_button.grid(row=2, column=1)
 
 
 def name_confirm(button, username, time):
@@ -366,13 +327,6 @@ def return_to_menu(frame):
 def view_board():
     game_finished_window.destroy()
     game_frame.pack()
-    # for i in range(0, game.board.grid_height):
-    #    for j in range(0, game.board.grid_width):
-    #        tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
-    #        if game.get_cell(i, j, "value") == "*":
-    #            tiles[i][j].config(bg="red")
-    #        if game.get_cell(i, j, "value") == "0":
-    #            tiles[i][j].config(text="")
     if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         reveal_all_mines()
     Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=10, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
@@ -441,8 +395,6 @@ def start_classic_mode(difficulty):
 
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
-            # tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
-            # tile = Button(widgets.cell_grid, image=cell_images["hidden_cell_image"], width=60, height=60)
             tile = Button(widgets.cell_grid)
             tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
             tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
@@ -490,19 +442,6 @@ def make_tt_board():
             tiles[i][j] = tile
 
 
-# def view_board():
-#    game_finished_window.destroy()
-#    game_frame.pack()
-#    for i in range(0, game.board.grid_height):
-#        for j in range(0, game.board.grid_width):
-#            tiles[i][j].config(text=game.board.grid[i][j].value, bg="white")
-#            if game.get_cell(i, j, "value") == "*":
-#                tiles[i][j].config(bg="red")
-#            if game.get_cell(i, j, "value") == "0":
-#                tiles[i][j].config(text="")
-#    Button(game_frame, text="Menu", bg="blue", fg="white", font=15, width=6, command=lambda: return_to_menu(game_frame)).grid(row=2, column=2)
-
-
 Minesweeper = Tk()
 Minesweeper.title("Minesweeper")
 
@@ -525,7 +464,7 @@ cell_images = {
     "hidden_cell_image": Image.open("hidden_cell.png"),
     "mine_image": Image.open("mine_cell_red.png"),
     "flag_image": Image.open("minesweeper_flag.png"),
-    "incorrect_flag_image": Image.open("incorrect_flag.png"),
+    "incorrect_flag_image": Image.open("incorrect_flag_new.png"),
     "confused_cell_image": Image.open("confuse_cell.png"),
     "highlighted_hidden_cell_image": Image.open("highlighted_hidden_cell.png"),
     "highlighted_flag_image": Image.open("highlighted_minesweeper_flag.png")
@@ -537,33 +476,6 @@ for i in range(9):
     current_image = Image.open(f"{i}_cell_new.png")
     cell_number_images.append(current_image)
 current_number_images = []
-
-# for image in cell_images:
-#    cell_images[image] = cell_images[image].resize((60,60))
-#    cell_images[image] = ImageTk.PhotoImage(cell_images[image])
-
-# hidden_cell_image = Image.open("hidden_cell.png")
-# hidden_cell_image = hidden_cell_image.resize((60,60))
-# hidden_cell_image = ImageTk.PhotoImage(hidden_cell_image)
-# mine_image = Image.open("mine_cell_red.png")
-# mine_image = mine_image.resize((60,60))
-# mine_image = ImageTk.PhotoImage(mine_image)
-# flag_image = Image.open("Minesweeper_flag.png")
-# flag_image = flag_image.resize((60,60))
-# flag_image = ImageTk.PhotoImage(flag_image)
-# incorrect_flag_image = Image.open("incorrect_flag.png")
-# incorrect_flag_image = incorrect_flag_image.resize((60,60))
-# incorrect_flag_image = ImageTk.PhotoImage(incorrect_flag_image)
-# confused_cell_image = Image.open("confuse_cell.png")
-# confused_cell_image = confused_cell_image.resize((60,60))
-# confused_cell_image = ImageTk.PhotoImage(confused_cell_image)
-
-# cell_number_images=[]
-# for i in range(9):
-#    current_image = Image.open(f"{i}_cell.png")
-#    #cell_number_image = cell_number_image.resize((60,60))
-#    #cell_number_image = ImageTk.PhotoImage(cell_number_image)
-#    cell_number_images.append(current_image)
 
 
 # CREATING MAIN MENU
