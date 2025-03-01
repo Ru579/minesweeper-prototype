@@ -18,7 +18,8 @@ class GameManager:
         self.stopwatch = 0
         self.countdown_timer = ""
         self.stage = 0
-        self.tt_running = False
+        self.tt_running = False #used to determine when the timer should first start (upon first click on first board) and when it ends (tt game over)
+        self.user_can_interact = False
         self.time_to_be_added = False
         self.time_change_type = ""
         self.bonus_times = {
@@ -94,30 +95,11 @@ class GameManager:
                 self.game_has_been_won = True
             elif self.game_mode == "Time Trial":
                 self.board_done = True
+            self.user_can_interact = False
 
     def update_countdown_timer(self, minutes, seconds):
         minutes = int(minutes)
         seconds = int(seconds)
-        #if self.timer_on:
-        #    self.stopwatch += 1
-        #    seconds -= 1
-        #    if seconds < 0:
-        #        seconds = 59
-        #        minutes -= 1
-        #    if seconds == 0 and minutes == 0:
-        #        self.board.game_over = True
-        #        self.time_change_type = "Time Game Over"
-        #    else:
-        #        if self.time_to_be_added:
-        #            total_time = minutes * 60 + seconds
-        #            total_time += self.bonus_times[self.tt_difficulty]
-        #            self.time_to_be_added = False
-        #            minutes = total_time // 60
-        #            seconds = total_time % 60
-        #            self.time_change_type = "Time Added"
-        #        else:
-        #            self.time_change_type = "Time Normal"
-        #return minutes, seconds
         if self.timer_on:
             self.stopwatch += 1
             seconds -= 1

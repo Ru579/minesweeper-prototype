@@ -3,33 +3,34 @@ from Settings import *
 
 
 def ui_open_cell(x, y):
-    game.open_cell(x, y)
-    update_ui()
-    widgets.communicator.config(text="")
-    if not game.game_started:
-        game.game_started = True
-        if game.game_mode == "Classic":
-            widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
-        if game.game_mode == "Time Trial" and not game.tt_running:
-            game.tt_running = True
-            widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
+    if game.user_can_interact:
+        game.open_cell(x, y)
+        update_ui()
+        widgets.communicator.config(text="")
+        if not game.game_started:
+            game.game_started = True
+            if game.game_mode == "Classic":
+                widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
+            if game.game_mode == "Time Trial" and not game.tt_running:
+                game.tt_running = True
+                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
 
-    if game.flag_difference < 0:
-        for i in range(x - 1, x + 2):
-            for j in range(y - 1, y + 2):
-                if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Hidden":
-                    tiles[i][j].config(image=current_cell_images["highlighted_hidden_cell_image"])
-                    return_cell_to_normal(i,j, normal_state="Hidden")
-        widgets.communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
-    if game.flag_difference > 0:
-        for i in range(x - 1, x + 2):
-            for j in range(y - 1, y + 2):
-                if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Flagged":
-                    tiles[i][j].config(image=current_cell_images["highlighted_flag_image"])
-                    return_cell_to_normal(i,j, normal_state="Flagged")
-        widgets.communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
+        if game.flag_difference < 0:
+            for i in range(x - 1, x + 2):
+                for j in range(y - 1, y + 2):
+                    if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Hidden":
+                        tiles[i][j].config(image=current_cell_images["highlighted_hidden_cell_image"])
+                        return_cell_to_normal(i,j, normal_state="Hidden")
+            widgets.communicator.config(text=f"Cell has {-1 * game.flag_difference} too few flags.")
+        if game.flag_difference > 0:
+            for i in range(x - 1, x + 2):
+                for j in range(y - 1, y + 2):
+                    if game.board.in_bounds(i, j) and game.get_cell(i, j, "state") == "Flagged":
+                        tiles[i][j].config(image=current_cell_images["highlighted_flag_image"])
+                        return_cell_to_normal(i,j, normal_state="Flagged")
+            widgets.communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
 
-    game_state_check()
+        game_state_check()
 
 
 def return_cell_to_normal(row, column, normal_state):
@@ -45,25 +46,27 @@ def fix_cell_colour(row, column, normal_state):
 
 
 def ui_flag_cell(x, y):
-    game.flag_cell(x, y)
-    if game.get_cell(x, y, "state") == "Flagged":
-        tiles[x][y].config(image=current_cell_images["flag_image"])
-    elif game.get_cell(x, y, "state") == "Hidden":
-        tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
-        if game.board.not_enough_flags:
-            widgets.communicator.config(text="Not enough flags")
-            widgets.communicator.after(500, lambda: widgets.communicator.config(text=""))
-            game.board.not_enough_flags = False
-    widgets.mines_left_counter.config(text=str(game.mines_left))
+    if game.user_can_interact:
+        game.flag_cell(x, y)
+        if game.get_cell(x, y, "state") == "Flagged":
+            tiles[x][y].config(image=current_cell_images["flag_image"])
+        elif game.get_cell(x, y, "state") == "Hidden":
+            tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
+            if game.board.not_enough_flags:
+                widgets.communicator.config(text="Not enough flags")
+                widgets.communicator.after(500, lambda: widgets.communicator.config(text=""))
+                game.board.not_enough_flags = False
+        widgets.mines_left_counter.config(text=str(game.mines_left))
 
 
 def ui_confuse_cell(x, y):
-    game.confuse_cell(x, y)
-    if game.get_cell(x, y, "state") == "Confused":
-        tiles[x][y].config(image=current_cell_images["confused_cell_image"])
-    if game.get_cell(x, y, "state") == "Hidden":
-        tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
-    widgets.mines_left_counter.config(text=str(game.mines_left))
+    if game.user_can_interact:
+        game.confuse_cell(x, y)
+        if game.get_cell(x, y, "state") == "Confused":
+            tiles[x][y].config(image=current_cell_images["confused_cell_image"])
+        if game.get_cell(x, y, "state") == "Hidden":
+            tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
+        widgets.mines_left_counter.config(text=str(game.mines_left))
 
 
 def update_ui():
@@ -113,6 +116,7 @@ def change_difficulty(difficulty):
 
 def game_state_check():
     if game.board.game_over:
+        game.user_can_interact = False
         game.tt_running = False
         finish_board()
         do_game_over()
@@ -407,6 +411,7 @@ def start_classic_mode(difficulty):
 
             tile.grid(row=i + 1, column=j + 1)
             tiles[i][j] = tile
+    game.user_can_interact = True
 
 
 def start_time_trial():
@@ -440,6 +445,7 @@ def make_tt_board():
                 tile.config(width=4, height=2, font=("Segoe UI", 9))
             tile.grid(row=i + 1, column=j + 1)
             tiles[i][j] = tile
+    game.user_can_interact = True
 
 
 Minesweeper = Tk()
