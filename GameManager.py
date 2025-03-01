@@ -11,6 +11,7 @@ class GameManager:
         self.mines_revealed = False
         self.difficulty = ""
         self.tt_difficulty = ""  # difficulty for time trial
+        self.swapped_to_hard_tt = False
         self.game_has_been_won = False
         self.board_done = False
         self.game_mode = ""
@@ -129,6 +130,9 @@ class GameManager:
         #print(f"Dimensions of board: {self.stage}x{self.stage}.\nStage: {self.stage - 5}.\nDifficulty: {self.tt_difficulty}")
         self.mines_left = self.board.calculate_no_of_mines(self.stage, self.tt_difficulty)
         self.board_done = False
+        if self.tt_difficulty=="Hard" and not self.swapped_to_hard_tt:
+            self.swapped_to_hard_tt = True
+            return True
 
     def set_difficulty(self):
         #NOTE: the first stage is stage 6, as it is a 6x6 board

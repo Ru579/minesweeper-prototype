@@ -145,10 +145,10 @@ def next_tt_stage():
     finish_board()
     widgets.communicator.config(text="Next Stage")
     game.time_to_be_added = True
-    game.next_tt_stage()
+    swapped_to_hard = game.next_tt_stage()
     game.timer_on = False
     widgets.mines_left_counter.config(text=game.mines_left)
-    game_frame.after(500, lambda: make_tt_board())
+    game_frame.after(500, lambda: make_tt_board(swapped_to_hard))
     # game.timer_on = True
 
     # SHOULD BE SET TO FALSE??
@@ -423,10 +423,21 @@ def start_time_trial():
     widgets.mines_left_counter = Label(game_frame, text=str(game.mines_left), font=("Calibri", 20), width=2)
     widgets.mines_left_counter.grid(row=0, column=0)
 
+    global current_number_images
+    if current_number_images:
+        current_number_images = []
+    for image in cell_images:
+        current_cell_images[image] = cell_images[image].resize((67, 67))
+        current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
+    for number in range(9):
+        temp_number_image = cell_number_images[number].resize((62, 62))
+        temp_number_image = ImageTk.PhotoImage(temp_number_image)
+        current_number_images.append(temp_number_image)
+
     make_tt_board()
 
 
-def make_tt_board():
+def make_tt_board(swapped_to_hard = False):
     game.game_started = False
     widgets.cell_grid = Frame(game_frame)
     widgets.cell_grid.grid(row=1, column=1)
@@ -437,15 +448,41 @@ def make_tt_board():
 
     for i in range(0, game.board.grid_height):
         for j in range(0, game.board.grid_width):
-            tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
+            #tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
+            tile=Button(widgets.cell_grid)
             tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
             tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
             tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
-            if game.tt_difficulty == "Hard" or game.tt_difficulty == "Very Hard":
-                tile.config(width=4, height=2, font=("Segoe UI", 9))
+            if game.tt_difficulty=="Easy" or game.tt_difficulty=="Medium":
+                tile.config(image=current_cell_images["hidden_cell_image"],width=60, height=60)
+            else:
+                if game.swapped_to_hard_tt:
+                    global current_number_images
+                    if current_number_images:
+                        current_number_images = []
+                    for image in cell_images:
+                        current_cell_images[image] = cell_images[image].resize((47, 47))
+                        current_cell_images[image] = ImageTk.PhotoImage(current_cell_images[image])
+                    for number in range(9):
+                        temp_number_image = cell_number_images[number].resize((42, 42))
+                        temp_number_image = ImageTk.PhotoImage(temp_number_image)
+                        current_number_images.append(temp_number_image)
+                tile.config(image=current_cell_images["hidden_cell_image"], width=40, height=40)
             tile.grid(row=i + 1, column=j + 1)
             tiles[i][j] = tile
     game.user_can_interact = True
+
+    #for i in range(0, game.board.grid_height):
+    #    for j in range(0, game.board.grid_width):
+    #        tile = Button(widgets.cell_grid, text="", width=5, height=2, bg="#d8d8d8", font=("Segoe UI", 12))
+    #        tile.config(command=lambda row=i, column=j: ui_open_cell(row, column))
+    #        tile.bind("<Button-2>", lambda event, row=i, column=j: ui_confuse_cell(row, column))
+    #        tile.bind("<Button-3>", lambda event, row=i, column=j: ui_flag_cell(row, column))
+    #        if game.tt_difficulty == "Hard" or game.tt_difficulty == "Very Hard":
+    #            tile.config(width=4, height=2, font=("Segoe UI", 9))
+    #        tile.grid(row=i + 1, column=j + 1)
+    #        tiles[i][j] = tile
+    #game.user_can_interact = True
 
 
 Minesweeper = Tk()
