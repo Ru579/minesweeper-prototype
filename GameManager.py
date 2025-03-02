@@ -53,7 +53,8 @@ class GameManager:
         self.game_has_been_won = False
         self.board.game_over = False
         self.mines_revealed = False
-        self.stage = 6
+        self.swapped_to_hard_tt = False
+        self.stage = 16
         self.stopwatch = 0
         self.tt_difficulty = "Easy"
         self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, "Easy"))
@@ -137,19 +138,15 @@ class GameManager:
     def set_difficulty(self):
         #NOTE: the first stage is stage 6, as it is a 6x6 board
         #Testing new difficulties
-        #if self.stage < 10:
-        #    self.tt_difficulty = "Easy"
-        #elif 10 <= self.stage <= 16:
-        #    self.tt_difficulty = "Medium"
-        #elif 17 <= self.stage <= 23:
-        #    self.tt_difficulty = "Hard"
-        #elif 24 <= self.stage <= 30:
-        #    self.tt_difficulty = "Very Hard"
-
-        if self.stage < 8:
+        if self.stage < 10:
             self.tt_difficulty = "Easy"
-        else:
+        elif 10 <= self.stage <= 16:
+            self.tt_difficulty = "Medium"
+        elif 17 <= self.stage <= 23:
             self.tt_difficulty = "Hard"
+        elif 24 <= self.stage <= 30:
+            self.tt_difficulty = "Very Hard"
+
 
         #Old stage-difficulty conversions
         #if self.stage < 13:

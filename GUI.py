@@ -429,12 +429,21 @@ def start_time_trial():
 
 def make_tt_board(swapped_to_hard=False):
     game.game_started = False
+    for widget in widgets.cell_grid.winfo_children():
+        widget.destroy()
+    widgets.cell_grid.destroy()
     widgets.cell_grid = Frame(game_frame)
     widgets.cell_grid.grid(row=1, column=1)
     global tiles
     tiles = [[Button(widgets.cell_grid) for _ in range(0, game.board.grid_width)] for _ in range(0, game.board.grid_height)]
-
+    #if game.stage != 7:
     if swapped_to_hard:
+        #widgets.cell_grid.destroy()
+        #label  = Label(game_frame, image=current_cell_images["hidden_cell_image"], width=800, height=800, bg="blue")
+        #label.grid(row=1,column=1)
+        #label.after(5000,lambda: label.destroy())
+        #widgets.cell_grid = Frame(game_frame)
+        #widgets.cell_grid.grid(row=1, column=1)
         global current_number_images
         if current_number_images:
             current_number_images = []
