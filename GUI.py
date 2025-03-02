@@ -13,7 +13,7 @@ def ui_open_cell(x, y):
                 widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
             if game.game_mode == "Time Trial" and not game.tt_running:
                 game.tt_running = True
-                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
+                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(0, 5))
 
         if game.flag_difference < 0:
             for i in range(x - 1, x + 2):
@@ -194,10 +194,14 @@ def reveal_all_mines(button=None):
                 #    tiles[i][j].config(text="", bg="blue")
                 # elif tiles[i][j].cget("text") == "*":
                 #    tiles[i][j].config(text="", bg="#d8d8d8")
-                if game.get_cell(i, j, "value") != "*" and game.get_cell(i, j, "state") == "Flagged":  # a cell has been shown to have been incorrectly flagged
+                if game.get_cell(i,j,"state")=="Confused":
+                    tiles[i][j].config(image=current_cell_images["confused_cell_image"])
+                elif game.get_cell(i, j, "value") != "*" and game.get_cell(i, j, "state") == "Flagged":  # a cell has been shown to have been incorrectly flagged
                     tiles[i][j].config(image=current_cell_images["flag_image"])
                 elif game.get_cell(i, j, "value") == "*" and game.get_cell(i, j, "state") != "Flagged":
                     tiles[i][j].config(image=current_cell_images["hidden_cell_image"])
+                #elif game.get_cell(i,j,"state")=="Confused":
+                #    tiles[i][j].config(image=current_cell_images["confused_cell_image"])
         button.config(text="View Mines")
         game.mines_revealed = False
 

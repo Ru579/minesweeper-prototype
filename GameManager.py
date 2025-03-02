@@ -54,7 +54,7 @@ class GameManager:
         self.board.game_over = False
         self.mines_revealed = False
         self.swapped_to_hard_tt = False
-        self.stage = 16
+        self.stage = 6
         self.stopwatch = 0
         self.tt_difficulty = "Easy"
         self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, "Easy"))
