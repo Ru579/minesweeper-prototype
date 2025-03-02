@@ -1,20 +1,20 @@
+#from GUI import *
 from tkinter import *
-from PIL import Image, ImageTk
 
-root = Tk()
+root=Tk()
+#root.geometry("300x300")
+#
+#label = Label(root, text="x=50,y=50")
+#label.place(x=50,y=50)
+#label = Label(root, text="x=100,y=100")
+#label.place(x=100,y=100)
+#label = Label(root, text="x=200,y=200")
+#label.place(x=200,y=200)
+#label = Label(root, text="x=0,y=0")
+#label.place(x=0,y=0)
+#label = Label(root, text="x=10,y=70")
+#label.place(x=10,y=70)
 
-img = Image.open("mine_cell_red.png")
-img = img.resize((100,100))
-img = ImageTk.PhotoImage(img)
 
-label = Label(root, image=img)
-label.pack()
 
-print(label.cget("image"))
-print(img)
-if label.cget("image")==str(img):
-    print("It's a mine")
-else:
-    print("Not a mine?")
-
-root.mainloop()
+mainloop()

@@ -1,5 +1,6 @@
 from GameManager import *
 from Settings import *
+#from LoginGUI import *
 
 
 def ui_open_cell(x, y):
@@ -13,7 +14,7 @@ def ui_open_cell(x, y):
                 widgets.countup_timer.after(1000, lambda: update_countup_timer(0, 0))
             if game.game_mode == "Time Trial" and not game.tt_running:
                 game.tt_running = True
-                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(0, 5))
+                widgets.countdown_timer.after(1000, lambda: update_countdown_timer(3, 0))
 
         if game.flag_difference < 0:
             for i in range(x - 1, x + 2):
@@ -33,20 +34,6 @@ def ui_open_cell(x, y):
             widgets.communicator.config(text=f"Cell has {game.flag_difference} too many flags.")
 
         game_state_check()
-
-
-def return_cell_to_normal(row, column, normal_state):
-    tiles[row][column].after(500, lambda x=row, y=column: fix_cell_colour(x, y, normal_state))
-
-
-def fix_cell_colour(row, column, normal_state):
-    state = game.get_cell(row, column, "state")
-    if normal_state == "Hidden" and state == "Hidden":
-        tiles[row][column].config(image=current_cell_images["hidden_cell_image"])
-    elif normal_state == "Flagged" and state == "Flagged":
-        tiles[row][column].config(image=current_cell_images["flag_image"])
-    elif normal_state == "Confused" and state == "Confused":
-        tiles[row][column].config(image=current_cell_images["confused_cell_image"])
 
 
 def ui_flag_cell(x, y):
@@ -71,6 +58,20 @@ def ui_confuse_cell(x, y):
         if game.get_cell(x, y, "state") == "Hidden":
             tiles[x][y].config(image=current_cell_images["hidden_cell_image"])
         widgets.mines_left_counter.config(text=str(game.mines_left))
+
+
+def return_cell_to_normal(row, column, normal_state):
+    tiles[row][column].after(500, lambda x=row, y=column: fix_cell_colour(x, y, normal_state))
+
+
+def fix_cell_colour(row, column, normal_state):
+    state = game.get_cell(row, column, "state")
+    if normal_state == "Hidden" and state == "Hidden":
+        tiles[row][column].config(image=current_cell_images["hidden_cell_image"])
+    elif normal_state == "Flagged" and state == "Flagged":
+        tiles[row][column].config(image=current_cell_images["flag_image"])
+    elif normal_state == "Confused" and state == "Confused":
+        tiles[row][column].config(image=current_cell_images["confused_cell_image"])
 
 
 def update_ui():
@@ -298,21 +299,6 @@ def tt_game_over_window(final_time):
     retry_button.grid(row=1, column=1)
     Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=1)
     Button(game_finished_window, text="Close", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=3, column=1)
-
-
-def name_confirm(button, username, time):
-    user_info_get(username, time)
-    button.destroy()
-    Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=0)
-    Button(game_finished_window, text="MENU", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=2, column=2)
-
-
-def user_info_get(username, time):  # where time is an array, 1st index is minutes, 2nd index is seconds
-    if game.game_mode == "Classic":
-        add_classic_user_info(username, time)
-        return_to_menu(game_finished_window)
-    if game.game_mode == "Time Trial":
-        add_tt_user_info(username, time)
 
 
 def return_to_menu(frame):
