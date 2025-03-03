@@ -1,17 +1,32 @@
 import os
+from pathlib import Path
 
 class DatabaseHandler:
     def __init__(self):
         self.scores=[]
-        self.current_user = None
+        self.current_user_file = None
+        self.file_lines = None
 
     def find_user_file(self, username): #returns True if a file of the user's name is found
-        directory = "/user_data"
+        directory = "ms_user_data"
         for file in os.listdir(directory):
-            if file == f"{username}_classic.txt" or file==f"{username}_time_trial.txt":
-                self.current_user = username
+            if str(file) == f"{username}_classic.txt":
+                #self.current_user_file = open(f"/user_data/{username}_classic.txt")
+                text_folder = Path("ms_user_data")
+                user_file = text_folder / f"{username}_classic.txt"
+                self.current_user_file = open(user_file)
+                self.file_lines = self.current_user_file.readlines()
+
+                #self.current_user_file = open(f"\ms_user_data\{file}")
                 return True
         return False
+
+
+    def check_password(self, password):
+        if str(self.file_lines[0]) == password:
+            return True
+        return False
+
 
 
 
