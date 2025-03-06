@@ -17,11 +17,12 @@ class DatabaseHandler:
         #current_user_file = data_folder / "current_user_data"
         #current_user_file = open(current_user_file)
 
-        current_user_file = open("ms_user_data/current_user_data.txt")
-        lines = current_user_file.readlines()
+        self.current_user_file = open("ms_user_data/current_user_data.txt")
+        lines = self.current_user_file.readlines()
         if lines:
-            self.username = str(lines[0])
-            self.profile_pic_colour = str(lines[1])
+            print("someone is currently signed in")
+            self.username = str(lines[0].strip("\n"))
+            self.profile_pic_colour = str(lines[1].strip("\n"))
 
 
     #def get_current_user_data(self):
@@ -33,13 +34,11 @@ class DatabaseHandler:
         for file in os.listdir(directory):
             if str(file) == f"{username}_settings.txt":
                 self.username = username
-                #text_folder = Path("ms_user_data/settings")
-                #settings_file = text_folder / f"{username}_settings.txt"
-                #settings_file = open(settings_file)
                 settings_file = open(f"ms_user_data/settings/{username}_settings.txt")
 
                 settings_data = settings_file.readlines()
-                self.pword = settings_data[0]
+                self.pword = settings_data[0].strip("\n")
+                self.profile_pic_colour = settings_data[1].strip("\n")
                 return True
         return False
 
@@ -47,6 +46,7 @@ class DatabaseHandler:
     def check_pword(self, password):
         if str(self.pword) == password:
             return True
+        #print(f"self.pword = {self.pword} and user's input = {password}")
         return False
 
 
@@ -54,19 +54,25 @@ class DatabaseHandler:
         pass
 
 
-#directory = "ms_user_data"
-#        for file in os.listdir(directory):
-#            if str(file) == f"{username}_classic.txt":
-#                #self.current_user_file = open(f"/user_data/{username}_classic.txt")
-#                text_folder = Path("ms_user_data")
-#                user_file = text_folder / f"{username}_classic.txt"
-#                self.current_user_file = open(user_file)
-#                self.file_lines = self.current_user_file.readlines()
-#                self.username = username
-#
-#                #self.current_user_file = open(f"\ms_user_data\{file}")
-#                return True
-#        return False
+    def user_signed_in(self):
+        with open("ms_user_data/current_user_data.txt", "w") as file:
+            file.write(f"{self.username}\n{self.profile_pic_colour}\n")
+
+
+    def user_sign_out(self):
+        with open(f"ms_user_data/settings/{self.username}_settings.txt", "r") as file:
+            settings_data = file.readlines()
+        #settings_data[0] = self.pword #this line can be removed if we don't implement a feature allowing the user to change their password
+        settings_data[1] = f"{self.profile_pic_colour}\n"
+        print(settings_data)
+        with open(f"ms_user_data/settings/{self.username}_settings.txt", "w") as write_file:
+            for line in settings_data:
+                write_file.write(f"{line}")
+        open("ms_user_data/current_user_data.txt","w").close()
+
+
+
+
 
 
 

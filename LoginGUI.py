@@ -33,6 +33,7 @@ class LoginGUI():
 
         #other widgets
         self.profile_pic = None
+        self.profile_circle = None
         self.guest_profile_pic = None
         self.username_entry = None
         self.user_warning_text=None
@@ -69,7 +70,8 @@ class LoginGUI():
 
         #creating profile picture
         self.profile_pic = Canvas(self.login_frame, width=60, height=60, bg="#f0f0f0")
-        self.profile_pic.create_oval(3,3,61,61, fill=self.database_handler.profile_pic_colour)
+        self.profile_pic.bind("<Button-1>", lambda event: self.change_profile_pic())
+        self.profile_circle = self.profile_pic.create_oval(3,3,61,61, fill=self.database_handler.profile_pic_colour)
         self.profile_pic.create_text(32, 32, text=self.database_handler.username[0:2], font=("Calibri Bold", 15), anchor="center")
         self.profile_pic.grid(row=0, column=0)
         #creating login button
@@ -93,7 +95,7 @@ class LoginGUI():
             try:
                 x=self.login_button.winfo_rootx()
                 y=self.login_button.winfo_rooty()
-                log_in_options.tk_popup(x,y+10)
+                log_in_options.tk_popup(x,y+20)
             finally:
                 log_in_options.grab_release()
         else:
@@ -170,6 +172,7 @@ class LoginGUI():
         if not pword_correct:
             self.pword_warning_text.config(text="Incorrect Password")
         else:
+            self.database_handler.user_signed_in()
             self.create_user_profile()
             self.sign_in_window.destroy()
 
@@ -184,11 +187,13 @@ class LoginGUI():
 
 
     def sign_out(self):
-        pass
+        self.create_guest_profile()
+        self.database_handler.user_sign_out()
 
 
     def different_log_in(self):
-        pass
+        self.database_handler.user_sign_out()
+        self.sign_in()
 
 
     def switch_eye_image(self, button, pword_input):
@@ -208,3 +213,23 @@ class LoginGUI():
         self.pword_entry.delete(0, len(pword_input.get()) + 1)
         self.pword_entry.insert(0, current_input)
         self.pword_entry.place(x=120, y=160)
+
+
+    def change_profile_pic(self):
+        colour_options = Menu(self.login_frame, tearoff=False)
+        colours = ["red", "orange", "yellow", "green", "blue", "purple", "pink"]
+        for colour in colours:
+            colour_options.add_command(label="", background=colour, command=lambda current_colour=colour: self.switch_profile_colour(current_colour))
+        try:
+            x = self.profile_pic.winfo_rootx()
+            y = self.profile_pic.winfo_rooty()
+            colour_options.tk_popup(x,y+20)
+        finally:
+            colour_options.grab_release()
+
+
+
+    def switch_profile_colour(self, colour):
+        self.profile_pic.itemconfig(self.profile_circle, fill=colour)
+        print(colour)
+        self.database_handler.profile_pic_colour = colour
