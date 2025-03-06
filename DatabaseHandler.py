@@ -5,27 +5,68 @@ class DatabaseHandler:
     def __init__(self):
         self.scores=[]
         self.current_user_file = None
-        self.file_lines = None
+        self.classic_data = None
+        self.tt_data = None
+        #self.file_lines = None
+        self.username = ""
+        self.profile_pic_colour=""
+        self.pword=""
+
+        #attempts to read username and profile pic colour from current user file
+        #data_folder = Path("ms_user_data")
+        #current_user_file = data_folder / "current_user_data"
+        #current_user_file = open(current_user_file)
+
+        current_user_file = open("ms_user_data/current_user_data.txt")
+        lines = current_user_file.readlines()
+        if lines:
+            self.username = str(lines[0])
+            self.profile_pic_colour = str(lines[1])
+
+
+    #def get_current_user_data(self):
+    #    return self.username, self.profile_pic_colour
+
 
     def find_user_file(self, username): #returns True if a file of the user's name is found
-        directory = "ms_user_data"
+        directory = "ms_user_data/settings"
         for file in os.listdir(directory):
-            if str(file) == f"{username}_classic.txt":
-                #self.current_user_file = open(f"/user_data/{username}_classic.txt")
-                text_folder = Path("ms_user_data")
-                user_file = text_folder / f"{username}_classic.txt"
-                self.current_user_file = open(user_file)
-                self.file_lines = self.current_user_file.readlines()
+            if str(file) == f"{username}_settings.txt":
+                self.username = username
+                #text_folder = Path("ms_user_data/settings")
+                #settings_file = text_folder / f"{username}_settings.txt"
+                #settings_file = open(settings_file)
+                settings_file = open(f"ms_user_data/settings/{username}_settings.txt")
 
-                #self.current_user_file = open(f"\ms_user_data\{file}")
+                settings_data = settings_file.readlines()
+                self.pword = settings_data[0]
                 return True
         return False
 
 
-    def check_password(self, password):
-        if str(self.file_lines[0]) == password:
+    def check_pword(self, password):
+        if str(self.pword) == password:
             return True
         return False
+
+
+    def load_classic_tt_data(self):
+        pass
+
+
+#directory = "ms_user_data"
+#        for file in os.listdir(directory):
+#            if str(file) == f"{username}_classic.txt":
+#                #self.current_user_file = open(f"/user_data/{username}_classic.txt")
+#                text_folder = Path("ms_user_data")
+#                user_file = text_folder / f"{username}_classic.txt"
+#                self.current_user_file = open(user_file)
+#                self.file_lines = self.current_user_file.readlines()
+#                self.username = username
+#
+#                #self.current_user_file = open(f"\ms_user_data\{file}")
+#                return True
+#        return False
 
 
 

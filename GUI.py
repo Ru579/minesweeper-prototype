@@ -1,6 +1,6 @@
 from GameManager import *
 from Settings import *
-#from LoginGUI import *
+from LoginGUI import *
 
 
 def ui_open_cell(x, y):
@@ -473,7 +473,7 @@ game_frame = Frame(Minesweeper)
 game_finished_window = Frame(Minesweeper)
 
 # creating widgets to go into game-based frames
-widgets = Widget()
+widgets = Game_Widget()
 
 tiles = []
 
@@ -495,6 +495,21 @@ for i in range(9):
     current_image = Image.open(f"{i}_cell_new.png")
     cell_number_images.append(current_image)
 current_number_images = []
+
+#logo = Image.open("mine_cell_red.png")
+#logo = logo.resize((150, 150))
+#logo = ImageTk.PhotoImage(logo)
+## logo_label = Label(main_menu, image=logo, width=150, height=150)
+#
+#open_eye = Image.open("open_eye.png")
+#open_eye = open_eye.resize((30, 22))
+#open_eye = ImageTk.PhotoImage(open_eye)
+#
+#closed_eye = Image.open("closed_eye.png")
+#closed_eye = closed_eye.resize((30, 22))
+#closed_eye = ImageTk.PhotoImage(closed_eye)
+#
+#login_images = [logo, open_eye, closed_eye]
 
 # CREATING MAIN MENU
 
@@ -528,11 +543,15 @@ classic_button.grid(row=1, column=1, pady=7)
 game_modes = Frame(main_menu)
 game_modes.grid(row=2, column=1)
 Button(main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).grid(row=3, column=0)
-Label(main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=15).grid(row=3, column=2)
-Button(main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20, command=lambda: settings.create_settings_window(main_menu, Minesweeper)).grid(row=0,
-                                                                                                                                                                                           column=0)
-#log_in_button = Button(main_menu, text="Log In", font=("Calibri", 15), bg="dark grey", fg="white", height=2, width=10, command=lambda: log_in())
-#log_in_button.grid(row=0, column=2)
+Label(main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=10).grid(row=3, column=2)
+Button(main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20, command=lambda: settings.create_settings_window(main_menu, Minesweeper)).grid(row=0,column=0)
+
+loginGUI = LoginGUI(main_menu)
+
+#log_in_button = Button(main_menu, text="Log In", font=("Calibri", 15), bg="dark grey", fg="white", height=2, width=15,
+#                       command=lambda: log_in(main_menu, log_in_button, login_images))
+#log_in_button.grid(row=0, column=3)
+#add blank, guest image to button, which changes to first two letters of username upon logging in
 
 # Alternative game modes/ information
 Button(game_modes, text="Leaderboard", font=("Calibri", 24), bg="yellow", width=20, height=2, pady=8).grid(row=0, column=0, padx=5, pady=3)
