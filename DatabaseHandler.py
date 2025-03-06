@@ -20,7 +20,6 @@ class DatabaseHandler:
         self.current_user_file = open("ms_user_data/current_user_data.txt")
         lines = self.current_user_file.readlines()
         if lines:
-            print("someone is currently signed in")
             self.username = str(lines[0].strip("\n"))
             self.profile_pic_colour = str(lines[1].strip("\n"))
 
@@ -28,6 +27,8 @@ class DatabaseHandler:
     #def get_current_user_data(self):
     #    return self.username, self.profile_pic_colour
 
+
+    #SHOULDN@T COMPLETELY LOAD IN USER'S FILES YET UNTIL CONFIRMED THAT THEY HAVE SIGNED IN
 
     def find_user_file(self, username): #returns True if a file of the user's name is found
         directory = "ms_user_data/settings"
@@ -64,11 +65,40 @@ class DatabaseHandler:
             settings_data = file.readlines()
         #settings_data[0] = self.pword #this line can be removed if we don't implement a feature allowing the user to change their password
         settings_data[1] = f"{self.profile_pic_colour}\n"
-        print(settings_data)
         with open(f"ms_user_data/settings/{self.username}_settings.txt", "w") as write_file:
             for line in settings_data:
                 write_file.write(f"{line}")
         open("ms_user_data/current_user_data.txt","w").close()
+
+
+    def username_exists_check(self, username):
+        directory = "ms_user_data/settings"
+        for file in os.listdir(directory):
+            if str(file)==f"{username}_settings.txt":
+                return True
+        return False
+
+
+    def create_account(self, username, pword):
+        directory = "ms_user_data/settings"
+        new_file = f"{username}_settings.txt"
+        file_path = os.path.join(directory, new_file)
+
+        with open(file_path, "w") as file:
+            file.write(f"{pword}\nred\n")
+
+        game_modes = ["classic", "time_trial"]
+        for mode in game_modes:
+            directory = f"ms_user_data/{mode}"
+            new_file = f"{username}_{mode}.txt"
+            file_path = os.path.join(directory, new_file)
+            open(file_path, "w").close()
+
+        self.username = username
+        self.profile_pic_colour = "red"
+        self.user_signed_in()
+
+
 
 
 

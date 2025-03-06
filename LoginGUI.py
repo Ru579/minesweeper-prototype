@@ -30,6 +30,7 @@ class LoginGUI():
         self.sign_in_window = None
         self.username_frame = None
         self.pword_frame = None
+        self.create_account_frame = None
 
         #other widgets
         self.profile_pic = None
@@ -39,8 +40,13 @@ class LoginGUI():
         self.user_warning_text=None
         self.pword_entry = None
         self.pword_warning_text = None
+        #self.create_account_user_warning = None
+        #self.create_account_pword_warning = None
+        self.create_account_warning={}
 
-        self.login_button = Button(self.login_frame, font=("Calibri", 15), height=2, width=15, command=lambda: self.log_in())
+        self.warning_given = {}
+
+        self.login_button = Button(self.login_frame, font=("Calibri", 15), height=2, width=15, command=lambda: self.show_log_in_options())
         self.login_button.grid(row=0, column=1)
 
         if self.database_handler.username=="":
@@ -82,16 +88,12 @@ class LoginGUI():
         self.login_button.config(text=username)
 
 
-    def clear_login_frame(self):
-        for widget in self.login_frame:
-            widget.destroy()
-
-
-    def log_in(self):
+    def show_log_in_options(self):
         if self.login_button.cget("text")!="Log In":
             log_in_options = Menu(self.menu, tearoff=False)
             log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
             log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
+            log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_window("create_account"))
             try:
                 x=self.login_button.winfo_rootx()
                 y=self.login_button.winfo_rooty()
@@ -99,20 +101,44 @@ class LoginGUI():
             finally:
                 log_in_options.grab_release()
         else:
-            self.sign_in()
+            self.create_sign_in_window()
 
 
-    def sign_in(self):
+    def create_sign_in_window(self, frame_to_create=""):
         self.sign_in_window = Toplevel(self.menu)
         self.sign_in_window.title("Sign In")
         self.sign_in_window.geometry("600x400")
 
-        logo_label = Label(self.sign_in_window, image=self.logo, width=150,height=150)
+        logo_label = Label(self.sign_in_window, image=self.logo, width=150, height=150)
         logo_label.place(x=10, y=110)
 
         Label(self.sign_in_window, text="Sign into Minesweeper", font=("Calibri", 16)).place(x=10, y=10)
 
-        self.username_sign_in()
+        self.place_login_frames(frame_to_create)
+
+
+    def place_login_frames(self, frame_to_create="", forget_create_frame = False):
+        if frame_to_create=="create_account":
+            self.make_create_account_frame()
+        else:
+            if forget_create_frame:
+                self.create_account_frame.destroy()
+            self.username_sign_in()
+        #elif frame_to_create=="create_account":
+        #    self.make_create_account_frame()
+
+
+    #def sign_in(self):
+    #    self.sign_in_window = Toplevel(self.menu)
+    #    self.sign_in_window.title("Sign In")
+    #    self.sign_in_window.geometry("600x400")
+#
+    #    logo_label = Label(self.sign_in_window, image=self.logo, width=150,height=150)
+    #    logo_label.place(x=10, y=110)
+#
+    #    Label(self.sign_in_window, text="Sign into Minesweeper", font=("Calibri", 16)).place(x=10, y=10)
+#
+    #    self.username_sign_in()
 
 
     def username_sign_in(self):
@@ -124,11 +150,11 @@ class LoginGUI():
         self.username_entry = Entry(self.username_frame, font=("Calibri", 14), width=25, textvariable=username_input)
         self.username_entry.place(x=120, y=130)
 
-        self.user_warning_text = Label(self.username_frame, text="", font=("Calibri", 11), fg="red")
+        self.user_warning_text = Label(self.username_frame, text="", font=("Calibri Bold", 11), fg="red")
         self.user_warning_text.place(x=260, y=190)
 
         Button(self.username_frame, text="Create Account?", font=("Calibri Bold", 13), fg="#258cdb",
-               command=lambda: self.create_account()).place(x=180, y=310)
+               command=lambda: self.make_create_account_frame("username_frame")).place(x=180, y=310)
         Button(self.username_frame, text="Continue", font=("Calibri Bold", 13), bg="#258cdb",
                command=lambda: self.confirm_username(username_input.get())).place(x=330, y=310)
 
@@ -137,6 +163,8 @@ class LoginGUI():
         username_found = self.database_handler.find_user_file(username_input.lower())
         if not username_found:
             self.user_warning_text.config(text="Username not found")
+        elif username_input.strip()=="":
+            self.user_warning_text.config(text="Please Enter a Username")
         else:
             self.pword_sign_in()
 
@@ -158,7 +186,7 @@ class LoginGUI():
                                    command=lambda: self.switch_eye_image(view_pword_toggle, pword_input))
         view_pword_toggle.place(x=380, y=160)
 
-        self.pword_warning_text = Label(self.pword_frame, text="", font=("Calibri", 11), fg="red")
+        self.pword_warning_text = Label(self.pword_frame, text="", font=("Calibri Bold", 11), fg="red")
         self.pword_warning_text.place(x=260, y=220)
 
         Button(self.pword_frame, text="Sign In", font=("Calibri Bold", 13), bg="#258cdb",
@@ -182,8 +210,126 @@ class LoginGUI():
         self.username_frame.place(x=175,y=50)
 
 
-    def create_account(self):
-        pass
+    def make_create_account_frame(self, previous_frame=""):
+        if previous_frame=="username_frame":
+            self.username_frame.forget()
+
+        self.create_account_frame = Frame(self.sign_in_window, width=450, height=350)
+        self.create_account_frame.place(x=175, y=50)
+
+        Label(self.create_account_frame, text="Username:", font=("Calibri", 12)).place(x=50, y=50)
+        username_input = StringVar(self.create_account_frame)
+        username_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, textvariable=username_input)
+        username_entry.place(x=150, y=50)
+
+        #self.create_account_warning = {
+        #    "user": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red").place(x=250, y=70),
+        #    "pword": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red").place(x=250, y=270)
+        #}
+
+        #self.create_account_user_warning = Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
+        #self.create_account_user_warning.place(x=250, y=70)
+
+        Label(self.create_account_frame, text="Password:", font=("Calibri", 12)).place(x=50, y=150)
+        pword_input1 = StringVar(self.create_account_frame)
+        pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, textvariable=pword_input1)
+        pword_entry.place(x=150, y=150)
+
+        Label(self.create_account_frame, text="Confirm Password:", font=("Calibri", 12)).place(x=10, y=250)
+        pword_input2 = StringVar(self.create_account_frame)
+        confirm_pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, textvariable=pword_input2)
+        confirm_pword_entry.place(x=150, y=250)
+
+        #self.create_account_pword_warning = Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
+        #self.create_account_pword_warning.place(x=250, y=270)
+
+        Button(self.create_account_frame, text="Sign In", font=("Calibri Bold", 13), fg="#258cdb", command=lambda: self.place_login_frames("username_frame", True)).place(x=220, y=310)
+        Button(self.create_account_frame, text="Create Account", font=("Calibri Bold", 13), bg="#258cdb", command=lambda: self.account_validator(username_input.get(), pword_input1.get(), pword_input2.get())).place(x=300, y=310)
+
+
+#add hide and view, open/close eye buttons to the password entries?
+
+
+    #def account_validator(self, username_input, pword_input1, pword_input2):
+    #    account_valid = True
+    #    username_exists = self.database_handler.username_exists_check(username_input)
+    #    if username_input.strip()=="":
+    #        self.create_account_user_warning.config(text="Please Enter a Valid Username")
+    #        account_valid=False
+    #    if account_valid and username_exists:
+    #        self.create_account_user_warning.config(text="Username Already Exists")
+    #        account_valid = False
+    #    if account_valid and pword_input1!=pword_input2:
+    #        self.create_account_pword_warning.config(text="Passwords Don't Match")
+    #        account_valid = False
+    #    if account_valid and pword_input1.strip()=="":
+    #        self.create_account_pword_warning.config(text="Please Enter a Valid Password")
+    #        account_valid = False
+    #    if account_valid:
+    #        self.database_handler.create_account(username_input, pword_input1)
+    #        self.create_user_profile()
+    #        self.sign_in_window.destroy()
+
+
+    def account_validator(self, username_input, pword_input1, pword_input2):
+        self.create_account_warning = {
+            "user": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red"),
+            "pword": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
+        }
+        print(self.create_account_warning)
+        self.warning_given = {
+            "user": False,
+            "pword": False
+        }
+
+        #self.create_account_warning["user"].place(x=250, y=70)
+        #self.create_account_warning["pword"].place(x=250, y=270)
+
+
+        account_valid = True
+        username_exists = self.database_handler.username_exists_check(username_input)
+
+        warning_text = ["Please Enter a Valid Username",
+                        "Username Already Exists",
+                        "Passwords Don't Match",
+                        "Please Enter a Valid Password"]
+        conditions = [username_input.strip()=="", username_exists, pword_input1!=pword_input2, pword_input1.strip()==""]
+        print(f"conditions are: {conditions}")
+        for i in range(4):
+            warning_type = "user"
+            if i==2 or i==3:
+                warning_type = "pword"
+            account_valid = self.check_condition(account_valid, conditions[i], warning_text[i], warning_type)
+
+
+        self.create_account_warning["user"].place(x=250, y=70)
+        self.create_account_warning["pword"].place(x=250, y=270)
+
+
+        if account_valid:
+            self.database_handler.create_account(username_input, pword_input1)
+            self.create_user_profile()
+            self.sign_in_window.destroy()
+
+
+
+
+    def check_condition(self, account_valid, condition, warning_text, warning_type):
+        if condition:
+            self.create_account_warning[warning_type].config(text=warning_text)
+            self.warning_given[warning_type] = True
+            account_valid = False
+        else:
+            if not self.warning_given[warning_type]:
+                print(f"No {warning_type} warnings given")
+                #self.create_account_warning[warning_type].config(text="")
+                self.create_account_warning[warning_type].destroy()
+                #self.create_account_warning[warning_type] = "HELLO"
+                self.create_account_warning[warning_type] = Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
+        return account_valid
+
+    #ABOVE FUNCTION IS NOT REMOVING OLD WARNINGS
+
 
 
     def sign_out(self):
@@ -193,7 +339,7 @@ class LoginGUI():
 
     def different_log_in(self):
         self.database_handler.user_sign_out()
-        self.sign_in()
+        self.create_sign_in_window()
 
 
     def switch_eye_image(self, button, pword_input):
@@ -228,8 +374,10 @@ class LoginGUI():
             colour_options.grab_release()
 
 
-
     def switch_profile_colour(self, colour):
         self.profile_pic.itemconfig(self.profile_circle, fill=colour)
-        print(colour)
         self.database_handler.profile_pic_colour = colour
+
+    # def clear_login_frame(self):
+    #    for widget in self.login_frame:
+    #        widget.destroy()
