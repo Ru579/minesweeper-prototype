@@ -160,13 +160,22 @@ class LoginGUI():
 
 
     def confirm_username(self, username_input):
-        username_found = self.database_handler.find_user_file(username_input.lower())
-        if not username_found:
-            self.user_warning_text.config(text="Username not found")
-        elif username_input.strip()=="":
+        if username_input.strip()=="":
             self.user_warning_text.config(text="Please Enter a Username")
+        elif not self.database_handler.find_user_file(username_input):
+            self.user_warning_text.config(text="Username not found")
         else:
             self.pword_sign_in()
+
+
+
+        #username_found = self.database_handler.find_user_file(username_input)
+        #if not username_found:
+        #    self.user_warning_text.config(text="Username not found")
+        #elif username_input.strip()=="":
+        #    self.user_warning_text.config(text="Please Enter a Username")
+        #else:
+        #    self.pword_sign_in()
 
 
     def pword_sign_in(self):
@@ -262,7 +271,6 @@ class LoginGUI():
                         "Passwords Don't Match",
                         "Please Enter a Valid Password"]
         conditions = [username_input.strip()=="", username_exists, pword_input1!=pword_input2, pword_input1.strip()==""]
-        print(f"conditions are: {conditions}")
         for i in range(4):
             warning_type = "user"
             if i==2 or i==3:
@@ -289,7 +297,6 @@ class LoginGUI():
             account_valid = False
         else:
             if not self.warning_given[warning_type]:
-                print(f"No {warning_type} warnings given")
                 self.create_account_warning[warning_type].config(text="")
         return account_valid
 

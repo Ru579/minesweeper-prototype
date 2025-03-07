@@ -33,7 +33,8 @@ class DatabaseHandler:
     def find_user_file(self, username): #returns True if a file of the user's name is found
         directory = "ms_user_data/settings"
         for file in os.listdir(directory):
-            if str(file) == f"{username}_settings.txt":
+            if str(file).lower() == f"{username.lower()}_settings.txt":
+                username = str(file)[0:len(str(file))-13]
                 self.username = username
                 settings_file = open(f"ms_user_data/settings/{username}_settings.txt")
 
@@ -47,7 +48,6 @@ class DatabaseHandler:
     def check_pword(self, password):
         if str(self.pword) == password:
             return True
-        #print(f"self.pword = {self.pword} and user's input = {password}")
         return False
 
 
@@ -74,7 +74,7 @@ class DatabaseHandler:
     def username_exists_check(self, username):
         directory = "ms_user_data/settings"
         for file in os.listdir(directory):
-            if str(file)==f"{username}_settings.txt":
+            if str(file).lower()==f"{username.lower()}_settings.txt":
                 return True
         return False
 
