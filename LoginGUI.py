@@ -156,7 +156,7 @@ class LoginGUI():
         self.pword_frame = Frame(self.sign_in_frame, width=450, height=350)
         self.pword_frame.place(x=175, y=50)
 
-        Label(self.pword_frame, text=f"Username: {self.database_handler.username}", font=("Calibri", 12)).place(x=15, y=130)
+        Label(self.pword_frame, text=f"Username: {self.database_handler.temp_username}", font=("Calibri", 12)).place(x=15, y=130)
         Label(self.pword_frame, text="Password:", font=("Calibri", 14)).place(x=15, y=160)
 
         pword_input = StringVar(self.pword_frame)
@@ -183,7 +183,6 @@ class LoginGUI():
         else:
             self.database_handler.sign_in_user()
             self.create_user_profile()
-            #self.sign_in_frame.destroy()
             self.return_to_menu()
 
 

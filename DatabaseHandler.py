@@ -11,6 +11,10 @@ class DatabaseHandler:
         self.profile_pic_colour=""
         self.pword=""
 
+        self.temp_username = ""
+        self.temp_profile_pic_colour = ""
+        self.temp_pword = ""
+
         #attempts to read username and profile pic colour from current user file
         #data_folder = Path("ms_user_data")
         #current_user_file = data_folder / "current_user_data"
@@ -37,18 +41,18 @@ class DatabaseHandler:
         for file in os.listdir(directory):
             if str(file).lower() == f"{username.lower()}_settings.txt":
                 username = str(file)[0:len(str(file))-13]
-                self.username = username
+                self.temp_username = username
                 settings_file = open(f"ms_user_data/settings/{username}_settings.txt")
 
                 settings_data = settings_file.readlines()
-                self.pword = settings_data[0].strip("\n")
-                self.profile_pic_colour = settings_data[1].strip("\n")
+                self.temp_pword = settings_data[0].strip("\n")
+                self.temp_profile_pic_colour = settings_data[1].strip("\n")
                 return True
         return False
 
 
     def check_pword(self, password):
-        if str(self.pword) == password:
+        if str(self.temp_pword) == password:
             return True
         return False
 
@@ -59,6 +63,9 @@ class DatabaseHandler:
 
     def sign_in_user(self):
         with open("ms_user_data/current_user_data.txt", "w") as file:
+            self.username = self.temp_username
+            self.pword = self.temp_pword
+            self.profile_pic_colour = self.temp_profile_pic_colour
             file.write(f"{self.username}\n{self.profile_pic_colour}\n")
             self.user_signed_in = True
 
