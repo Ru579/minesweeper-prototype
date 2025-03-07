@@ -107,7 +107,7 @@ class LoginGUI():
     def create_sign_in_window(self, frame_to_create=""):
         self.sign_in_window = Toplevel(self.menu)
         self.sign_in_window.title("Sign In")
-        self.sign_in_window.geometry("600x400")
+        self.sign_in_window.geometry("700x400")
 
         logo_label = Label(self.sign_in_window, image=self.logo, width=150, height=150)
         logo_label.place(x=10, y=110)
@@ -214,7 +214,7 @@ class LoginGUI():
         if previous_frame=="username_frame":
             self.username_frame.forget()
 
-        self.create_account_frame = Frame(self.sign_in_window, width=450, height=350)
+        self.create_account_frame = Frame(self.sign_in_window, width=550, height=350)
         self.create_account_frame.place(x=175, y=50)
 
         Label(self.create_account_frame, text="Username:", font=("Calibri", 12)).place(x=50, y=50)
@@ -272,11 +272,14 @@ class LoginGUI():
 
 
     def account_validator(self, username_input, pword_input1, pword_input2):
+        if self.create_account_warning:
+            self.create_account_warning["user"].destroy()
+            self.create_account_warning["pword"].destroy()
         self.create_account_warning = {
             "user": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red"),
             "pword": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
         }
-        print(self.create_account_warning)
+
         self.warning_given = {
             "user": False,
             "pword": False
@@ -315,6 +318,10 @@ class LoginGUI():
 
 
     def check_condition(self, account_valid, condition, warning_text, warning_type):
+        #if warning_type==0:
+        #    current_type = "user"
+        #else:
+        #    current_type = "pword"
         if condition:
             self.create_account_warning[warning_type].config(text=warning_text)
             self.warning_given[warning_type] = True
@@ -322,10 +329,9 @@ class LoginGUI():
         else:
             if not self.warning_given[warning_type]:
                 print(f"No {warning_type} warnings given")
-                #self.create_account_warning[warning_type].config(text="")
-                self.create_account_warning[warning_type].destroy()
-                #self.create_account_warning[warning_type] = "HELLO"
-                self.create_account_warning[warning_type] = Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
+                self.create_account_warning[warning_type].config(text="")
+                #self.create_account_warning[warning_type].destroy()
+                #self.create_account_warning[warning_type] = Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
         return account_valid
 
     #ABOVE FUNCTION IS NOT REMOVING OLD WARNINGS
