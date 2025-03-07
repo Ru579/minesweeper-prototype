@@ -40,6 +40,8 @@ class LoginGUI():
         self.user_warning_text=None
         self.pword_entry = None
         self.pword_warning_text = None
+        self.create_pword_entry = None
+        self.confirm_pword_entry = None
         #self.create_account_user_warning = None
         #self.create_account_pword_warning = None
         self.create_account_warning={}
@@ -124,21 +126,6 @@ class LoginGUI():
             if forget_create_frame:
                 self.create_account_frame.destroy()
             self.username_sign_in()
-        #elif frame_to_create=="create_account":
-        #    self.make_create_account_frame()
-
-
-    #def sign_in(self):
-    #    self.sign_in_window = Toplevel(self.menu)
-    #    self.sign_in_window.title("Sign In")
-    #    self.sign_in_window.geometry("600x400")
-#
-    #    logo_label = Label(self.sign_in_window, image=self.logo, width=150,height=150)
-    #    logo_label.place(x=10, y=110)
-#
-    #    Label(self.sign_in_window, text="Sign into Minesweeper", font=("Calibri", 16)).place(x=10, y=10)
-#
-    #    self.username_sign_in()
 
 
     def username_sign_in(self):
@@ -168,16 +155,6 @@ class LoginGUI():
             self.pword_sign_in()
 
 
-
-        #username_found = self.database_handler.find_user_file(username_input)
-        #if not username_found:
-        #    self.user_warning_text.config(text="Username not found")
-        #elif username_input.strip()=="":
-        #    self.user_warning_text.config(text="Please Enter a Username")
-        #else:
-        #    self.pword_sign_in()
-
-
     def pword_sign_in(self):
         # switching username with password sign in frame
         self.username_frame.forget()
@@ -192,7 +169,7 @@ class LoginGUI():
         self.pword_entry.place(x=120, y=160)
 
         view_pword_toggle = Button(self.pword_frame, image=self.open_eye, width=30, height=22,
-                                   command=lambda: self.switch_eye_image(view_pword_toggle, pword_input))
+                                   command=lambda: self.switch_eye_image(view_pword_toggle, pword_input, "pword"))
         view_pword_toggle.place(x=380, y=160)
 
         self.pword_warning_text = Label(self.pword_frame, text="", font=("Calibri Bold", 11), fg="red")
@@ -233,13 +210,16 @@ class LoginGUI():
 
         Label(self.create_account_frame, text="Password:", font=("Calibri", 12)).place(x=50, y=150)
         pword_input1 = StringVar(self.create_account_frame)
-        pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, textvariable=pword_input1)
-        pword_entry.place(x=150, y=150)
+        self.create_pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, show="*", textvariable=pword_input1)
+        self.create_pword_entry.place(x=150, y=150)
+        view_create_pword_toggle = Button(self.create_account_frame, image=self.open_eye, width=30, height=22,
+                                          command=lambda: self.switch_eye_image(view_create_pword_toggle, pword_input1, "create_pword"))
+        view_create_pword_toggle.place(x=360, y=150)
 
         Label(self.create_account_frame, text="Confirm Password:", font=("Calibri", 12)).place(x=10, y=250)
         pword_input2 = StringVar(self.create_account_frame)
-        confirm_pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, textvariable=pword_input2)
-        confirm_pword_entry.place(x=150, y=250)
+        self.confirm_pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, show="*", textvariable=pword_input2)
+        self.confirm_pword_entry.place(x=150, y=250)
 
         #self.create_account_pword_warning = Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
         #self.create_account_pword_warning.place(x=250, y=270)
@@ -288,8 +268,6 @@ class LoginGUI():
             self.sign_in_window.destroy()
 
 
-
-
     def check_condition(self, account_valid, condition, warning_text, warning_type):
         if condition:
             self.create_account_warning[warning_type].config(text=warning_text)
@@ -311,23 +289,37 @@ class LoginGUI():
         self.create_sign_in_window()
 
 
-    def switch_eye_image(self, button, pword_input):
+    def switch_eye_image(self, button, pword_input, entry):
         if button.cget("image") == str(self.open_eye):
             button.config(image=self.closed_eye)
             current_input = pword_input.get()
-            self.pword_entry.destroy()
-            self.pword_entry = Entry(self.pword_frame, font=("Calibri", 14), width=25, textvariable=pword_input)
-            #self.pword_entry.delete(0, len(pword_input.get()) + 1)
-            #self.pword_entry.insert(0, current_input)
-            #self.pword_entry.place(x=120, y=160)
+            if entry=="pword":
+                self.pword_entry.destroy()
+                self.pword_entry = Entry(self.pword_frame, font=("Calibri", 14), width=25, textvariable=pword_input)
+            elif entry=="create_pword":
+                self.create_pword_entry.destroy()
+                self.create_pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, textvariable=pword_input) #may not work, may have to be set to pword_input1
         else:
             button.config(image=self.open_eye)
             current_input = pword_input.get()
-            self.pword_entry.destroy()
-            self.pword_entry = Entry(self.pword_frame, font=("Calibri", 14), width=25, show="*", textvariable=pword_input)
-        self.pword_entry.delete(0, len(pword_input.get()) + 1)
-        self.pword_entry.insert(0, current_input)
-        self.pword_entry.place(x=120, y=160)
+            #self.pword_entry.destroy()
+            #self.pword_entry = Entry(self.pword_frame, font=("Calibri", 14), width=25, show="*", textvariable=pword_input)
+            if entry == "pword":
+                self.pword_entry.destroy()
+                self.pword_entry = Entry(self.pword_frame, font=("Calibri", 14), width=25, show="*", textvariable=pword_input)
+            elif entry == "create_pword":
+                self.create_pword_entry.destroy()
+                self.create_pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, show="*", textvariable=pword_input)
+
+        if entry=="pword":
+            self.pword_entry.delete(0, len(pword_input.get()) + 1)
+            self.pword_entry.insert(0, current_input)
+            self.pword_entry.place(x=120, y=160)
+        elif entry=="create_pword":
+            self.create_pword_entry.delete(0, len(pword_input.get())+1)
+            self.create_pword_entry.insert(0, current_input)
+            self.create_pword_entry.place(x=150, y=150)
+
 
 
     def change_profile_pic(self):
