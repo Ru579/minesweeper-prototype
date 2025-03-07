@@ -24,16 +24,19 @@ class LoginGUI():
 
         self.database_handler = DatabaseHandler()
 
-        #frames and windows
-        self.login_frame = Frame(menu)
-        self.login_frame.grid(row=0, column=2)
-        self.sign_in_window = None
+        #frames
+        #self.login_frame = Frame(menu)
+        #self.login_frame.grid(row=0, column=2)
+        self.sign_in_window = None #to be replaced with a swappable frame
         self.username_frame = None
         self.pword_frame = None
         self.create_account_frame = None
 
         #other widgets
-        self.profile_pic = None
+        self.profile_pic = Canvas(self.menu)
+        self.profile_pic.grid(row=0,column=2)
+
+
         self.profile_circle = None
         self.guest_profile_pic = None
         self.username_entry = None
@@ -42,14 +45,12 @@ class LoginGUI():
         self.pword_warning_text = None
         self.create_pword_entry = None
         self.confirm_pword_entry = None
-        #self.create_account_user_warning = None
-        #self.create_account_pword_warning = None
         self.create_account_warning={}
 
         self.warning_given = {}
 
-        self.login_button = Button(self.login_frame, font=("Calibri", 15), height=2, width=15, command=lambda: self.show_log_in_options())
-        self.login_button.grid(row=0, column=1)
+        #self.login_button = Button(self.login_frame, font=("Calibri", 15), height=2, width=15, command=lambda: self.show_log_in_options())
+        #self.login_button.grid(row=0, column=1)
 
         if self.database_handler.username=="":
             self.signed_in = False
@@ -65,10 +66,11 @@ class LoginGUI():
             self.profile_pic.destroy()
 
 
-        self.guest_profile_pic = Label(self.login_frame, image=self.guest_image, width=60, height=60)
-        self.guest_profile_pic.grid(row=0, column=0)
-        self.login_button.config(text="Log In")
-        self.login_button.grid(row=0, column=1)
+        self.guest_profile_pic = Label(self.menu, image=self.guest_image, width=60, height=60)
+        self.guest_profile_pic.bind("<Button-1>", lambda event: self.create_sign_in_window())
+        self.guest_profile_pic.grid(row=0, column=2)
+        #self.login_button.config(text="Log In")
+        #self.login_button.grid(row=0, column=1)
 
 
     def create_user_profile(self):
@@ -77,33 +79,60 @@ class LoginGUI():
             self.profile_pic.destroy()
 
         #creating profile picture
-        self.profile_pic = Canvas(self.login_frame, width=60, height=60, bg="#f0f0f0")
-        self.profile_pic.bind("<Button-1>", lambda event: self.change_profile_pic())
+        self.profile_pic = Canvas(self.menu, width=60, height=60, bg="#f0f0f0")
+        self.profile_pic.bind("<Button-1>", lambda event: self.show_log_in_options())
+        self.profile_pic.bind("<Button-3>", lambda event: self.change_profile_pic())
         self.profile_circle = self.profile_pic.create_oval(3,3,61,61, fill=self.database_handler.profile_pic_colour)
         self.profile_pic.create_text(32, 32, text=self.database_handler.username[0:2], font=("Calibri Bold", 15), anchor="center")
-        self.profile_pic.grid(row=0, column=0)
+        self.profile_pic.grid(row=0, column=2)
         #creating login button
-        if len(self.database_handler.username)>15:
-            username = self.database_handler.username[0:16]
-        else:
-            username = self.database_handler.username
-        self.login_button.config(text=username)
+        #if len(self.database_handler.username)>15:
+        #    username = self.database_handler.username[0:16]
+        #else:
+        #    username = self.database_handler.username
+        #self.login_button.config(text=username)
 
 
     def show_log_in_options(self):
-        if self.login_button.cget("text")!="Log In":
-            log_in_options = Menu(self.menu, tearoff=False)
-            log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
-            log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
-            log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_window("create_account"))
-            try:
-                x=self.login_button.winfo_rootx()
-                y=self.login_button.winfo_rooty()
-                log_in_options.tk_popup(x,y+60)
-            finally:
-                log_in_options.grab_release()
-        else:
-            self.create_sign_in_window()
+        log_in_options = Menu(self.menu, tearoff=False)
+        log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
+        log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
+        log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_window("create_account"))
+        try:
+            x=self.profile_pic.winfo_rootx()
+            y=self.profile_pic.winfo_rooty()
+            log_in_options.tk_popup(x,y+60)
+        finally:
+            log_in_options.grab_release()
+
+
+        #if self.database_handler.user_signed_in:
+        #    log_in_options = Menu(self.menu, tearoff=False)
+        #    log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
+        #    log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
+        #    log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_window("create_account"))
+        #    try:
+        #        x=self.profile_pic.winfo_rootx()
+        #        y=self.profile_pic.winfo_rooty()
+        #        log_in_options.tk_popup(x,y+60)
+        #    finally:
+        #        log_in_options.grab_release()
+        #else:
+        #    self.create_sign_in_window()
+
+        #if self.login_button.cget("text")!="Log In":
+        #    log_in_options = Menu(self.menu, tearoff=False)
+        #    log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
+        #    log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
+        #    log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_window("create_account"))
+        #    try:
+        #        x=self.login_button.winfo_rootx()
+        #        y=self.login_button.winfo_rooty()
+        #        log_in_options.tk_popup(x,y+60)
+        #    finally:
+        #        log_in_options.grab_release()
+        #else:
+        #    self.create_sign_in_window()
 
 
     def create_sign_in_window(self, frame_to_create=""):
@@ -186,7 +215,7 @@ class LoginGUI():
         if not pword_correct:
             self.pword_warning_text.config(text="Incorrect Password")
         else:
-            self.database_handler.user_signed_in()
+            self.database_handler.sign_in_user()
             self.create_user_profile()
             self.sign_in_window.destroy()
 
@@ -226,7 +255,6 @@ class LoginGUI():
 
         Button(self.create_account_frame, text="Sign In", font=("Calibri Bold", 13), fg="#258cdb", command=lambda: self.place_login_frames("username_frame", True)).place(x=220, y=310)
         Button(self.create_account_frame, text="Create Account", font=("Calibri Bold", 13), bg="#258cdb", command=lambda: self.account_validator(username_input.get(), pword_input1.get(), pword_input2.get())).place(x=300, y=310)
-#add hide and view, open/close eye buttons to the password entries?
 
 
     def account_validator(self, username_input, pword_input1, pword_input2):
@@ -302,8 +330,6 @@ class LoginGUI():
         else:
             button.config(image=self.open_eye)
             current_input = pword_input.get()
-            #self.pword_entry.destroy()
-            #self.pword_entry = Entry(self.pword_frame, font=("Calibri", 14), width=25, show="*", textvariable=pword_input)
             if entry == "pword":
                 self.pword_entry.destroy()
                 self.pword_entry = Entry(self.pword_frame, font=("Calibri", 14), width=25, show="*", textvariable=pword_input)
@@ -321,9 +347,8 @@ class LoginGUI():
             self.create_pword_entry.place(x=150, y=150)
 
 
-
     def change_profile_pic(self):
-        colour_options = Menu(self.login_frame, tearoff=False)
+        colour_options = Menu(self.menu, tearoff=False)
         colours = ["red", "orange", "yellow", "green", "blue", "purple", "pink"]
         for colour in colours:
             colour_options.add_command(label="", background=colour, command=lambda current_colour=colour: self.switch_profile_colour(current_colour))

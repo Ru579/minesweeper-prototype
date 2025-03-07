@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 class DatabaseHandler:
     def __init__(self):
@@ -22,6 +21,9 @@ class DatabaseHandler:
         if lines:
             self.username = str(lines[0].strip("\n"))
             self.profile_pic_colour = str(lines[1].strip("\n"))
+            self.user_signed_in = True
+        else:
+            self.user_signed_in = False
 
 
     #def get_current_user_data(self):
@@ -55,9 +57,10 @@ class DatabaseHandler:
         pass
 
 
-    def user_signed_in(self):
+    def sign_in_user(self):
         with open("ms_user_data/current_user_data.txt", "w") as file:
             file.write(f"{self.username}\n{self.profile_pic_colour}\n")
+            self.user_signed_in = True
 
 
     def user_sign_out(self):
@@ -69,6 +72,7 @@ class DatabaseHandler:
             for line in settings_data:
                 write_file.write(f"{line}")
         open("ms_user_data/current_user_data.txt","w").close()
+        self.user_signed_in = False
 
 
     def username_exists_check(self, username):
@@ -96,7 +100,7 @@ class DatabaseHandler:
 
         self.username = username
         self.profile_pic_colour = "red"
-        self.user_signed_in()
+        self.sign_in_user()
 
 
     def change_profile_pic_colour(self, colour):
