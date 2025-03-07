@@ -97,7 +97,7 @@ class LoginGUI():
             try:
                 x=self.login_button.winfo_rootx()
                 y=self.login_button.winfo_rooty()
-                log_in_options.tk_popup(x,y+20)
+                log_in_options.tk_popup(x,y+60)
             finally:
                 log_in_options.grab_release()
         else:
@@ -222,14 +222,6 @@ class LoginGUI():
         username_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, textvariable=username_input)
         username_entry.place(x=150, y=50)
 
-        #self.create_account_warning = {
-        #    "user": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red").place(x=250, y=70),
-        #    "pword": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red").place(x=250, y=270)
-        #}
-
-        #self.create_account_user_warning = Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
-        #self.create_account_user_warning.place(x=250, y=70)
-
         Label(self.create_account_frame, text="Password:", font=("Calibri", 12)).place(x=50, y=150)
         pword_input1 = StringVar(self.create_account_frame)
         pword_entry = Entry(self.create_account_frame, font=("Calibri", 12), width=25, textvariable=pword_input1)
@@ -245,30 +237,7 @@ class LoginGUI():
 
         Button(self.create_account_frame, text="Sign In", font=("Calibri Bold", 13), fg="#258cdb", command=lambda: self.place_login_frames("username_frame", True)).place(x=220, y=310)
         Button(self.create_account_frame, text="Create Account", font=("Calibri Bold", 13), bg="#258cdb", command=lambda: self.account_validator(username_input.get(), pword_input1.get(), pword_input2.get())).place(x=300, y=310)
-
-
 #add hide and view, open/close eye buttons to the password entries?
-
-
-    #def account_validator(self, username_input, pword_input1, pword_input2):
-    #    account_valid = True
-    #    username_exists = self.database_handler.username_exists_check(username_input)
-    #    if username_input.strip()=="":
-    #        self.create_account_user_warning.config(text="Please Enter a Valid Username")
-    #        account_valid=False
-    #    if account_valid and username_exists:
-    #        self.create_account_user_warning.config(text="Username Already Exists")
-    #        account_valid = False
-    #    if account_valid and pword_input1!=pword_input2:
-    #        self.create_account_pword_warning.config(text="Passwords Don't Match")
-    #        account_valid = False
-    #    if account_valid and pword_input1.strip()=="":
-    #        self.create_account_pword_warning.config(text="Please Enter a Valid Password")
-    #        account_valid = False
-    #    if account_valid:
-    #        self.database_handler.create_account(username_input, pword_input1)
-    #        self.create_user_profile()
-    #        self.sign_in_window.destroy()
 
 
     def account_validator(self, username_input, pword_input1, pword_input2):
@@ -284,10 +253,6 @@ class LoginGUI():
             "user": False,
             "pword": False
         }
-
-        #self.create_account_warning["user"].place(x=250, y=70)
-        #self.create_account_warning["pword"].place(x=250, y=270)
-
 
         account_valid = True
         username_exists = self.database_handler.username_exists_check(username_input)
@@ -318,10 +283,6 @@ class LoginGUI():
 
 
     def check_condition(self, account_valid, condition, warning_text, warning_type):
-        #if warning_type==0:
-        #    current_type = "user"
-        #else:
-        #    current_type = "pword"
         if condition:
             self.create_account_warning[warning_type].config(text=warning_text)
             self.warning_given[warning_type] = True
@@ -330,12 +291,7 @@ class LoginGUI():
             if not self.warning_given[warning_type]:
                 print(f"No {warning_type} warnings given")
                 self.create_account_warning[warning_type].config(text="")
-                #self.create_account_warning[warning_type].destroy()
-                #self.create_account_warning[warning_type] = Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
         return account_valid
-
-    #ABOVE FUNCTION IS NOT REMOVING OLD WARNINGS
-
 
 
     def sign_out(self):
@@ -375,14 +331,14 @@ class LoginGUI():
         try:
             x = self.profile_pic.winfo_rootx()
             y = self.profile_pic.winfo_rooty()
-            colour_options.tk_popup(x,y+20)
+            colour_options.tk_popup(x,y+60)
         finally:
             colour_options.grab_release()
 
 
     def switch_profile_colour(self, colour):
         self.profile_pic.itemconfig(self.profile_circle, fill=colour)
-        self.database_handler.profile_pic_colour = colour
+        self.database_handler.change_profile_pic_colour(colour)
 
     # def clear_login_frame(self):
     #    for widget in self.login_frame:

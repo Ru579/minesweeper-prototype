@@ -99,6 +99,12 @@ class DatabaseHandler:
         self.user_signed_in()
 
 
+    def change_profile_pic_colour(self, colour):
+        self.profile_pic_colour = colour
+        with open("ms_user_data/current_user_data.txt","w") as file:
+            file.write(f"{self.username}\n{self.profile_pic_colour}\n")
+
+
 
 
 
