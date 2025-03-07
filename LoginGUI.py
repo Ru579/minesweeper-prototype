@@ -3,8 +3,9 @@ from PIL import Image, ImageTk
 from DatabaseHandler import *
 
 class LoginGUI():
-    def __init__(self, menu):
+    def __init__(self, menu, window):
         self.menu = menu
+        self.window = window
 
         logo = Image.open("mine_cell_red.png")
         logo = logo.resize((150, 150))
@@ -25,9 +26,7 @@ class LoginGUI():
         self.database_handler = DatabaseHandler()
 
         #frames
-        #self.login_frame = Frame(menu)
-        #self.login_frame.grid(row=0, column=2)
-        self.sign_in_window = None #to be replaced with a swappable frame
+        self.sign_in_frame = None #to be replaced with a swappable frame
         self.username_frame = None
         self.pword_frame = None
         self.create_account_frame = None
@@ -35,7 +34,6 @@ class LoginGUI():
         #other widgets
         self.profile_pic = Canvas(self.menu)
         self.profile_pic.grid(row=0,column=2)
-
 
         self.profile_circle = None
         self.guest_profile_pic = None
@@ -49,9 +47,6 @@ class LoginGUI():
 
         self.warning_given = {}
 
-        #self.login_button = Button(self.login_frame, font=("Calibri", 15), height=2, width=15, command=lambda: self.show_log_in_options())
-        #self.login_button.grid(row=0, column=1)
-
         if self.database_handler.username=="":
             self.signed_in = False
             self.create_guest_profile()
@@ -61,20 +56,15 @@ class LoginGUI():
 
 
     def create_guest_profile(self):
-        # EXPERIMENTAL
         if self.profile_pic is not None:
             self.profile_pic.destroy()
 
-
         self.guest_profile_pic = Label(self.menu, image=self.guest_image, width=60, height=60)
-        self.guest_profile_pic.bind("<Button-1>", lambda event: self.create_sign_in_window())
+        self.guest_profile_pic.bind("<Button-1>", lambda event: self.create_sign_in_frame())
         self.guest_profile_pic.grid(row=0, column=2)
-        #self.login_button.config(text="Log In")
-        #self.login_button.grid(row=0, column=1)
 
 
     def create_user_profile(self):
-        #EXPERIMENTAL
         if self.profile_pic is not None:
             self.profile_pic.destroy()
 
@@ -85,19 +75,13 @@ class LoginGUI():
         self.profile_circle = self.profile_pic.create_oval(3,3,61,61, fill=self.database_handler.profile_pic_colour)
         self.profile_pic.create_text(32, 32, text=self.database_handler.username[0:2], font=("Calibri Bold", 15), anchor="center")
         self.profile_pic.grid(row=0, column=2)
-        #creating login button
-        #if len(self.database_handler.username)>15:
-        #    username = self.database_handler.username[0:16]
-        #else:
-        #    username = self.database_handler.username
-        #self.login_button.config(text=username)
 
 
     def show_log_in_options(self):
         log_in_options = Menu(self.menu, tearoff=False)
         log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
         log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
-        log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_window("create_account"))
+        log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_frame("create_account"))
         try:
             x=self.profile_pic.winfo_rootx()
             y=self.profile_pic.winfo_rooty()
@@ -106,46 +90,28 @@ class LoginGUI():
             log_in_options.grab_release()
 
 
-        #if self.database_handler.user_signed_in:
-        #    log_in_options = Menu(self.menu, tearoff=False)
-        #    log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
-        #    log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
-        #    log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_window("create_account"))
-        #    try:
-        #        x=self.profile_pic.winfo_rootx()
-        #        y=self.profile_pic.winfo_rooty()
-        #        log_in_options.tk_popup(x,y+60)
-        #    finally:
-        #        log_in_options.grab_release()
-        #else:
-        #    self.create_sign_in_window()
+    def create_sign_in_frame(self, frame_to_create=""):
+        self.sign_in_frame = Frame(self.window, width=700, height=400)
+        self.menu.forget()
+        self.sign_in_frame.pack()
 
-        #if self.login_button.cget("text")!="Log In":
-        #    log_in_options = Menu(self.menu, tearoff=False)
-        #    log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
-        #    log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
-        #    log_in_options.add_command(label="Create an Account", command=lambda: self.create_sign_in_window("create_account"))
-        #    try:
-        #        x=self.login_button.winfo_rootx()
-        #        y=self.login_button.winfo_rooty()
-        #        log_in_options.tk_popup(x,y+60)
-        #    finally:
-        #        log_in_options.grab_release()
-        #else:
-        #    self.create_sign_in_window()
+        #self.sign_in_frame.title("Sign In")
+        #self.sign_in_frame.geometry("700x400")
 
-
-    def create_sign_in_window(self, frame_to_create=""):
-        self.sign_in_window = Toplevel(self.menu)
-        self.sign_in_window.title("Sign In")
-        self.sign_in_window.geometry("700x400")
-
-        logo_label = Label(self.sign_in_window, image=self.logo, width=150, height=150)
+        logo_label = Label(self.sign_in_frame, image=self.logo, width=150, height=150)
         logo_label.place(x=10, y=110)
 
-        Label(self.sign_in_window, text="Sign into Minesweeper", font=("Calibri", 16)).place(x=10, y=10)
+        #close_button
+        Button(self.sign_in_frame, text="X", font=("Calibri", 30), fg="red", command=lambda:self.return_to_menu()).place(x=650, y=0)
+
+        Label(self.sign_in_frame, text="Sign into Minesweeper", font=("Calibri", 16)).place(x=10, y=10)
 
         self.place_login_frames(frame_to_create)
+
+
+    def return_to_menu(self):
+        self.sign_in_frame.destroy()
+        self.menu.pack()
 
 
     def place_login_frames(self, frame_to_create="", forget_create_frame = False):
@@ -158,7 +124,7 @@ class LoginGUI():
 
 
     def username_sign_in(self):
-        self.username_frame = Frame(self.sign_in_window, width=450, height=350)
+        self.username_frame = Frame(self.sign_in_frame, width=450, height=350)
         self.username_frame.place(x=175, y=50)
 
         Label(self.username_frame, text="Username:", font=("Calibri", 14)).place(x=15, y=130)
@@ -187,7 +153,7 @@ class LoginGUI():
     def pword_sign_in(self):
         # switching username with password sign in frame
         self.username_frame.forget()
-        self.pword_frame = Frame(self.sign_in_window, width=450, height=350)
+        self.pword_frame = Frame(self.sign_in_frame, width=450, height=350)
         self.pword_frame.place(x=175, y=50)
 
         Label(self.pword_frame, text=f"Username: {self.database_handler.username}", font=("Calibri", 12)).place(x=15, y=130)
@@ -217,7 +183,8 @@ class LoginGUI():
         else:
             self.database_handler.sign_in_user()
             self.create_user_profile()
-            self.sign_in_window.destroy()
+            #self.sign_in_frame.destroy()
+            self.return_to_menu()
 
 
     def back_to_username_frame(self):
@@ -229,7 +196,7 @@ class LoginGUI():
         if previous_frame=="username_frame":
             self.username_frame.forget()
 
-        self.create_account_frame = Frame(self.sign_in_window, width=550, height=350)
+        self.create_account_frame = Frame(self.sign_in_frame, width=550, height=350)
         self.create_account_frame.place(x=175, y=50)
 
         Label(self.create_account_frame, text="Username:", font=("Calibri", 12)).place(x=50, y=50)
@@ -293,7 +260,7 @@ class LoginGUI():
         if account_valid:
             self.database_handler.create_account(username_input, pword_input1)
             self.create_user_profile()
-            self.sign_in_window.destroy()
+            self.sign_in_frame.destroy()
 
 
     def check_condition(self, account_valid, condition, warning_text, warning_type):
@@ -314,7 +281,7 @@ class LoginGUI():
 
     def different_log_in(self):
         self.database_handler.user_sign_out()
-        self.create_sign_in_window()
+        self.create_sign_in_frame()
 
 
     def switch_eye_image(self, button, pword_input, entry):
