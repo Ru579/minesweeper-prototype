@@ -547,6 +547,7 @@ Label(main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=10).grid(r
 Button(main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20, command=lambda: settings.create_settings_window(main_menu, Minesweeper)).grid(row=0,column=0)
 
 loginGUI = LoginGUI(main_menu, Minesweeper)
+game.loginGUI = loginGUI
 
 #log_in_button = Button(main_menu, text="Log In", font=("Calibri", 15), bg="dark grey", fg="white", height=2, width=15,
 #                       command=lambda: log_in(main_menu, log_in_button, login_images))

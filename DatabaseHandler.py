@@ -15,11 +15,10 @@ class DatabaseHandler:
         self.temp_profile_pic_colour = ""
         self.temp_pword = ""
 
-        #attempts to read username and profile pic colour from current user file
-        #data_folder = Path("ms_user_data")
-        #current_user_file = data_folder / "current_user_data"
-        #current_user_file = open(current_user_file)
+        self.top_10_classic = []
+        self.top_10_time_trial = []
 
+        #Loads in currently logged-in user, if there is one
         self.current_user_file = open("ms_user_data/current_user_data.txt")
         lines = self.current_user_file.readlines()
         if lines:
@@ -29,12 +28,6 @@ class DatabaseHandler:
         else:
             self.user_signed_in = False
 
-
-    #def get_current_user_data(self):
-    #    return self.username, self.profile_pic_colour
-
-
-    #SHOULDN@T COMPLETELY LOAD IN USER'S FILES YET UNTIL CONFIRMED THAT THEY HAVE SIGNED IN
 
     def find_user_file(self, username): #returns True if a file of the user's name is found
         directory = "ms_user_data/settings"
@@ -62,18 +55,29 @@ class DatabaseHandler:
 
 
     def sign_in_user(self):
+        self.username = self.temp_username
+        self.pword = self.temp_pword
+        self.profile_pic_colour = self.temp_profile_pic_colour
+        self.user_signed_in = True
         with open("ms_user_data/current_user_data.txt", "w") as file:
-            self.username = self.temp_username
-            self.pword = self.temp_pword
-            self.profile_pic_colour = self.temp_profile_pic_colour
             file.write(f"{self.username}\n{self.profile_pic_colour}\n")
-            self.user_signed_in = True
+        with open(f"ms_user_data/classic/{self.username}_Classic.txt") as classic_file:
+            data = classic_file.readlines()
+            self.top_10_classic = data[0].split(",")
+            #for i in range(10):
+            #    self.top_10_classic[i] = int(self.top_10_classic[i])
+        with open(f"ms_user_data/time_trial/{self.username}_Time_Trial.txt") as tt_file:
+            data = tt_file.readlines()
+            self.top_10_time_trial = data[0].split(",")
+        #converting arrays values from strings into integers
+        for i in range(10):
+            self.top_10_classic[i] = int(self.top_10_classic[i])
+            self.top_10_time_trial[i] = int(self.top_10_time_trial[i])
 
 
     def user_sign_out(self):
         with open(f"ms_user_data/settings/{self.username}_settings.txt", "r") as file:
             settings_data = file.readlines()
-        #settings_data[0] = self.pword #this line can be removed if we don't implement a feature allowing the user to change their password
         settings_data[1] = f"{self.profile_pic_colour}\n"
         with open(f"ms_user_data/settings/{self.username}_settings.txt", "w") as write_file:
             for line in settings_data:
@@ -98,15 +102,17 @@ class DatabaseHandler:
         with open(file_path, "w") as file:
             file.write(f"{pword}\nred\n")
 
-        game_modes = ["classic", "time_trial"]
+        game_modes = ["Classic", "Time_Trial"]
         for mode in game_modes:
-            directory = f"ms_user_data/{mode}"
-            new_file = f"{username}_{mode}.txt"
-            file_path = os.path.join(directory, new_file)
-            open(file_path, "w").close()
+            #directory = f"ms_user_data/{mode}"
+            #new_file = f"{username}_{mode}.txt"
+            #file_path = os.path.join(directory, new_file)
+            #open(file_path, "w").close()
+            with open(f"ms_user_data/{mode}/{username}_{mode}.txt", "w") as file:
+                file.write("0,0,0,0,0,0,0,0,0,0")
 
-        self.username = username
-        self.profile_pic_colour = "red"
+        self.temp_username = username #set as temp_username because, in self.sign_in(), self.username = self.temp_username
+        self.temp_profile_pic_colour = "red" #set as temp_profile_pic_colour for the same reasons as above
         self.sign_in_user()
 
 
@@ -114,6 +120,47 @@ class DatabaseHandler:
         self.profile_pic_colour = colour
         with open("ms_user_data/current_user_data.txt","w") as file:
             file.write(f"{self.username}\n{self.profile_pic_colour}\n")
+
+
+    def add_score(self, game_mode, score):
+        score = int(score[0:2])*60 + int(score[3:5])
+        if game_mode=="Classic":
+            self.add_classic_time(score)
+        elif game_mode=="Time Trial":
+            self.add_tt_stage(score)
+
+
+    def add_classic_time(self, time):
+        with open(f"ms_user_data/classic/{self.username}_Classic.txt", "a") as file:
+            file.write(f"{time}\n")
+
+
+
+    def add_tt_stage(self, stage):
+        with open(f"ms_user_data/time_trial/{self.username}_Classic.txt", "a") as file:
+            file.write(f"{stage}\n")
+
+
+    def check_if_top_10_time(self, time):
+        for i in range(0, 10, -1):
+            if time>self.top_10_classic[i]:
+                if i!=9:
+                    self.top_10_classic.insert(i+1, time)
+                    del self.top_10_classic[10]
+                break
+
+
+    def check_if_top_10_stage(self, stage):
+        for i in range(0,10,-1):
+            if stage<self.top_10_time_trial[i]:
+                if i!=9:
+                    self.top_10_time_trial.insert(i+1, stage)
+                    del self.top_10_time_trial[10]
+                break
+
+
+
+
 
 
 

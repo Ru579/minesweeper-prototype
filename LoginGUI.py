@@ -91,7 +91,7 @@ class LoginGUI():
 
 
     def create_sign_in_frame(self, frame_to_create=""):
-        self.sign_in_frame = Frame(self.window, width=700, height=400)
+        self.sign_in_frame = Frame(self.window, width=700, height=440)
         self.menu.forget()
         self.sign_in_frame.pack()
 
@@ -99,10 +99,10 @@ class LoginGUI():
         #self.sign_in_frame.geometry("700x400")
 
         logo_label = Label(self.sign_in_frame, image=self.logo, width=150, height=150)
-        logo_label.place(x=10, y=110)
+        logo_label.place(x=10, y=140)
 
         #close_button
-        Button(self.sign_in_frame, text="X", font=("Calibri", 30), fg="red", command=lambda:self.return_to_menu()).place(x=650, y=0)
+        Button(self.sign_in_frame, text="X", font=("Calibri", 30), fg="red", height=1, command=lambda:self.return_to_menu()).place(x=650, y=0)
 
         Label(self.sign_in_frame, text="Sign into Minesweeper", font=("Calibri", 16)).place(x=10, y=10)
 
@@ -125,7 +125,7 @@ class LoginGUI():
 
     def username_sign_in(self):
         self.username_frame = Frame(self.sign_in_frame, width=450, height=350)
-        self.username_frame.place(x=175, y=50)
+        self.username_frame.place(x=175, y=90)
 
         Label(self.username_frame, text="Username:", font=("Calibri", 14)).place(x=15, y=130)
         username_input = StringVar(self.username_frame)
@@ -154,7 +154,7 @@ class LoginGUI():
         # switching username with password sign in frame
         self.username_frame.forget()
         self.pword_frame = Frame(self.sign_in_frame, width=450, height=350)
-        self.pword_frame.place(x=175, y=50)
+        self.pword_frame.place(x=175, y=90)
 
         Label(self.pword_frame, text=f"Username: {self.database_handler.temp_username}", font=("Calibri", 12)).place(x=15, y=130)
         Label(self.pword_frame, text="Password:", font=("Calibri", 14)).place(x=15, y=160)
@@ -196,7 +196,7 @@ class LoginGUI():
             self.username_frame.forget()
 
         self.create_account_frame = Frame(self.sign_in_frame, width=550, height=350)
-        self.create_account_frame.place(x=175, y=50)
+        self.create_account_frame.place(x=175, y=90)
 
         Label(self.create_account_frame, text="Username:", font=("Calibri", 12)).place(x=50, y=50)
         username_input = StringVar(self.create_account_frame)
@@ -259,7 +259,8 @@ class LoginGUI():
         if account_valid:
             self.database_handler.create_account(username_input, pword_input1)
             self.create_user_profile()
-            self.sign_in_frame.destroy()
+            #self.sign_in_frame.destroy()
+            self.return_to_menu()
 
 
     def check_condition(self, account_valid, condition, warning_text, warning_type):
@@ -329,7 +330,3 @@ class LoginGUI():
     def switch_profile_colour(self, colour):
         self.profile_pic.itemconfig(self.profile_circle, fill=colour)
         self.database_handler.change_profile_pic_colour(colour)
-
-    # def clear_login_frame(self):
-    #    for widget in self.login_frame:
-    #        widget.destroy()

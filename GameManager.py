@@ -1,5 +1,4 @@
 from Board import *
-from DatabaseHandler import *
 
 
 class GameManager:
@@ -29,6 +28,7 @@ class GameManager:
             "Hard": 60,
             "Very Hard": 90
         }
+        self.loginGUI = None
 
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
