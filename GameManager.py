@@ -29,12 +29,14 @@ class GameManager:
             "Very Hard": 90
         }
         self.loginGUI = None
+        self.freeplay_enabled = False
 
     def start_classic_mode(self, difficulty):
         self.difficulty = difficulty
         self.game_mode = "Classic"
         self.game_has_been_won = False
         self.mines_revealed=False
+        self.loginGUI.database_handler.no_of_games += 1
         if difficulty == "Beginner":
             self.board = Board(8, 8, 10)
             self.mines_left = 10
@@ -57,6 +59,7 @@ class GameManager:
         self.stage = 6
         self.stopwatch = 0
         self.tt_difficulty = "Easy"
+        self.loginGUI.database_handler.no_of_games += 1
         self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, "Easy"))
         self.mines_left = self.board.calculate_no_of_mines(self.stage, "Easy")
 
@@ -126,6 +129,7 @@ class GameManager:
     def next_tt_stage(self):
         self.timer_on = False
         self.stage += 1
+        self.loginGUI.database_handler.boards_completed += 1
         self.set_difficulty()
         self.board = Board(self.stage, self.stage, self.board.calculate_no_of_mines(self.stage, self.tt_difficulty))
         #print(f"Dimensions of board: {self.stage}x{self.stage}.\nStage: {self.stage - 5}.\nDifficulty: {self.tt_difficulty}")
@@ -147,13 +151,13 @@ class GameManager:
         elif 24 <= self.stage <= 30:
             self.tt_difficulty = "Very Hard"
 
+    def game_finished(self, final_score="", outcome="", mine_clicked=False):
+        if self.game_mode=="Time Trial":
+            self.loginGUI.database_handler.add_tt_stage(self.stage - 5, mine_clicked)
+        elif self.game_mode=="Classic":
+            if outcome=="WIN":
+                self.loginGUI.database_handler.add_classic_time(final_score)
+            elif outcome=="LOSE":
+                self.loginGUI.database_handler.no_of_losses += 1
+                self.loginGUI.database_handler.update_games_losses_boards()
 
-        #Old stage-difficulty conversions
-        #if self.stage < 13:
-        #    self.tt_difficulty = "Easy"
-        #elif 13 <= self.stage <= 19:
-        #    self.tt_difficulty = "Medium"
-        #elif 20 <= self.stage <= 26:
-        #    self.tt_difficulty = "Hard"
-        #elif 27 <= self.stage <= 33:
-        #    self.tt_difficulty = "Very Hard"

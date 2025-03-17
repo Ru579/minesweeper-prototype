@@ -126,6 +126,9 @@ def game_state_check():
         game.game_started = False
     elif game.game_mode == "Classic":
         if game.game_has_been_won:
+            #####
+            game.game_finished(widgets.countup_timer.cget("text"), "WIN")
+
             # not 100% sure about the following line
             game.timer_on = False
 
@@ -157,13 +160,17 @@ def next_tt_stage():
 
 def do_game_over(delay=1250):
     game.timer_on = False
+    #######
+    #game.game_finished(widgets.countup_timer.cget("text"), "LOSE", )
     if game.game_mode == "Time Trial" and widgets.countdown_timer.cget("text") == "00:00":
         game.user_can_interact = False
+        game.game_finished()
         widgets.communicator.config(text="GAME OVER: Time Ran Out!")
         if not settings.user_settings["create_game_finished_window"]:
             view_mines_button = Button(game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: reveal_all_mines(view_mines_button))
             view_mines_button.grid(row=3, column=2)
     else:
+        game.game_finished(widgets.countup_timer.cget("text"), "LOSE", True)
         widgets.communicator.config(text="GAME OVER!")
         reveal_all_mines()
 
@@ -299,6 +306,7 @@ def tt_game_over_window(final_time):
     retry_button.grid(row=1, column=1)
     Button(game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: view_board()).grid(row=2, column=1)
     Button(game_finished_window, text="Close", font=("Calibri", 16), command=lambda: return_to_menu(game_finished_window)).grid(row=3, column=1)
+    #final time is a stopwatch of how long the player lasted- in the first line, don't re-get values from game.stopwatch
 
 
 def return_to_menu(frame):
@@ -546,8 +554,9 @@ Button(main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).g
 Label(main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=10).grid(row=3, column=2)
 Button(main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20, command=lambda: settings.create_settings_window(main_menu, Minesweeper)).grid(row=0,column=0)
 
-loginGUI = LoginGUI(main_menu, Minesweeper)
-game.loginGUI = loginGUI
+#loginGUI = LoginGUI(main_menu, Minesweeper)
+#game.loginGUI = loginGUI
+game.loginGUI = LoginGUI(main_menu, Minesweeper)
 
 #log_in_button = Button(main_menu, text="Log In", font=("Calibri", 15), bg="dark grey", fg="white", height=2, width=15,
 #                       command=lambda: log_in(main_menu, log_in_button, login_images))
