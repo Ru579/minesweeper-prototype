@@ -202,7 +202,8 @@ class DatabaseHandler:
         with open(path) as read_file:
             file_data = read_file.readlines()
             file_data[0] = f"{self.top_10_scores[specific_game_mode]}\n"
-            file_data[1] = f"{self.glb[specific_game_mode][0]},{self.glb[specific_game_mode][1]},{self.glb[specific_game_mode][2]}\n"
+            #file_data[1] = f"{self.glb[specific_game_mode][0]},{self.glb[specific_game_mode][1]},{self.glb[specific_game_mode][2]}\n"
+            file_data[1] = f"{self.glb[specific_game_mode]}\n"
         with open(path,"w") as rewrite_file:
             for line in file_data:
                 rewrite_file.write(line)
