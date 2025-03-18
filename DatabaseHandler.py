@@ -15,16 +15,12 @@ class DatabaseHandler:
         self.glb = {}
         #each value in self.glb is a list, with the three values in the comment above. Each game-mode/difficulty has its own value in the dictionary
         self.top_10_scores = {}
+        self.top_10_rank = 100
+        self.no_1_status = ""
 
         self.temp_username = ""
         self.temp_profile_pic_colour = ""
         self.temp_pword = ""
-        #self.temp_no_of_games = 0
-        #self.temp_no_of_losses = 0
-        #self.temp_boards_completed = 0
-
-        #self.top_10_classic = []
-        #self.top_10_time_trial = []
 
         #Loads in currently logged-in user, if there is one
         self.current_user_file = open("ms_user_data/current_user_data.txt")
@@ -33,6 +29,7 @@ class DatabaseHandler:
             self.username = str(lines[0].strip("\n"))
             self.profile_pic_colour = str(lines[1].strip("\n"))
             self.user_signed_in = True
+            self.load_current_user_game_data()
         else:
             self.user_signed_in = False
 
@@ -98,24 +95,33 @@ class DatabaseHandler:
         self.user_signed_in = True
         with open("ms_user_data/current_user_data.txt", "w") as file:
             file.write(f"{self.username}\n{self.profile_pic_colour}\n")
+        self.load_current_user_game_data()
 
+    def load_current_user_game_data(self):
         #opening classic data
         for difficulty in self.difficulties:
             with open(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt") as classic_file:
                 classic_data = classic_file.readlines()
-                self.top_10_scores[f"Cl{difficulty}"] = classic_data[0].strip("\n").split(",")
-                for i in range(10):
-                    self.top_10_scores[f"Cl{difficulty}"][i] = int(self.top_10_scores[f"Cl{difficulty}"][i])
-                self.glb[f"Cl{difficulty}"] = classic_data[1].strip("\n").split(",")
 
+                self.top_10_scores[f"Cl{difficulty}"] = classic_data[0].strip("\n")[1:len(classic_data[0])-2].split(",")
+                for i in range(11): #because of the first value being the extra, extreme value
+                    self.top_10_scores[f"Cl{difficulty}"][i] = int(self.top_10_scores[f"Cl{difficulty}"][i])
+
+                self.glb[f"Cl{difficulty}"] = classic_data[1].strip("\n")[1:len(classic_data[1])-2].split(",")
+                for i in range(3):
+                    print(self.glb[f"Cl{difficulty}"][i])
+                    print(self.glb)
+                    self.glb[f"Cl{difficulty}"][i] = int(self.glb[f"Cl{difficulty}"][i])
 
         # opening time trial data
         with open(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt") as tt_file:
             tt_data = tt_file.readlines()
-            self.top_10_scores["Time Trial"] = tt_data[0].strip("\n").split(",")
-            self.glb["Time Trial"] = tt_data[1].strip("\n").split(",")
-            for i in range(10):
+            self.top_10_scores["Time Trial"] = tt_data[0].strip("\n")[1:len(tt_data[0])-2].split(",")
+            for i in range(11): #because of the first value being the extra, extreme value
                 self.top_10_scores["Time Trial"][i] = int(self.top_10_scores["Time Trial"][i])
+            self.glb["Time Trial"] = tt_data[1].strip("\n")[1:len(tt_data[1])-2].split(",")
+            for i in range(3):
+                self.glb["Time Trial"][i] = int(self.glb["Time Trial"][i])
 
 
     def user_sign_out(self):
@@ -142,11 +148,13 @@ class DatabaseHandler:
             file.write(f"{pword}\nred\n")
 
         with open(f"ms_user_data/Time Trial/{username}_Time Trial.txt","w") as file:
-            file.write("0,0,0,0,0,0,0,0,0,0\n0,0,0\n")
+            file.write("[99999,0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n")#first number is very high so that top_10_stage checker will never have to deal with the very first index
 
         for difficulty in self.difficulties:
-            with open(f"ms_user_data/Classic/{difficulty}/{username}_ClBeginner.txt","w") as file:
-                file.write("0,0,0,0,0,0,0,0,0,0\n0,0,0\n")
+            with open(f"ms_user_data/Classic/{difficulty}/{username}_Cl{difficulty}.txt","w") as file:
+                file.write("[-100,999999,999999,999999,999999,999999,999999,999999,999999,999999,999999]\n[0,0,0]\n")
+                #first number is very low so that top_10_stage checker will never have to deal with the very first index, following numbers are very large so that user's time is guaranteed to be faster at first
+
         # Cl is put before the difficulty to signify that this is a classic game mode- just in case, in the future, other game modes are introduced that use game modes
 
         self.temp_username = username #set as temp_username because, in self.sign_in(), self.username = self.temp_username
@@ -161,15 +169,11 @@ class DatabaseHandler:
 
 
     def add_classic_time(self, time, difficulty):
-        #self.boards_completed += 1
-        #time = int(time[0:2]) * 60 + int(time[3:5])
-        #with open(f"ms_user_data/Classic/{self.username}_Classic.txt", "a") as file:
-        #    file.write(f"{time}\n")
-        #self.update_top_10_and_glb()
-        self.glb[difficulty][2] += 1
+        self.glb[f"Cl{difficulty}"][2] += 1
         time = int(time[0:2]) * 60 + int(time[3:5])
-        with open(f"ms_user_data/Classic/{self.username}_Classic.txt", "a") as file:
+        with open(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt", "a") as file:
             file.write(f"{time}\n")
+        self.check_if_top_10_time(time, difficulty)
         self.update_top_10_and_glb("Classic", difficulty)
 
 
@@ -178,43 +182,26 @@ class DatabaseHandler:
             file.write(f"{stage}\n")
 
         #updating no. of boards completed and, POSSIBLY, no. of losses
-        #if mine_clicked:
-        #    self.no_of_losses+=1
-        #self.update_top_10_and_glb()
         if mine_clicked:
             self.glb["Time Trial"][1] += 1
+
+        self.check_if_top_10_stage(stage)
         self.update_top_10_and_glb("Time Trial")
 
 
-    #def update_top_10_and_glb(self):
-    #    settings_file = open(f"ms_user_data/Settings/{self.username}_Settings.txt")
-    #    settings_data = settings_file.readlines()
-    #    settings_data[2] = f"{self.no_of_games},{self.no_of_losses},{self.boards_completed}\n"
-    #    with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as file:
-    #        for line in settings_data:
-    #            file.write(line)
-
     def update_top_10_and_glb(self, game_mode, difficulty=""):
-        #if game_mode=="Classic":
-        #    with open(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt") as read_cl_file:
-        #        classic_data = read_cl_file.readlines()
-        #        formatted_difficulty = f"Cl{difficulty}"
-        #        classic_data[1] = f"{self.glb[formatted_difficulty][0]},{self.glb[formatted_difficulty][1]},{self.glb[formatted_difficulty][2]}\n"
-        #    with open(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt","w") as write_cl_file:
-        #        for line in classic_data:
-        #            write_cl_file.write(line)
         path=""
         specific_game_mode=""
         if game_mode=="Classic":
             path = f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt"
             specific_game_mode = f"Cl{difficulty}"
-            rank = self.check_if_top_10_time()
         elif game_mode=="Time Trial":
             path = f"ms_user_data/Time Trial/{self.username}_Time Trial.txt"
             specific_game_mode = "Time Trial"
 
         with open(path) as read_file:
             file_data = read_file.readlines()
+            file_data[0] = f"{self.top_10_scores[specific_game_mode]}\n"
             file_data[1] = f"{self.glb[specific_game_mode][0]},{self.glb[specific_game_mode][1]},{self.glb[specific_game_mode][2]}\n"
         with open(path,"w") as rewrite_file:
             for line in file_data:
@@ -222,27 +209,38 @@ class DatabaseHandler:
 
 
     def check_if_top_10_time(self, time, difficulty): #for classic mode
-        #original_top_10 = self.top_10_scores[f"Cl{difficulty}"]
-        for i in range(0, 10, -1):
-            if time>self.top_10_scores[f"Cl{difficulty}"][i]:
-                if i!=9:
-                    self.top_10_scores[f"Cl{difficulty}"].insert(i+1, time)
-                    del self.top_10_scores[f"Cl{difficulty}"][10]
-                    #break
-                    return i
-                return 100 #100 will be used to represent that the time was not in the top 10
+        for i in range(10,-1,-1):
+            #if not time<self.top_10_scores[f"Cl{difficulty}"][i]:
+            if time>=self.top_10_scores[f"Cl{difficulty}"][i]:
+                if i!=10:
+                    self.top_10_scores[f"Cl{difficulty}"].insert(i + 1, time)
+                    del self.top_10_scores[f"Cl{difficulty}"][11]
+                    self.top_10_rank = i
+                    if i==0:
+                        self.no_1_status = "Reached"
+                    elif time==self.top_10_scores[f"Cl{difficulty}"][1]:
+                        self.no_1_status = "Tied"
+                        #if self.top_10_scores[f"Cl{difficulty}"][i]==self.top_10_scores[f"Cl{difficulty}"][i+1]:
+                        #    self.no_1_status="Tied" #player tied with their best time
+                        #else:
+                        #    self.no_1_status = "Reached" #player achieved a new best time
+
+                break
+
 
 
     def check_if_top_10_stage(self, stage): #for time trial mode
-        for i in range(0,10,-1):
-            if stage<self.top_10_scores["Time Trial"][i]:
-                if i!=9:
+        for i in range(10,-1,-1):
+            if stage<=self.top_10_scores["Time Trial"][i]:
+                if i!=10:
                     self.top_10_scores["Time Trial"].insert(i+1, stage)
-                    del self.top_10_scores["Time Trial"][10]
-                    #break
-                    return i
-                return 100  # 100 will be used to represent that the time was not in the top 10
-
+                    del self.top_10_scores["Time Trial"][11]
+                    self.top_10_rank = i
+                    if i==0:
+                        self.no_1_status = "Reached"
+                    elif stage==self.top_10_scores["Time Trial"][1]:
+                        self.no_1_status = "Tied"
+                break
 
     #running out of time in time trial should not count as a loss, but hitting a mine in time trial should
     #def add_classic_loss(self):
