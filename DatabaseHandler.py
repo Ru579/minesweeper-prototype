@@ -63,31 +63,6 @@ class DatabaseHandler:
         pass
 
 
-    #def sign_in_user(self):
-    #    self.username = self.temp_username
-    #    self.pword = self.temp_pword
-    #    self.profile_pic_colour = self.temp_profile_pic_colour
-    #    #with open(f"ms_user_data/Settings/{self.username}_Settings.txt") as file:
-    #    #    settings_data = file.readlines()
-    #    #    games_losses_boards = settings_data[2].strip("\n").split(",")
-    #    #self.no_of_games = int(games_losses_boards[0])
-    #    #self.no_of_losses = int(games_losses_boards[1])
-    #    #self.boards_completed = int(games_losses_boards[2])
-    #    self.user_signed_in = True
-    #    with open("ms_user_data/current_user_data.txt", "w") as file:
-    #        file.write(f"{self.username}\n{self.profile_pic_colour}\n")
-    #    with open(f"ms_user_data/Classic/{self.username}_Classic.txt") as classic_file:
-    #        data = classic_file.readlines()
-    #        self.top_10_classic = data[0].split(",")
-    #    with open(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt") as tt_file:
-    #        data = tt_file.readlines()
-    #        self.top_10_time_trial = data[0].split(",")
-    #    #converting arrays values from strings into integers
-    #    for i in range(10):
-    #        self.top_10_classic[i] = int(self.top_10_classic[i])
-    #        self.top_10_time_trial[i] = int(self.top_10_time_trial[i])
-
-
     def sign_in_user(self):
         self.username = self.temp_username
         self.pword = self.temp_pword
@@ -96,6 +71,7 @@ class DatabaseHandler:
         with open("ms_user_data/current_user_data.txt", "w") as file:
             file.write(f"{self.username}\n{self.profile_pic_colour}\n")
         self.load_current_user_game_data()
+
 
     def load_current_user_game_data(self):
         #opening classic data
@@ -109,8 +85,8 @@ class DatabaseHandler:
 
                 self.glb[f"Cl{difficulty}"] = classic_data[1].strip("\n")[1:len(classic_data[1])-2].split(",")
                 for i in range(3):
-                    print(self.glb[f"Cl{difficulty}"][i])
-                    print(self.glb)
+                    #print(self.glb[f"Cl{difficulty}"][i])
+                    #print(self.glb)
                     self.glb[f"Cl{difficulty}"][i] = int(self.glb[f"Cl{difficulty}"][i])
 
         # opening time trial data
