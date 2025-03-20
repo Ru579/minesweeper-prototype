@@ -37,7 +37,8 @@ class DatabaseHandler:
     def find_user_file(self, username): #returns True if a file of the user's name is found
         directory = "ms_user_data/Settings"
         for file in os.listdir(directory):
-            if str(file).lower() == f"{username.lower()}_Settings.txt":
+            #if str(file).lower() == f"{username.lower()}_Settings.txt":
+            if f"{str(file).lower()[0:len(str(file)) - 13]}_Settings.txt" == f"{username.lower()}_Settings.txt":
                 username = str(file)[0:len(str(file))-13]
                 self.temp_username = username
                 settings_file = open(f"ms_user_data/Settings/{username}_Settings.txt")
@@ -114,7 +115,7 @@ class DatabaseHandler:
     def username_exists_check(self, username):
         directory = "ms_user_data/Settings"
         for file in os.listdir(directory):
-            if str(file).lower()==f"{username.lower()}_Settings.txt":
+            if f"{str(file).lower()[0:len(str(file))-13]}_Settings.txt"==f"{username.lower()}_Settings.txt":
                 return True
         return False
 
@@ -154,7 +155,7 @@ class DatabaseHandler:
 
 
     def add_tt_stage(self, stage, mine_clicked):
-        with open(f"ms_user_data/Time Trial/{self.username}_Classic.txt", "a") as file:
+        with open(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt", "a") as file:
             file.write(f"{stage}\n")
 
         #updating no. of boards completed and, POSSIBLY, no. of losses

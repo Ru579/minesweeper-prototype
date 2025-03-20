@@ -246,9 +246,10 @@ class LoginGUI():
                         "Please Enter a Valid Password"]
         conditions = [username_input.strip()=="", username_exists, pword_input1!=pword_input2, pword_input1.strip()==""]
         for i in range(4):
-            warning_type = "user"
-            if i==2 or i==3:
-                warning_type = "pword"
+            #warning_type = "user"
+            #if i==2 or i==3:
+            #    warning_type = "pword"
+            warning_type = "pword" if i==2 or i==3 else "user"
             account_valid = self.check_condition(account_valid, conditions[i], warning_text[i], warning_type)
 
 
