@@ -422,25 +422,6 @@ class GUI:
             self.make_quick_replay_buttons()
 
     def show_top_10_rank(self):
-        #if self.game.top_10_rank != 100:
-        #    #removes rowspan from communicator so that it doesn't merge with the label showing what stage was reached and the time taken
-        #    if self.game.game_mode=="Time Trial":
-        #        current_text = self.communicator.cget("text")
-        #        self.communicator.destroy()
-        #        self.communicator = Label(self.game_frame, font=("Calibri", 18), text=current_text, width=24, wraplength=300, height=3)  # height = 2
-        #        self.communicator.grid(row=2, column=1)
-
-        #    if not (self.game.game_mode == "Time Trial" and self.game.stage == 6):
-        #        if self.game.no_1_status == "Reached":
-        #            top_10_statement = "NEW HIGHSCORE!"
-        #        elif self.game.no_1_status == "Tied":
-        #            top_10_statement = "So close- you have tied with your best score"
-        #        else:
-        #            suffixes = ["st", "nd", "rd"]
-        #            suffix = "th" if self.game.top_10_rank not in (1, 2, 3) else suffixes[self.game.top_10_rank - 1]
-        #            top_10_statement = f"Top 10 Score Achieved: {self.game.top_10_rank}{suffix}"
-        #        self.communicator.config(text=self.communicator.cget("text")+f"\n{top_10_statement}")
-
         top_10_statement = self.game.calculate_output_top_10_statement(self.communicator.cget("text"))
 
         # removes rowspan from communicator so that it doesn't merge with the label showing what stage was reached and the time taken
@@ -449,9 +430,8 @@ class GUI:
             self.communicator.destroy()
             self.communicator = Label(self.game_frame, font=("Calibri", 18), text=current_text, width=24, wraplength=300, height=3)  # height = 2
             self.communicator.grid(row=2, column=1)
+
         self.communicator.config(text=top_10_statement)
-
-
 
     def toggle_all_mine_reveal(self, button=None):
         # reveal all cells that are mines
@@ -560,7 +540,9 @@ class GUI:
     def classic_game_over_window(self, outcome, final_time):
         # creates text confirming outcome and final time
         if outcome == "WIN":
-            Label(self.game_finished_window, text=f"Your time was:\n {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
+            Label(self.game_finished_window, text=self.game.calculate_output_top_10_statement(f"Congratulations!\nYour time was:\n {final_time[0]}:{final_time[1]}"),
+            font=("Calibri", 16)).grid(row=0, column=1)
+
         elif outcome == "LOSE":
             Label(self.game_finished_window, text=f"GAME OVER!\nYour time was {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
 
@@ -584,7 +566,8 @@ class GUI:
 
     def tt_game_over_window(self, final_time):
         # Label(self.game_finished_window, text=f"You got to stage {self.game.stage - 5}\nYou lasted for:\n {self.game.stopwatch // 60:02}:{self.game.stopwatch % 60:02}", font=("Calibri", 16)).grid(row=0, column=1)
-        Label(self.game_finished_window, text=f"You got to stage {self.game.stage - 5}\nYou lasted for:\n {final_time[0]}:{final_time[1]}", font=("Calibri", 16)).grid(row=0, column=1)
+        Label(self.game_finished_window, text=self.game.calculate_output_top_10_statement(f"You got to stage {self.game.stage - 5}\nYou lasted for:\n {final_time[0]}:{final_time[1]}"),
+              font=("Calibri", 16)).grid(row=0, column=1)
 
         retry_button = Button(self.game_finished_window, text="Retry?", bg="blue", fg="white", font=15, width=6, command=lambda: self.retry(destroy_window=True))
         retry_button.grid(row=1, column=1)
