@@ -141,27 +141,29 @@ class DatabaseHandler:
             file.write(f"{self.username}\n{self.profile_pic_colour}\n")
 
 
+    def delete_user(self):
+        os.remove(f"ms_user_data/Settings/{self.username}_Settings.txt")
+        os.remove(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt")
+        for difficulty in self.difficulties:
+            os.remove(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt")
+
+        open("ms_user_data/current_user_data.txt","w").close()
+        self.user_signed_in = False
+
+
     def add_classic_time(self, time, difficulty):
         self.glb[f"Cl{difficulty}"][2] += 1
         time = int(time[0:2]) * 60 + int(time[3:5])
-        #with open(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt", "a") as file:
-        #    file.write(f"{time}\n")
-        #self.check_if_top_10_time(time, difficulty)
-        #self.update_top_10_and_glb("Classic", difficulty)
+
         self.update_top_10(time, "Classic", difficulty)
         self.update_user_files("Classic", time, difficulty)
 
 
     def add_tt_stage(self, stage, mine_clicked):
-        #with open(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt", "a") as file:
-        #    file.write(f"{stage}\n")
-
         #updating no. of boards completed and, POSSIBLY, no. of losses
         if mine_clicked:
             self.glb["Time Trial"][1] += 1
 
-        #self.check_if_top_10_stage(stage)
-        #self.update_top_10_and_glb("Time Trial")
         self.update_top_10(stage, "Time Trial")
         self.update_user_files("Time Trial", stage)
 
@@ -169,26 +171,6 @@ class DatabaseHandler:
     def add_classic_loss(self, difficulty):
         self.glb[f"Cl{difficulty}"][1] += 1
         self.update_user_files("Classic", difficulty=difficulty)
-
-
-    #def update_top_10_and_glb(self, game_mode, difficulty=""):
-    #    path=""
-    #    specific_game_mode=""
-    #    if game_mode=="Classic":
-    #        path = f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt"
-    #        specific_game_mode = f"Cl{difficulty}"
-    #    elif game_mode=="Time Trial":
-    #        path = f"ms_user_data/Time Trial/{self.username}_Time Trial.txt"
-    #        specific_game_mode = "Time Trial"
-#
-    #    with open(path) as read_file:
-    #        file_data = read_file.readlines()
-    #        file_data[0] = f"{self.top_10_scores[specific_game_mode]}\n"
-    #        #file_data[1] = f"{self.glb[specific_game_mode][0]},{self.glb[specific_game_mode][1]},{self.glb[specific_game_mode][2]}\n"
-    #        file_data[1] = f"{self.glb[specific_game_mode]}\n"
-    #    with open(path,"w") as rewrite_file:
-    #        for line in file_data:
-    #            rewrite_file.write(line)
 
 
     def update_user_files(self, game_mode, score=None, difficulty=""):
@@ -209,40 +191,6 @@ class DatabaseHandler:
                 rewrite_file.write(line)
 
 
-    #def check_if_top_10_time(self, time, difficulty): #for classic mode
-    #    for i in range(10,-1,-1):
-    #        #if not time<self.top_10_scores[f"Cl{difficulty}"][i]:
-    #        if time>=self.top_10_scores[f"Cl{difficulty}"][i]:
-    #            if i!=10:
-    #                self.top_10_scores[f"Cl{difficulty}"].insert(i + 1, time)
-    #                del self.top_10_scores[f"Cl{difficulty}"][11]
-    #                self.top_10_rank = i
-    #                if i==0:
-    #                    self.no_1_status = "Reached"
-    #                elif time==self.top_10_scores[f"Cl{difficulty}"][1]:
-    #                    self.no_1_status = "Tied"
-    #                    #if self.top_10_scores[f"Cl{difficulty}"][i]==self.top_10_scores[f"Cl{difficulty}"][i+1]:
-    #                    #    self.no_1_status="Tied" #player tied with their best time
-    #                    #else:
-    #                    #    self.no_1_status = "Reached" #player achieved a new best time
-#
-    #            break
-#
-#
-#
-    #def check_if_top_10_stage(self, stage): #for time trial mode
-    #    for i in range(10,-1,-1):
-    #        if stage<=self.top_10_scores["Time Trial"][i]:
-    #            if i!=10:
-    #                self.top_10_scores["Time Trial"].insert(i+1, stage)
-    #                del self.top_10_scores["Time Trial"][11]
-    #                self.top_10_rank = i
-    #                if i==0:
-    #                    self.no_1_status = "Reached"
-    #                elif stage==self.top_10_scores["Time Trial"][1]:
-    #                    self.no_1_status = "Tied"
-    #            break
-
     def update_top_10(self, score, game_mode, difficulty=""):
         specific_game_mode = f"Cl{difficulty}" if game_mode=="Classic" else "Time Trial"
         for i in range(10,-1,-1):
@@ -257,16 +205,3 @@ class DatabaseHandler:
                     elif score==self.top_10_scores[specific_game_mode][1]:
                         self.no_1_status = "Tied"
                 break
-
-
-
-
-    #running out of time in time trial should not count as a loss, but hitting a mine in time trial should
-    #def add_classic_loss(self):
-    #    self.no_of_losses+=1
-    #    settings_file = open(f"ms_user_data/settings/{self.username}_Settings.txt")
-    #    settings_data = settings_file.readlines()
-    #    settings_data[2] = f"{self.no_of_games},{self.no_of_losses},{self.boards_completed}\n"
-    #    with open(f"ms_user_data/settings/{self.username}_Settings.txt", "w") as file:
-    #        for line in settings_data:
-    #            file.write(line)

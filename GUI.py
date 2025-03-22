@@ -100,6 +100,9 @@ class GUI:
         Button(game_modes, text="Tips", font=("Calibri", 24), bg="purple", width=20, height=2, pady=8).grid(row=1, column=0, padx=5, pady=3)
         Button(game_modes, text="Statistics", font=("Calibri", 24), bg="red", width=20, height=2, pady=8).grid(row=1, column=1, padx=5, pady=3)
 
+        #TEMPORARY
+        Button(self.main_menu, text="Delete current account?", bg="red", command=lambda: self.game.loginGUI.delete_user()).grid(row=4,column=2)
+
         self.main_menu.pack()
 
     def change_difficulty(self, difficulty):
@@ -318,13 +321,6 @@ class GUI:
             if normal_state == cell_state and state == cell_state:
                 self.tiles[row][column].config(image=self.formatted_cell_images[f"{cell_state.lower()}_cell_image"])
 
-        # if normal_state == "Hidden" and state == "Hidden":
-        #    self.tiles[row][column].config(image=self.formatted_cell_images["hidden_cell_image"])
-        # elif normal_state == "Flagged" and state == "Flagged":
-        #    self.tiles[row][column].config(image=self.formatted_cell_images["flagged_cell_image"])
-        # elif normal_state == "Confused" and state == "Confused":
-        #    self.tiles[row][column].config(image=self.formatted_cell_images["confused_cell_image"])
-
     def ui_flag_cell(self, x, y):
         if self.game.user_can_interact:
             self.game.flag_cell(x, y)
@@ -488,9 +484,6 @@ class GUI:
         difficulties = Menu(self.game_frame, tearoff=False)
         for difficulty in "Beginner", "Intermediate", "Expert":
             difficulties.add_command(label=difficulty, command=lambda current_difficulty = difficulty: button.config(text=current_difficulty))
-        # difficulties.add_command(label="Beginner", command=lambda: button.config(text="Beginner"))
-        # difficulties.add_command(label="Intermediate", command=lambda: button.config(text="Intermediate"))
-        # difficulties.add_command(label="Expert", command=lambda: button.config(text="Expert"))
         try:
             x = button.winfo_rootx()
             y = button.winfo_rooty()

@@ -188,7 +188,7 @@ class LoginGUI():
 
     def back_to_username_frame(self):
         self.pword_frame.destroy()
-        self.username_frame.place(x=175,y=50)
+        self.username_frame.place(x=175,y=90)
 
 
     def make_create_account_frame(self, previous_frame=""):
@@ -278,6 +278,11 @@ class LoginGUI():
     def sign_out(self):
         self.create_guest_profile()
         self.database_handler.user_sign_out()
+
+
+    def delete_user(self):
+        self.create_guest_profile()
+        self.database_handler.delete_user()
 
 
     def different_log_in(self):
