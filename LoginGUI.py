@@ -3,8 +3,9 @@ from PIL import Image, ImageTk
 from DatabaseHandler import *
 
 class LoginGUI():
-    def __init__(self, menu, window):
-        self.menu = menu
+    def __init__(self, window, database):
+        #self.menu = menu
+        self.menu = None
         self.window = window
 
         logo = Image.open("mine_cell_red.png")
@@ -23,7 +24,7 @@ class LoginGUI():
         pic = pic.resize((60, 60))
         self.guest_image = ImageTk.PhotoImage(pic)
 
-        self.database_handler = DatabaseHandler()
+        self.database_handler = database
 
         #frames
         self.sign_in_frame = None #to be replaced with a swappable frame
@@ -32,8 +33,10 @@ class LoginGUI():
         self.create_account_frame = None
 
         #other widgets
-        self.profile_pic = Canvas(self.menu)
-        self.profile_pic.grid(row=0,column=2)
+        #self.profile_pic = Canvas(self.menu)
+        #self.profile_pic.grid(row=0,column=2)
+        self.profile_pic = None
+
 
         self.profile_circle = None
         self.guest_profile_pic = None
@@ -46,6 +49,15 @@ class LoginGUI():
         self.create_account_warning={}
 
         self.warning_given = {}
+
+        #status variables
+        self.signed_in = None
+
+
+    def create_profile(self, menu):
+        self.menu = menu
+        self.profile_pic = Canvas(self.menu)
+        self.profile_pic.grid(row=0, column=2)
 
         if self.database_handler.username=="":
             self.signed_in = False

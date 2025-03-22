@@ -12,6 +12,7 @@ class GUI:
         # creating logic units
         self.game = GameManager()
         self.settings = Settings(self.Minesweeper)
+        self.loginGUI = LoginGUI(self.Minesweeper, self.game.database)
 
         # creating frames
         self.main_menu = Frame(self.Minesweeper)
@@ -92,7 +93,9 @@ class GUI:
                command=lambda: self.settings.create_settings_window(self.main_menu, self.Minesweeper)).grid(
             row=0, column=0)
         # MAY NEED TO BE CHANGED- currently, instantiation of loginGUI is what creates the login button
-        self.game.loginGUI = LoginGUI(self.main_menu, self.Minesweeper)
+        #self.game.loginGUI = LoginGUI(self.main_menu, self.Minesweeper)
+        self.loginGUI.create_profile(self.main_menu)
+
 
         # central buttons (below classic button)
         Button(game_modes, text="Leaderboard", font=("Calibri", 24), bg="yellow", width=20, height=2, pady=8).grid(row=0, column=0, padx=5, pady=3)
