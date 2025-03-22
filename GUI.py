@@ -104,7 +104,7 @@ class GUI:
         Button(game_modes, text="Statistics", font=("Calibri", 24), bg="red", width=20, height=2, pady=8).grid(row=1, column=1, padx=5, pady=3)
 
         #TEMPORARY
-        Button(self.main_menu, text="Delete current account?", bg="red", command=lambda: self.game.loginGUI.delete_user()).grid(row=4,column=2)
+        Button(self.main_menu, text="Delete current account?", bg="red", command=lambda: self.loginGUI.delete_user()).grid(row=4,column=2)
 
         self.main_menu.pack()
 
@@ -124,8 +124,8 @@ class GUI:
         title = Label(self.game_frame, text="MINESWEEPER.PROTO", font=("Calibri", 20))
         title.grid(row=0, column=1)
 
-        self.communicator = Label(self.game_frame, text="Click a cell to start", font=("Calibri", 18), width=24)
-        self.communicator.grid(row=2, column=1)
+        self.communicator = Label(self.game_frame, text="Click a cell to start", font=("Calibri", 18), width=24, wraplength=300, height=2)
+        self.communicator.grid(row=2, column=1, rowspan=4) #rowspan = 3
 
         self.mines_left_counter = Label(self.game_frame, text="", font=("Calibri", 20), width=2)
         self.mines_left_counter.grid(row=0, column=0)
@@ -375,7 +375,6 @@ class GUI:
             self.game.game_started = False
         elif self.game.game_mode == "Classic":
             if self.game.game_has_been_won:
-                #####
                 self.game.game_finished(self.countup_timer.cget("text"), "WIN")
 
                 # not 100% sure about the following line
@@ -386,7 +385,9 @@ class GUI:
                 if self.settings.user_settings["create_game_finished_window"]:
                     self.game_frame.after(500, lambda: self.create_game_finished_window("WIN"))
                 else:
+                    self.show_top_10_rank()
                     self.make_quick_replay_buttons()
+                    #self.show_top_10_rank()
 
         elif self.game.game_mode == "Time Trial":
             if self.game.board_done:
@@ -396,7 +397,7 @@ class GUI:
 
     def do_game_over(self, delay=1250):
         self.game.timer_on = False
-        #######
+
         # if player ran out of time
         if self.game.game_mode == "Time Trial" and self.countdown_timer.cget("text") == "00:00":
             self.game.user_can_interact = False
@@ -406,15 +407,46 @@ class GUI:
                 # create a button to view mines
                 view_mines_button = Button(self.game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: self.toggle_all_mine_reveal(view_mines_button))
                 view_mines_button.grid(row=3, column=2)
+        #if player clicked a mine in either time trial or classic
         else:
             self.game.game_finished(self.countup_timer.cget("text"), "LOSE", True)
+
             self.communicator.config(text="GAME OVER!")
             self.toggle_all_mine_reveal()
 
         if self.settings.user_settings["create_game_finished_window"]:
             self.game_frame.after(delay, lambda: self.create_game_finished_window("LOSE"))
         else:
+            if self.game.game_mode=="Time Trial":
+                self.show_top_10_rank()
             self.make_quick_replay_buttons()
+            #self.show_top_10_rank()
+
+    def show_top_10_rank(self):
+        if self.game.top_10_rank != 100:
+            #gives self.communicator rowspan so that it doesn't push down the difficulty changer button
+            #if self.game.game_mode=="Classic":
+            #    self.communicator.destroy()
+            #    self.communicator = Label(self.game_frame, font=("Calibri", 18), text="Congratulations!", width=24, wraplength=300, height=2)  # height = 2
+            #    self.communicator.grid(row=2, column=1, rowspan=3)
+            if self.game.game_mode=="Time Trial":
+                current_text = self.communicator.cget("text")
+                self.communicator.destroy()
+                self.communicator = Label(self.game_frame, font=("Calibri", 18), text=current_text, width=24, wraplength=300, height=3)  # height = 2
+                self.communicator.grid(row=2, column=1)
+
+            if self.game.no_1_status == "Reached":
+                top_10_statement = "NEW HIGHSCORE!"
+            elif self.game.no_1_status == "Tied":
+                top_10_statement = "So close- you have tied with your best score"
+            else:
+                suffixes = ["st", "nd", "rd"]
+                suffix = "th" if self.game.top_10_rank not in (1, 2, 3) else suffixes[self.game.top_10_rank - 1]
+                top_10_statement = f"Top 10 Score Achieved: {self.game.top_10_rank}{suffix}"
+            self.communicator.config(text=self.communicator.cget("text")+f"\n{top_10_statement}")
+
+        #else:  # player didn't get a top 10 score
+        #    self.communicator.config(text="Congratulations!")
 
     def toggle_all_mine_reveal(self, button=None):
         # reveal all cells that are mines

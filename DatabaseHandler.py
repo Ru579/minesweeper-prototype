@@ -198,7 +198,8 @@ class DatabaseHandler:
                 if i != 10:
                     self.top_10_scores[specific_game_mode].insert(i+1, score)
                     del self.top_10_scores[specific_game_mode][11]
-                    self.top_10_rank = i
+                    #self.top_10_rank = i
+                    self.top_10_rank = i + 1
 
                     if i==0:
                         self.no_1_status = "Reached"
