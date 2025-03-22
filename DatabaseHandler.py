@@ -1,4 +1,5 @@
 import os
+import datetime
 
 class DatabaseHandler:
     def __init__(self):
@@ -121,12 +122,16 @@ class DatabaseHandler:
             file.write(f"{pword}\nred\n")
 
         with open(f"ms_user_data/Time Trial/{username}_Time Trial.txt","w") as file:
-            file.write("[99999,0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n")#first number is very high so that top_10_stage checker will never have to deal with the very first index
+            file.write("[99999,0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n***\n")#first number is very high so that top_10_stage checker will never have to deal with the very first index
+        open(f"ms_user_data/Exact Scores/Time Trial/{username}_Time Trial_long_term.txt", "w").close()
 
         for difficulty in self.difficulties:
             with open(f"ms_user_data/Classic/{difficulty}/{username}_Cl{difficulty}.txt","w") as file:
-                file.write("[-100,999999,999999,999999,999999,999999,999999,999999,999999,999999,999999]\n[0,0,0]\n")
+                file.write("[-100,999999,999999,999999,999999,999999,999999,999999,999999,999999,999999]\n[0,0,0]\n***\n")
                 #first number is very low so that top_10_stage checker will never have to deal with the very first index, following numbers are very large so that user's time is guaranteed to be faster at first
+            open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{username}_Cl{difficulty}_long_term.txt","w") .close()
+
+        # *** is used to separate average scores from the normal scores added to the file
 
         # Cl is put before the difficulty to signify that this is a classic game mode- just in case, in the future, other game modes are introduced that use game modes
 
@@ -155,14 +160,22 @@ class DatabaseHandler:
         self.glb[f"Cl{difficulty}"][2] += 1
         time = int(time[0:2]) * 60 + int(time[3:5])
 
+        with open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt", "a") as file:
+            date = datetime.datetime.now().strftime("%d-%m-%Y")
+            file.write(f"{time}:{date}\n")
+
         self.update_top_10(time, "Classic", difficulty)
         self.update_user_files("Classic", time, difficulty)
 
 
     def add_tt_stage(self, stage, mine_clicked):
-        #updating no. of boards completed and, POSSIBLY, no. of losses
+        # updating no. of boards completed and, POSSIBLY, no. of losses
         if mine_clicked:
             self.glb["Time Trial"][1] += 1
+
+        with open(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt", "a") as file:
+            date = datetime.datetime.now().strftime("%d-%m-%Y")
+            file.write(f"{stage}:{date}\n")
 
         self.update_top_10(stage, "Time Trial")
         self.update_user_files("Time Trial", stage)
@@ -174,6 +187,7 @@ class DatabaseHandler:
 
 
     def update_user_files(self, game_mode, score=None, difficulty=""):
+        # setting up specific path to correct folder
         path = ""
         specific_game_mode = ""
         if game_mode == "Classic":
@@ -182,11 +196,18 @@ class DatabaseHandler:
         elif game_mode == "Time Trial":
             path = f"ms_user_data/Time Trial/{self.username}_Time Trial.txt"
             specific_game_mode = "Time Trial"
+
+        # updating top_10_scores and glb of files
         self.user_file_data[specific_game_mode][0] = f"{self.top_10_scores[specific_game_mode]}\n"
         self.user_file_data[specific_game_mode][1] = f"{self.glb[specific_game_mode]}\n"
+
+        #adds the score to database's attribute of user_data if not just adding a loss
         if score is not None:
             self.user_file_data[specific_game_mode].append(f"{score}\n")
+
+
         with open(path, "w") as rewrite_file:
+            self.calc_100_average(game_mode, difficulty)
             for line in self.user_file_data[specific_game_mode]:
                 rewrite_file.write(line)
 
@@ -206,3 +227,58 @@ class DatabaseHandler:
                     elif score==self.top_10_scores[specific_game_mode][1]:
                         self.no_1_status = "Tied"
                 break
+
+
+    #must be called after the data has been added, otherwise, there is a chance that the program could be forcefully closed at the wrong time?
+    def calc_100_average(self, game_mode, difficulty):
+        #specific_game_mode = game_mode if game_mode=="Time Trial" else f"Cl{difficulty}"
+#
+        #if len(self.user_file_data[specific_game_mode])>101:
+        #    # sums final 100 lines
+        #    start_sum = False
+        #    total = 0
+        #    for line in self.user_file_data[specific_game_mode]:
+        #        print(line.strip("\n"))
+        #        if line=="***\n":
+        #            start_sum = True
+        #            print("start sum is now true")
+        #        elif start_sum:
+        #            print("start sum is true")
+        #            for _ in range(100):
+        #                total += int(self.user_file_data[specific_game_mode][len(self.user_file_data[specific_game_mode])-1])
+        #                print(total)
+        #                del self.user_file_data[specific_game_mode][len(self.user_file_data[specific_game_mode])-1]
+        #            break
+        #    total /= 100 #calculating the average of the 100 values
+        #    print(total)
+#
+        #    self.user_file_data[specific_game_mode].insert(len(self.user_file_data[specific_game_mode])-1, str(total)+"\n")
+#
+        #else:
+        #    print("not long enough")
+        #
+
+        specific_game_mode = game_mode if game_mode=="Time Trial" else f"Cl{difficulty}"
+
+        if len(self.user_file_data[specific_game_mode])>101:
+            # sums final 100 lines
+            start_sum = False
+            total = 0
+            for line in self.user_file_data[specific_game_mode]:
+                if line == "***\n":
+                    start_sum = True
+                elif start_sum:
+                    i = len(self.user_file_data[specific_game_mode])-1
+                    while self.user_file_data[specific_game_mode][i] != "***\n":
+                        total += int(self.user_file_data[specific_game_mode][i].strip("\n"))
+                        del self.user_file_data[specific_game_mode][i]
+                        i -= 1
+                    break
+            total /= 100
+
+            self.user_file_data[specific_game_mode].insert(len(self.user_file_data[specific_game_mode]) - 1, str(total)+"\n")
+
+
+
+
+

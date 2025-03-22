@@ -48,7 +48,7 @@ class GameManager:
         if self.database.user_signed_in:
             self.database.glb[f"Cl{self.difficulty}"][0]+=1
         if difficulty == "Beginner":
-            self.board = Board(8, 8, 10)
+            self.board = Board(8, 8, 1)
             self.mines_left = 10
         elif difficulty == "Intermediate":
             self.board = Board(16, 16, 40)
