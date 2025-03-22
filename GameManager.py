@@ -171,8 +171,9 @@ class GameManager:
                     self.reset_top_10_info()
                 elif outcome=="LOSE":
                     #self.loginGUI.database_handler.no_of_losses += 1
-                    self.loginGUI.database_handler.glb[f"Cl{self.difficulty}"][1]+=1
-                    self.loginGUI.database_handler.update_top_10_and_glb("Classic", self.difficulty)
+                    #self.loginGUI.database_handler.glb[f"Cl{self.difficulty}"][1]+=1
+                    #self.loginGUI.database_handler.update_top_10_and_glb("Classic", self.difficulty)
+                    self.loginGUI.database_handler.add_classic_loss(self.difficulty)
 
     def reset_top_10_info(self):
         self.top_10_rank = self.loginGUI.database_handler.top_10_rank
