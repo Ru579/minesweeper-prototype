@@ -420,33 +420,38 @@ class GUI:
             if self.game.game_mode=="Time Trial":
                 self.show_top_10_rank()
             self.make_quick_replay_buttons()
-            #self.show_top_10_rank()
 
     def show_top_10_rank(self):
-        if self.game.top_10_rank != 100:
-            #gives self.communicator rowspan so that it doesn't push down the difficulty changer button
-            #if self.game.game_mode=="Classic":
-            #    self.communicator.destroy()
-            #    self.communicator = Label(self.game_frame, font=("Calibri", 18), text="Congratulations!", width=24, wraplength=300, height=2)  # height = 2
-            #    self.communicator.grid(row=2, column=1, rowspan=3)
-            if self.game.game_mode=="Time Trial":
-                current_text = self.communicator.cget("text")
-                self.communicator.destroy()
-                self.communicator = Label(self.game_frame, font=("Calibri", 18), text=current_text, width=24, wraplength=300, height=3)  # height = 2
-                self.communicator.grid(row=2, column=1)
+        #if self.game.top_10_rank != 100:
+        #    #removes rowspan from communicator so that it doesn't merge with the label showing what stage was reached and the time taken
+        #    if self.game.game_mode=="Time Trial":
+        #        current_text = self.communicator.cget("text")
+        #        self.communicator.destroy()
+        #        self.communicator = Label(self.game_frame, font=("Calibri", 18), text=current_text, width=24, wraplength=300, height=3)  # height = 2
+        #        self.communicator.grid(row=2, column=1)
 
-            if self.game.no_1_status == "Reached":
-                top_10_statement = "NEW HIGHSCORE!"
-            elif self.game.no_1_status == "Tied":
-                top_10_statement = "So close- you have tied with your best score"
-            else:
-                suffixes = ["st", "nd", "rd"]
-                suffix = "th" if self.game.top_10_rank not in (1, 2, 3) else suffixes[self.game.top_10_rank - 1]
-                top_10_statement = f"Top 10 Score Achieved: {self.game.top_10_rank}{suffix}"
-            self.communicator.config(text=self.communicator.cget("text")+f"\n{top_10_statement}")
+        #    if not (self.game.game_mode == "Time Trial" and self.game.stage == 6):
+        #        if self.game.no_1_status == "Reached":
+        #            top_10_statement = "NEW HIGHSCORE!"
+        #        elif self.game.no_1_status == "Tied":
+        #            top_10_statement = "So close- you have tied with your best score"
+        #        else:
+        #            suffixes = ["st", "nd", "rd"]
+        #            suffix = "th" if self.game.top_10_rank not in (1, 2, 3) else suffixes[self.game.top_10_rank - 1]
+        #            top_10_statement = f"Top 10 Score Achieved: {self.game.top_10_rank}{suffix}"
+        #        self.communicator.config(text=self.communicator.cget("text")+f"\n{top_10_statement}")
 
-        #else:  # player didn't get a top 10 score
-        #    self.communicator.config(text="Congratulations!")
+        top_10_statement = self.game.calculate_output_top_10_statement(self.communicator.cget("text"))
+
+        # removes rowspan from communicator so that it doesn't merge with the label showing what stage was reached and the time taken
+        if self.game.game_mode == "Time Trial":
+            current_text = self.communicator.cget("text")
+            self.communicator.destroy()
+            self.communicator = Label(self.game_frame, font=("Calibri", 18), text=current_text, width=24, wraplength=300, height=3)  # height = 2
+            self.communicator.grid(row=2, column=1)
+        self.communicator.config(text=top_10_statement)
+
+
 
     def toggle_all_mine_reveal(self, button=None):
         # reveal all cells that are mines

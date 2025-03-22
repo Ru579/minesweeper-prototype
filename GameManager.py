@@ -182,3 +182,17 @@ class GameManager:
         self.no_1_status = self.database.no_1_status
         self.database.top_10_rank = 100
         self.database.no_1_status = ""
+
+    def calculate_output_top_10_statement(self, current_communicator_text):
+        if self.top_10_rank != 100:
+            if not (self.game_mode == "Time Trial" and self.stage == 6):
+                if self.no_1_status == "Reached":
+                    top_10_statement = "NEW HIGHSCORE!"
+                elif self.no_1_status == "Tied":
+                    top_10_statement = "So close- you have tied with your best score"
+                else:
+                    suffixes = ["st", "nd", "rd"]
+                    suffix = "th" if self.top_10_rank not in (1, 2, 3) else suffixes[self.top_10_rank - 1]
+                    top_10_statement = f"Top 10 Score Achieved: {self.top_10_rank}{suffix}"
+                return f"{current_communicator_text}\n{top_10_statement}"
+        return current_communicator_text
