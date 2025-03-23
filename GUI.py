@@ -560,7 +560,8 @@ class GUI:
         difficulty_changer.grid(row=0, column=1)
 
         Button(game_finished_options, text="View Board?", font=("Calibri", 16), width=15, command=lambda: self.view_board()).grid(row=1, column=0)
-        Button(game_finished_options, text="Close", font=("Calibri", 16), width=15, command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=1, column=1)
+        Button(game_finished_options, text="Menu", font=("Calibri", 16), width=15, command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=1, column=1)
+        #replaced the text of the button above to "Menu" instead of "Close"
 
         # game_finished_options.grid(row=1, column=1)
 

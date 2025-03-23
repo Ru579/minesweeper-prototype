@@ -168,14 +168,14 @@ class GameManager:
     def game_finished(self, final_score="", outcome="", mine_clicked=False):
         if self.database.user_signed_in:
             if self.game_mode=="Time Trial":
-                self.database.add_tt_stage(self.stage - 5, mine_clicked)
+                self.database.add_tt_stage(self.stage - 5, mine_clicked, self.stopwatch)
                 self.reset_top_10_info()
             elif self.game_mode=="Classic":
                 if outcome=="WIN":
                     self.database.add_classic_time(final_score, self.difficulty)
                     self.reset_top_10_info()
                 elif outcome=="LOSE":
-                    self.database.add_classic_loss(self.difficulty)
+                    self.database.add_classic_loss(final_score, self.difficulty)
 
     def reset_top_10_info(self):
         self.top_10_rank = self.database.top_10_rank

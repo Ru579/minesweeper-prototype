@@ -19,7 +19,8 @@ class DatabaseHandler:
         self.top_10_rank = 100
         self.no_1_status = ""
 
-        #The number of games ina file that haven't been averaged
+        self.game_time = {}
+        #The number of games in a file that haven't been averaged
         self.nonAver_games = {}
 
         self.temp_username = ""
@@ -87,7 +88,9 @@ class DatabaseHandler:
                 for i in range(3):
                     self.glb[f"Cl{difficulty}"][i] = int(self.glb[f"Cl{difficulty}"][i])
 
-                self.nonAver_games[f"Cl{difficulty}"] = int(self.user_file_data[f"Cl{difficulty}"][2].strip("\n"))
+                self.game_time[f"Cl{difficulty}"] = int(self.user_file_data[f"Cl{difficulty}"][2].strip("\n"))
+
+                self.nonAver_games[f"Cl{difficulty}"] = int(self.user_file_data[f"Cl{difficulty}"][3].strip("\n"))
 
 
         # opening time trial data
@@ -102,7 +105,9 @@ class DatabaseHandler:
             for i in range(3):
                 self.glb["Time Trial"][i] = int(self.glb["Time Trial"][i])
 
-            self.nonAver_games["Time Trial"] = int(self.user_file_data["Time Trial"][2].strip("\n"))
+            self.game_time["Time Trial"] = int(self.user_file_data["Time Trial"][2].strip("\n"))
+
+            self.nonAver_games["Time Trial"] = int(self.user_file_data["Time Trial"][3].strip("\n"))
 
 
     def user_sign_out(self):
@@ -130,12 +135,12 @@ class DatabaseHandler:
             file.write(f"{pword}\nred\n")
 
         with open(f"ms_user_data/Time Trial/{username}_Time Trial.txt","w") as file:
-            file.write("[99999,0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n0\n&&&\n***\n")#first number is very high so that top_10_stage checker will never have to deal with the very first index
+            file.write("[99999,0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n0\n0\n&&&\n***\n")#first number is very high so that top_10_stage checker will never have to deal with the very first index
         open(f"ms_user_data/Exact Scores/Time Trial/{username}_Time Trial_long_term.txt", "w").close()
 
         for difficulty in self.difficulties:
             with open(f"ms_user_data/Classic/{difficulty}/{username}_Cl{difficulty}.txt","w") as file:
-                file.write("[-100,999999,999999,999999,999999,999999,999999,999999,999999,999999,999999]\n[0,0,0]\n0\n&&&\n***\n")
+                file.write("[-100,999999,999999,999999,999999,999999,999999,999999,999999,999999,999999]\n[0,0,0]\n0\n0\n&&&\n***\n")
                 #first number is very low so that top_10_stage checker will never have to deal with the very first index, following numbers are very large so that user's time is guaranteed to be faster at first
             open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{username}_Cl{difficulty}_long_term.txt","w") .close()
 
@@ -172,10 +177,11 @@ class DatabaseHandler:
 
         # increasing the number of boards completed
         self.glb[f"Cl{difficulty}"][2] += 1
+
+        self.game_time[f"Cl{difficulty}"] += time
+
         # increasing the number of games that haven't been averaged
         self.nonAver_games[f"Cl{difficulty}"] += 1
-
-
 
         with open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt", "a") as file:
             date = datetime.datetime.now().strftime("%d-%m-%Y")
@@ -185,13 +191,15 @@ class DatabaseHandler:
         self.update_user_files("Classic", time, difficulty)
 
 
-    def add_tt_stage(self, stage, mine_clicked):
+    def add_tt_stage(self, stage, mine_clicked, stopwatch_time):
         # updating no. of boards completed and, POSSIBLY, no. of losses
         if mine_clicked:
             self.glb["Time Trial"][1] += 1
+
+        self.game_time["Time Trial"] += stopwatch_time
+
         # increasing the number of games that haven't been averaged
         self.nonAver_games["Time Trial"] += 1
-
 
         with open(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt", "a") as file:
             date = datetime.datetime.now().strftime("%d-%m-%Y")
@@ -201,8 +209,9 @@ class DatabaseHandler:
         self.update_user_files("Time Trial", stage)
 
 
-    def add_classic_loss(self, difficulty):
+    def add_classic_loss(self, time, difficulty):
         self.glb[f"Cl{difficulty}"][1] += 1
+        self.game_time[f"Cl{difficulty}"] += int(time[0:2])*60 + int(time[3:5])
         self.update_user_files("Classic", difficulty=difficulty)
 
 
@@ -220,7 +229,7 @@ class DatabaseHandler:
         # updating top_10_scores and glb of files
         self.user_file_data[specific_game_mode][0] = f"{self.top_10_scores[specific_game_mode]}\n"
         self.user_file_data[specific_game_mode][1] = f"{self.glb[specific_game_mode]}\n"
-        #self.user_file_data[specific_game_mode][2] = f"{self.nonAver_games[specific_game_mode]}\n"
+        self.user_file_data[specific_game_mode][2] = f"{self.game_time[specific_game_mode]}\n"
 
         #adds the score to database's attribute of user_data if not just adding a loss
         if score is not None:
@@ -229,7 +238,7 @@ class DatabaseHandler:
 
         with open(path, "w") as rewrite_file:
             self.calc_100_average(game_mode, difficulty)
-            self.user_file_data[specific_game_mode][2] = f"{self.nonAver_games[specific_game_mode]}\n" #nonAver_games must be updated after calc_100 has possibly changed it
+            self.user_file_data[specific_game_mode][3] = f"{self.nonAver_games[specific_game_mode]}\n" #nonAver_games must be updated after calc_100 has possibly changed it
             for line in self.user_file_data[specific_game_mode]:
                 rewrite_file.write(line)
 
@@ -259,7 +268,6 @@ class DatabaseHandler:
     def calc_100_average(self, game_mode, difficulty):
         specific_game_mode = game_mode if game_mode=="Time Trial" else f"Cl{difficulty}"
 
-        #if len(self.user_file_data[specific_game_mode])>101:
         if self.nonAver_games[specific_game_mode]>=100:
             # sums final 100 lines
             start_sum = False
