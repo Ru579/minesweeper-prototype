@@ -1,104 +1,115 @@
-from Widget import *
-from PIL import Image, ImageTk
-
 class Settings:
-    def __init__(self, minesweeper_window):
-        self.volume=50
-        self.fifty_fifty_on = False
-        #self.create_game_finished_window = True
-        self.settings_window = Frame(minesweeper_window)
-        #self.on = PhotoImage(file="on_switch.png", master=self.settings_window)
-        #self.off = PhotoImage(file="off_switch.png", master=self.settings_window)
-        self.on = Image.open("on_switch.png")
-        self.on = self.on.resize((80, 20))
-        self.on = ImageTk.PhotoImage(self.on)
-        self.off = Image.open("off_switch.png")
-        self.off = self.off.resize((80, 20))
-        self.off = ImageTk.PhotoImage(self.off)
-        self.user_settings={}
-        with open("user_settings.txt", "r") as file:
-            for line in file:
-                record = line.split(":")
-                if record[1].strip("\n")=="True":
-                    self.user_settings[record[0]] = True
-                elif record[1].strip("\n")=="False":
-                    self.user_settings[record[0]] = False
+    def __init__(self, user_signed_in, username):
+        self.user_bool_settings = {}
+        self.user_var_settings = {}
+
+        self.username = username
+
+        # settings data
+        self.settings_data = []
+
+        self.linked_settings = {
+            "Auto Reveal Cells":"Highlight Cells"
+        }
+
+        if user_signed_in:
+            self.user_signed_in = True
+            self.load_user_settings()
+        else:
+            self.user_signed_in = False
+            self.load_default_settings()
 
 
-    def create_settings_window(self, main_menu, window):
-        main_menu.forget()
-        self.settings_window = Frame(window)
-        self.settings_window.pack()
+    def load_user_settings(self):
+        with open(f"ms_user_data/Settings/{self.username}_Settings.txt") as file:
+            self.settings_data = file.readlines()
 
-        #title
-        Label(self.settings_window, text="Settings", font=("Calibri", 24), bg="white", fg="grey").grid(row=0, column=1)
+            # loads boolean settings
+            i = 2
+            while self.settings_data[i] != "***\n":
+                record = self.settings_data[i].strip("\n").split(":")
+                if record[1] == "True":
+                    self.user_bool_settings[record[0]] = True
+                elif record[1] == "False":
+                    self.user_bool_settings[record[0]] = False
+                i += 1
 
-        #creating close button
-        Button(self.settings_window, text="X", font=("Calibri", 30), bg="white", fg="red", command=lambda: self.close_window(self.settings_window, main_menu)).grid(row=0, column=2)
-
-        settings_options=Frame(self.settings_window)
-        settings_options.grid(row=1,column=1)
-
-        #creating options in settings_options window
-        #create_gfw_button = Button(settings_options,
-        #                           image=self.get_switch_status("create_game_finished_window"),
-        #                           command=lambda: self.switch(create_gfw_button,
-        #                                                       self.user_settings["create_game_finished_window"],
-        #                                                       "create_game_finished_window"))
-
-        #img = Image.open("on_switch.png")
-        #new_image = PhotoImage(ImageTk.PhotoImage(img))
-        #create_gfw_button = Button(settings_options,
-        #                           command=lambda: self.switch(create_gfw_button,
-        #                                                       self.user_settings["create_game_finished_window"],
-        #                                                       "create_game_finished_window"))
-        #create_gfw_button.config(image=new_image)
-
-        create_gfw_button = Button(settings_options,
-                                   image=self.get_switch_status("create_game_finished_window"),
-                                   command=lambda: self.switch(create_gfw_button,
-                                                               self.user_settings["create_game_finished_window"],
-                                                               "create_game_finished_window"))
-
-        if create_gfw_button.cget("image")==self.on:
-            print("Button is on")
-        elif create_gfw_button.cget("image")==self.off:
-            print("Button is off")
-        create_gfw_button.grid(row=0,column=0)
-
-    def get_switch_status(self, attribute):
-        if self.user_settings[attribute]:
-            return self.on
-        elif not self.user_settings[attribute]:
-            return self.off
+            # loads variable settings
+            for j in range(i + 1, len(self.settings_data) - 1):
+                record = self.settings_data[j].strip("\n").split(":")
+                self.user_var_settings[record[0]] = record[1]
 
 
-    def switch(self, button, status, attribute):
-        if not status:
-            self.user_settings[attribute] = True
-            button.config(image=self.on)
-        elif status:
-            self.user_settings[attribute] = False
-            button.config(image=self.off)
-
-    def close_window(self, settings_window, main_menu):
-        with open("user_settings.txt","w") as file:
-            for a,b in self.user_settings.items():
-                file.write(f"{a}:{b}\n")
-        settings_window.destroy()
-        main_menu.pack()
-
-        #use user_settings.txt to, during initialisation, create a dictionary of the names of settings and their values
-        #then, set each of the attributes of the Settings object to the value in the dictionary:
-        # eg. self.create_game_finished_window = settings_map[create_game_finished_window]
+    def load_default_settings(self):
+        self.user_bool_settings = {
+            "Create Game Finished Window": True,
+            "Auto Reveal Cells": True, # auto reveal a 'full' cell when it is clicked
+            "Highlight Cells": True, # highlights cells purple when there is a non-zero flag difference
+            "Dark Mode": False
+        }
+        self.user_var_settings = {
+            "test": "10"
+        }
 
 
-#need to add more options, also need to add text for what each option is
-#need to resize images of switches
+    def switch(self, bool_setting):
+        if not self.user_bool_settings[bool_setting]:
+            self.user_bool_settings[bool_setting] = True
+            if bool_setting in self.linked_settings.values():
+                linked_key = [key for key, val in self.linked_settings.items() if val==bool_setting][0]
+                self.user_bool_settings[linked_key] = True
+                return linked_key
+            return None
 
-#class Settings:
-#    def __init__(self, window):
-#        self.user_settings={"create_game_finished_window":True}
-#
-#    def create_settings_window(self,a,b):
-#        pass
+        else:
+            self.user_bool_settings[bool_setting] = False
+            if bool_setting in self.linked_settings:
+                self.user_bool_settings[self.linked_settings[bool_setting]] = False #also switches the linked setting to False
+                return self.linked_settings[bool_setting]
+            return None
+
+
+
+    #def save_settings(self):
+    #    if self.user_signed_in:
+    #        pword_and_colour = []
+    #        with open(f"ms_user_data/Settings/{self.username}_Settings.txt") as file:
+    #            for i in range(2):
+    #                pword_and_colour.append(file.readline())
+    #        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as file:
+    #            for line in pword_and_colour:
+    #                file.write(line)
+    #            for setting in self.user_bool_settings:
+    #                file.write(f"{setting}:{self.user_bool_settings[setting]}\n")
+    #            for setting in self.user_var_settings:
+    #                file.write(f"{setting}:{self.user_var_settings[setting]}\n")
+    #            file.close()
+    #    else:
+
+    def save_settings(self):
+        pword_and_colour = []
+        if self.user_signed_in:
+            path = f"ms_user_data/Settings/{self.username}_Settings.txt"
+            with open(path) as file:
+                for i in range(2):
+                    pword_and_colour.append(file.readline())
+        else:
+            path = "ms_user_data/temp_settings.txt"
+
+        with open(path, "w") as file:
+            if self.user_signed_in:
+                for line in pword_and_colour:
+                    file.write(line)
+            for setting in self.user_bool_settings:
+                file.write(f"{setting}:{self.user_bool_settings[setting]}\n")
+            for setting in self.user_var_settings:
+                file.write(f"{setting}:{self.user_var_settings[setting]}\n")
+            file.close()
+
+
+    def settings_user_sign_out(self):
+        self.user_signed_in = False
+        
+
+
+

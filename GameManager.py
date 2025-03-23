@@ -1,5 +1,6 @@
 from Board import *
 from DatabaseHandler import *
+from Settings import *
 
 #need to update this file to deal with the new glb array, not just no. of losses
 
@@ -35,8 +36,9 @@ class GameManager:
         self.top_10_rank = 100
         self.no_1_status = ""
 
-        #TEMP
         self.database = DatabaseHandler()
+        self.settings = Settings(self.database.user_signed_in, self.database.username)
+        self.database.settings = self.settings
 
 
     def start_classic_mode(self, difficulty):

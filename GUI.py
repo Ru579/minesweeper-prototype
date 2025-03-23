@@ -1,5 +1,5 @@
 from GameManager import *
-from Settings import *
+from SettingsGUI import *
 from LoginGUI import *
 
 
@@ -11,8 +11,8 @@ class GUI:
 
         # creating logic units
         self.game = GameManager()
-        self.settings = Settings(self.Minesweeper)
         self.loginGUI = LoginGUI(self.Minesweeper, self.game.database)
+        self.settingsGUI = SettingsGUI(self.game.settings, self.Minesweeper)
 
         # creating frames
         self.main_menu = Frame(self.Minesweeper)
@@ -90,9 +90,7 @@ class GUI:
         Button(self.main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).grid(row=3, column=0)
         Label(self.main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=10).grid(row=3, column=2)
         Button(self.main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20,
-               command=lambda: self.settings.create_settings_window(self.main_menu, self.Minesweeper)).grid(
-            row=0, column=0)
-        # MAY NEED TO BE CHANGED- currently, instantiation of loginGUI is what creates the login button
+               command=lambda: self.settingsGUI.create_settings_window(self.main_menu)).grid(row=0, column=0)
         #self.game.loginGUI = LoginGUI(self.main_menu, self.Minesweeper)
         self.loginGUI.create_profile(self.main_menu)
 
@@ -115,6 +113,10 @@ class GUI:
             self.difficulty_button.config(text="Expert")
         elif difficulty == "Expert":
             self.difficulty_button.config(text="Beginner")
+        #could be changed to a dictionary of:
+        #{"Beginner":"Intermediate",
+        #"Intermediate":"Expert",
+        #"Expert":"Beginner"}
 
     def start_game(self, game_mode, difficulty=""):
         self.main_menu.forget()
@@ -382,7 +384,8 @@ class GUI:
 
                 self.communicator.config(text="Congratulations!")
                 self.game.game_started = False
-                if self.settings.user_settings["create_game_finished_window"]:
+                #if self.settings.user_settings["create_game_finished_window"]:
+                if self.game.settings.user_bool_settings["Create Game Finished Window"]:
                     self.game_frame.after(500, lambda: self.create_game_finished_window("WIN"))
                 else:
                     self.show_top_10_rank()
@@ -403,7 +406,8 @@ class GUI:
             self.game.user_can_interact = False
             self.game.game_finished()
             self.communicator.config(text="GAME OVER: Time Ran Out!")
-            if not self.settings.user_settings["create_game_finished_window"]:
+            #if not self.settings.user_settings["create_game_finished_window"]:
+            if not self.game.settings.user_bool_settings["Create Game Finished Window"]:
                 # create a button to view mines
                 view_mines_button = Button(self.game_frame, bg="yellow", text="View Mines", font=("Calibri", 15), width=10, command=lambda: self.toggle_all_mine_reveal(view_mines_button))
                 view_mines_button.grid(row=3, column=2)
@@ -414,7 +418,8 @@ class GUI:
             self.communicator.config(text="GAME OVER!")
             self.toggle_all_mine_reveal()
 
-        if self.settings.user_settings["create_game_finished_window"]:
+        #if self.settings.user_settings["create_game_finished_window"]:
+        if self.game.settings.user_bool_settings["Create Game Finished Window"]:
             self.game_frame.after(delay, lambda: self.create_game_finished_window("LOSE"))
         else:
             if self.game.game_mode=="Time Trial":

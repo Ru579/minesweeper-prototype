@@ -3,6 +3,8 @@ import datetime
 
 class DatabaseHandler:
     def __init__(self):
+        self.settings = None
+
         self.scores=[]
         self.current_user_file = None
         self.classic_data = None
@@ -12,9 +14,11 @@ class DatabaseHandler:
         self.profile_pic_colour=""
         self.pword=""
         self.difficulties = ["Beginner", "Intermediate", "Expert"]
+
         #glb = games_losses_boards = no of games played, no of losses, no of boards completed (games won/ boards done in time trial)
         self.glb = {}
         #each value in self.glb is a list, with the three values in the comment above. Each game-mode/difficulty has its own value in the dictionary
+
         self.top_10_scores = {}
         self.top_10_rank = 100
         self.no_1_status = ""
@@ -111,15 +115,16 @@ class DatabaseHandler:
 
 
     def user_sign_out(self):
-        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "r") as file:
-            settings_data = file.readlines()
-        settings_data[1] = f"{self.profile_pic_colour}\n"
-        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as write_file:
-            for line in settings_data:
-                write_file.write(f"{line}")
+        #with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "r") as file:
+        #    settings_data = file.readlines()
+        #settings_data[1] = f"{self.profile_pic_colour}\n"
+        #with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as write_file:
+        #    for line in settings_data:
+        #        write_file.write(f"{line}")
 
         open("ms_user_data/current_user_data.txt","w").close()
         self.user_signed_in = False
+        self.settings.settings_user_sign_out()
 
 
     def username_exists_check(self, username):
@@ -132,7 +137,13 @@ class DatabaseHandler:
 
     def create_account(self, username, pword):
         with open(f"ms_user_data/Settings/{username}_Settings.txt", "w") as file:
-            file.write(f"{pword}\nred\n")
+            file.write(f"{pword}\nred\n"
+                       f"Create Game Finished Window:True\n"
+                       f"Auto Reveal Cells:True\n"
+                       f"Highlight Cells:True\n"
+                       f"Dark Mode:False\n"
+                       f"***\n"
+                       f"test:10\n")
 
         with open(f"ms_user_data/Time Trial/{username}_Time Trial.txt","w") as file:
             file.write("[99999,0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n0\n0\n&&&\n***\n")#first number is very high so that top_10_stage checker will never have to deal with the very first index
@@ -159,60 +170,73 @@ class DatabaseHandler:
         with open("ms_user_data/current_user_data.txt","w") as file:
             file.write(f"{self.username}\n{self.profile_pic_colour}\n")
 
+        #updating profile pic colour in settings
+        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "r") as file:
+            settings_data = file.readlines()
+        settings_data[1] = f"{self.profile_pic_colour}\n"
+        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as write_file:
+            for line in settings_data:
+                write_file.write(f"{line}")
+
+
 
     def delete_user(self):
-        os.remove(f"ms_user_data/Settings/{self.username}_Settings.txt")
-        os.remove(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt")
-        os.remove(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt")
-        for difficulty in self.difficulties:
-            os.remove(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt")
-            os.remove(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt")
+        if self.user_signed_in:
+            os.remove(f"ms_user_data/Settings/{self.username}_Settings.txt")
+            os.remove(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt")
+            os.remove(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt")
+            for difficulty in self.difficulties:
+                os.remove(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt")
+                os.remove(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt")
 
-        open("ms_user_data/current_user_data.txt","w").close()
-        self.user_signed_in = False
+            open("ms_user_data/current_user_data.txt","w").close()
+            self.user_signed_in = False
 
 
     def add_classic_time(self, time, difficulty):
-        time = int(time[0:2]) * 60 + int(time[3:5])
+        if self.user_signed_in:
+            time = int(time[0:2]) * 60 + int(time[3:5])
 
-        # increasing the number of boards completed
-        self.glb[f"Cl{difficulty}"][2] += 1
+            # increasing the number of boards completed
+            self.glb[f"Cl{difficulty}"][2] += 1
 
-        self.game_time[f"Cl{difficulty}"] += time
+            self.game_time[f"Cl{difficulty}"] += time
 
-        # increasing the number of games that haven't been averaged
-        self.nonAver_games[f"Cl{difficulty}"] += 1
+            # increasing the number of games that haven't been averaged
+            self.nonAver_games[f"Cl{difficulty}"] += 1
 
-        with open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt", "a") as file:
-            date = datetime.datetime.now().strftime("%d-%m-%Y")
-            file.write(f"{time}:{date}\n")
+            with open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt", "a") as file:
+                date = datetime.datetime.now().strftime("%d-%m-%Y")
+                file.write(f"{time}:{date}\n")
 
-        self.update_top_10(time, "Classic", difficulty)
-        self.update_user_files("Classic", time, difficulty)
+            self.update_top_10(time, "Classic", difficulty)
+            self.update_user_files("Classic", time, difficulty)
 
 
     def add_tt_stage(self, stage, mine_clicked, stopwatch_time):
-        # updating no. of boards completed and, POSSIBLY, no. of losses
-        if mine_clicked:
-            self.glb["Time Trial"][1] += 1
+        if self.user_signed_in:
+            # updating no. of boards completed and, POSSIBLY, no. of losses
+            if mine_clicked:
+                self.glb["Time Trial"][1] += 1
 
-        self.game_time["Time Trial"] += stopwatch_time
+            self.game_time["Time Trial"] += stopwatch_time
 
-        # increasing the number of games that haven't been averaged
-        self.nonAver_games["Time Trial"] += 1
+            # increasing the number of games that haven't been averaged
+            self.nonAver_games["Time Trial"] += 1
 
-        with open(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt", "a") as file:
-            date = datetime.datetime.now().strftime("%d-%m-%Y")
-            file.write(f"{stage}:{date}\n")
+            with open(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt", "a") as file:
+                date = datetime.datetime.now().strftime("%d-%m-%Y")
+                file.write(f"{stage}:{date}\n")
 
-        self.update_top_10(stage, "Time Trial")
-        self.update_user_files("Time Trial", stage)
+            self.update_top_10(stage, "Time Trial")
+            self.update_user_files("Time Trial", stage)
 
 
     def add_classic_loss(self, time, difficulty):
-        self.glb[f"Cl{difficulty}"][1] += 1
-        self.game_time[f"Cl{difficulty}"] += int(time[0:2])*60 + int(time[3:5])
-        self.update_user_files("Classic", difficulty=difficulty)
+        if self.user_signed_in:
+            self.glb[f"Cl{difficulty}"][1] += 1
+            self.game_time[f"Cl{difficulty}"] += int(time[0:2])*60 + int(time[3:5])
+            self.update_user_files("Classic", difficulty=difficulty)
 
 
     def update_user_files(self, game_mode, score=None, difficulty=""):

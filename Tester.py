@@ -1,62 +1,97 @@
-#my_list = [0,1,2,3,4,5,6,7,8,9]
-#
-#length = len(my_list)
-#total = 0
-#for i,value in enumerate(my_list):
-#    print(i, value)
-#    total+=value
-#    #del my_list[i]
-#print(total/length)
-#my_list.insert(2,99)
-#print(my_list)
+from Widget import *
+from PIL import Image, ImageTk
+
+class Settings:
+    def __init__(self, minesweeper_window):
+        self.volume=50
+        self.fifty_fifty_on = False
+        #self.create_game_finished_window = True
+        self.settings_window = Frame(minesweeper_window)
+        #self.on = PhotoImage(file="on_switch.png", master=self.settings_window)
+        #self.off = PhotoImage(file="off_switch.png", master=self.settings_window)
+        self.on = Image.open("on_switch.png")
+        self.on = self.on.resize((80, 20))
+        self.on = ImageTk.PhotoImage(self.on)
+        self.off = Image.open("off_switch.png")
+        self.off = self.off.resize((80, 20))
+        self.off = ImageTk.PhotoImage(self.off)
+        self.user_settings={}
+        with open("user_settings.txt", "r") as file:
+            for line in file:
+                record = line.split(":")
+                if record[1].strip("\n")=="True":
+                    self.user_settings[record[0]] = True
+                elif record[1].strip("\n")=="False":
+                    self.user_settings[record[0]] = False
 
 
-#with open(f"ms_user_data/Classic/Beginner/123_ClBeginner.txt") as file:
-#    data = file.readlines()
-#print(len(data))
+    def create_settings_window(self, main_menu, window):
+        main_menu.forget()
+        self.settings_window = Frame(window)
+        self.settings_window.pack()
 
-#with open(f"ms_user_data/Classic/Beginner/123_ClBeginner.txt","a") as file:
-with open(f"test.txt","w") as file:
-    file.write("-100,999999,999999,999999,999999,999999,999999,999999,999999,999999,999999\n0,0,0\n50.8\n45.7\n43.6\n***\n")
-    for i in range(100):
-        file.write(str(i)+"\n")
+        #title
+        Label(self.settings_window, text="Settings", font=("Calibri", 24), bg="white", fg="grey").grid(row=0, column=1)
 
-with open("test.txt") as file:
-    data = file.readlines()
+        #creating close button
+        Button(self.settings_window, text="X", font=("Calibri", 30), bg="white", fg="red", command=lambda: self.close_window(self.settings_window, main_menu)).grid(row=0, column=2)
 
-def calc_100():
-    start_sum = False
-    total = 0
-    for line in data:
-        if line == "***\n":
-            start_sum = True
-        elif start_sum:
-            #for _ in range(100):
-            #    total += int(data[len(data) - 1].strip("\n"))
-            #    del data[len(data) - 1]
-            #for i in range(len(data)-1, 2, -1):
-            #    total += int(data[i].strip("\n"))
-            #    del data[i]
+        settings_options=Frame(self.settings_window)
+        settings_options.grid(row=1,column=1)
 
-            i=len(data)-1
-            while data[i]!="***\n":
-                total+= int(data[i].strip("\n"))
-                del data[i]
-                i-=1
-            break
-    total /= 100  # calculating the average of the 100 values
+        #creating options in settings_options window
+        #create_gfw_button = Button(settings_options,
+        #                           image=self.get_switch_status("create_game_finished_window"),
+        #                           command=lambda: self.switch(create_gfw_button,
+        #                                                       self.user_settings["create_game_finished_window"],
+        #                                                       "create_game_finished_window"))
 
-    data.insert(len(data) - 1, str(total) + "\n")
+        #img = Image.open("on_switch.png")
+        #new_image = PhotoImage(ImageTk.PhotoImage(img))
+        #create_gfw_button = Button(settings_options,
+        #                           command=lambda: self.switch(create_gfw_button,
+        #                                                       self.user_settings["create_game_finished_window"],
+        #                                                       "create_game_finished_window"))
+        #create_gfw_button.config(image=new_image)
 
-    with open("test.txt","w") as file:
-        for line in data:
-            file.write(line)
+        create_gfw_button = Button(settings_options,
+                                   image=self.get_switch_status("create_game_finished_window"),
+                                   command=lambda: self.switch(create_gfw_button,
+                                                               self.user_settings["create_game_finished_window"],
+                                                               "create_game_finished_window"))
+
+        if create_gfw_button.cget("image")==self.on:
+            print("Button is on")
+        elif create_gfw_button.cget("image")==self.off:
+            print("Button is off")
+        create_gfw_button.grid(row=0,column=0)
+
+    def get_switch_status(self, attribute):
+        if self.user_settings[attribute]:
+            return self.on
+        elif not self.user_settings[attribute]:
+            return self.off
 
 
-#for i in range(len(data)-1, 2, -1):
-#    del data[i]
-#data.insert(len(data) - 1, f"*999\n")
-#print(data)
+    def switch(self, button, status, attribute):
+        if not status:
+            self.user_settings[attribute] = True
+            button.config(image=self.on)
+        elif status:
+            self.user_settings[attribute] = False
+            button.config(image=self.off)
+
+    def close_window(self, settings_window, main_menu):
+        with open("user_settings.txt","w") as file:
+            for a,b in self.user_settings.items():
+                file.write(f"{a}:{b}\n")
+        settings_window.destroy()
+        main_menu.pack()
+
+        #use user_settings.txt to, during initialisation, create a dictionary of the names of settings and their values
+        #then, set each of the attributes of the Settings object to the value in the dictionary:
+        # eg. self.create_game_finished_window = settings_map[create_game_finished_window]
 
 
-calc_100()
+#need to add more options, also need to add text for what each option is
+#need to resize images of switches
