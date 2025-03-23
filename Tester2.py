@@ -8,5 +8,5 @@
 #average = total/100
 
 with open(f"ms_user_data/Classic/Beginner/123_ClBeginner.txt","a") as file:
-    for i in range(100):
+    for i in range(98):
         file.write(str(i)+"\n")
