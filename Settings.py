@@ -69,23 +69,6 @@ class Settings:
             return None
 
 
-
-    #def save_settings(self):
-    #    if self.user_signed_in:
-    #        pword_and_colour = []
-    #        with open(f"ms_user_data/Settings/{self.username}_Settings.txt") as file:
-    #            for i in range(2):
-    #                pword_and_colour.append(file.readline())
-    #        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as file:
-    #            for line in pword_and_colour:
-    #                file.write(line)
-    #            for setting in self.user_bool_settings:
-    #                file.write(f"{setting}:{self.user_bool_settings[setting]}\n")
-    #            for setting in self.user_var_settings:
-    #                file.write(f"{setting}:{self.user_var_settings[setting]}\n")
-    #            file.close()
-    #    else:
-
     def save_settings(self):
         pword_and_colour = []
         if self.user_signed_in:
@@ -109,7 +92,12 @@ class Settings:
 
     def settings_user_sign_out(self):
         self.user_signed_in = False
-        
+
+
+    def settings_user_sign_in(self, username):
+        self.user_signed_in = True
+        self.username = username
+
 
 
 

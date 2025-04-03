@@ -1,2 +1,6 @@
 321
 red
+Create Game Finished Window:False
+Auto Reveal Cells:True
+Highlight Cells:True
+Dark Mode:False

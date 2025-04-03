@@ -11,7 +11,7 @@ class GUI:
 
         # creating logic units
         self.game = GameManager()
-        self.loginGUI = LoginGUI(self.Minesweeper, self.game.database)
+        self.loginGUI = LoginGUI(self.game.database, self.Minesweeper)
         self.settingsGUI = SettingsGUI(self.game.settings, self.Minesweeper)
 
         # creating frames

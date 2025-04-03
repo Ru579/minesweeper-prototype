@@ -3,7 +3,7 @@ from PIL import Image, ImageTk
 from DatabaseHandler import *
 
 class LoginGUI():
-    def __init__(self, window, database):
+    def __init__(self, database, window):
         #self.menu = menu
         self.menu = None
         self.window = window
