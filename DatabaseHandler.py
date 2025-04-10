@@ -11,7 +11,7 @@ class DatabaseHandler:
         self.tt_data = None
         #self.file_lines = None
         self.username = ""
-        self.profile_pic_colour=""
+        #self.profile_pic_colour=""
         self.pword=""
         self.difficulties = ["Beginner", "Intermediate", "Expert"]
 
@@ -28,17 +28,17 @@ class DatabaseHandler:
         self.nonAver_games = {}
 
         self.temp_username = ""
-        self.temp_profile_pic_colour = ""
+        #self.temp_profile_pic_colour = ""
         self.temp_pword = ""
 
         self.user_file_data = {}
 
         #Loads in currently logged-in user, if there is one
         self.current_user_file = open("ms_user_data/current_user_data.txt")
-        lines = self.current_user_file.readlines()
-        if lines:
-            self.username = str(lines[0].strip("\n"))
-            self.profile_pic_colour = str(lines[1].strip("\n"))
+        line = self.current_user_file.readline()
+        if line:
+            self.username = str(line.strip("\n"))
+            #self.profile_pic_colour = str(lines[1].strip("\n"))
             self.user_signed_in = True
             self.load_current_user_game_data()
         else:
@@ -48,15 +48,15 @@ class DatabaseHandler:
     def find_user_file(self, username): #returns True if a file of the user's name is found
         directory = "ms_user_data/Settings"
         for file in os.listdir(directory):
-            #if str(file).lower() == f"{username.lower()}_Settings.txt":
-            if f"{str(file).lower()[0:len(str(file)) - 13]}_Settings.txt" == f"{username.lower()}_Settings.txt":
+            if str(file).lower() == f"{username.lower()}_settings.txt": #we type settings with a simple 's' because the file's name has all been made lowercase
+            #if f"{str(file).lower()[0:len(str(file)) - 13]}_Settings.txt" == f"{username.lower()}_Settings.txt":
                 username = str(file)[0:len(str(file))-13]
                 self.temp_username = username
                 settings_file = open(f"ms_user_data/Settings/{username}_Settings.txt")
 
                 settings_data = settings_file.readlines()
                 self.temp_pword = settings_data[0].strip("\n")
-                self.temp_profile_pic_colour = settings_data[1].strip("\n")
+                #self.temp_profile_pic_colour = settings_data[1].strip("\n")
 
                 return True
         return False
@@ -71,10 +71,11 @@ class DatabaseHandler:
     def sign_in_user(self):
         self.username = self.temp_username
         self.pword = self.temp_pword
-        self.profile_pic_colour = self.temp_profile_pic_colour
+        #self.profile_pic_colour = self.temp_profile_pic_colour
         self.user_signed_in = True
         with open("ms_user_data/current_user_data.txt", "w") as file:
-            file.write(f"{self.username}\n{self.profile_pic_colour}\n")
+            file.write(f"{self.username}\n")
+        self.settings.settings_user_sign_in(self.username)
         self.load_current_user_game_data()
 
 
@@ -163,22 +164,22 @@ class DatabaseHandler:
         # Cl is put before the difficulty to signify that this is a classic game mode- just in case, in the future, other game modes are introduced that use game modes
 
         self.temp_username = username #set as temp_username because, in self.sign_in(), self.username = self.temp_username
-        self.temp_profile_pic_colour = "red" #set as temp_profile_pic_colour for the same reasons as above
+        #self.temp_profile_pic_colour = "red" #set as temp_profile_pic_colour for the same reasons as above
         self.sign_in_user()
 
 
-    def change_profile_pic_colour(self, colour):
-        self.profile_pic_colour = colour
-        with open("ms_user_data/current_user_data.txt","w") as file:
-            file.write(f"{self.username}\n{self.profile_pic_colour}\n")
-
-        #updating profile pic colour in settings
-        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "r") as file:
-            settings_data = file.readlines()
-        settings_data[1] = f"{self.profile_pic_colour}\n"
-        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as write_file:
-            for line in settings_data:
-                write_file.write(f"{line}")
+    #def change_profile_pic_colour(self, colour):
+    #    self.profile_pic_colour = colour
+    #    with open("ms_user_data/current_user_data.txt","w") as file:
+    #        file.write(f"{self.username}\n{self.profile_pic_colour}\n")
+#
+    #    #updating profile pic colour in settings
+    #    with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "r") as file:
+    #        settings_data = file.readlines()
+    #    settings_data[1] = f"{self.profile_pic_colour}\n"
+    #    with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as write_file:
+    #        for line in settings_data:
+    #            write_file.write(f"{line}")
 
 
 

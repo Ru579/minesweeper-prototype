@@ -84,7 +84,7 @@ class LoginGUI():
         self.profile_pic = Canvas(self.menu, width=60, height=60, bg="#f0f0f0")
         self.profile_pic.bind("<Button-1>", lambda event: self.show_log_in_options())
         self.profile_pic.bind("<Button-3>", lambda event: self.change_profile_pic())
-        self.profile_circle = self.profile_pic.create_oval(3,3,61,61, fill=self.database_handler.profile_pic_colour)
+        self.profile_circle = self.profile_pic.create_oval(3,3,61,61, fill=self.database_handler.settings.profile_pic_colour)
         self.profile_pic.create_text(32, 32, text=self.database_handler.username[0:2], font=("Calibri Bold", 15), anchor="center")
         self.profile_pic.grid(row=0, column=2)
 
@@ -347,4 +347,5 @@ class LoginGUI():
 
     def switch_profile_colour(self, colour):
         self.profile_pic.itemconfig(self.profile_circle, fill=colour)
-        self.database_handler.change_profile_pic_colour(colour)
+        #self.database_handler.change_profile_pic_colour(colour)
+        self.database_handler.settings.change_profile_pic_colour(colour)

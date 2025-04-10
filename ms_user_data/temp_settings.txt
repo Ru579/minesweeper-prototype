@@ -1,5 +1,6 @@
-Create Game Finished Window:False
-Auto Reveal Cells:False
-Highlight Cells:False
+Create Game Finished Window:True
+Auto Reveal Cells:True
+Highlight Cells:True
 Dark Mode:False
+***
 test:10

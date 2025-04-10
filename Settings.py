@@ -3,9 +3,13 @@ class Settings:
         self.user_bool_settings = {}
         self.user_var_settings = {}
 
+        #information about user
         self.username = username
+        self.pword = ""
 
-        # settings data
+        self.profile_pic_colour = ""
+
+        #all data in the settings file when first loaded
         self.settings_data = []
 
         self.linked_settings = {
@@ -14,15 +18,22 @@ class Settings:
 
         if user_signed_in:
             self.user_signed_in = True
-            self.load_user_settings()
+            self.load_user_settings("sign_in")
         else:
             self.user_signed_in = False
-            self.load_default_settings()
+            #self.load_guest_settings()
+            self.load_user_settings()
 
 
-    def load_user_settings(self):
-        with open(f"ms_user_data/Settings/{self.username}_Settings.txt") as file:
+    def load_user_settings(self, user_type="guest"):
+        path = f"ms_user_data/Settings/{self.username}_Settings.txt" if user_type=="sign_in" else "ms_user_data/temp_settings.txt"
+
+        with open(path) as file:
             self.settings_data = file.readlines()
+
+            #loads password profile pic colour
+            self.pword = self.settings_data[0].strip("\n")
+            self.profile_pic_colour = self.settings_data[1].strip("\n")
 
             # loads boolean settings
             i = 2
@@ -40,7 +51,8 @@ class Settings:
                 self.user_var_settings[record[0]] = record[1]
 
 
-    def load_default_settings(self):
+    def load_guest_settings(self):
+        self.profile_pic_colour = ""
         self.user_bool_settings = {
             "Create Game Finished Window": True,
             "Auto Reveal Cells": True, # auto reveal a 'full' cell when it is clicked
@@ -50,7 +62,6 @@ class Settings:
         self.user_var_settings = {
             "test": "10"
         }
-
 
 
     def switch(self, bool_setting):
@@ -71,21 +82,25 @@ class Settings:
 
 
     def save_settings(self):
-        pword_and_colour = []
-        if self.user_signed_in:
-            path = f"ms_user_data/Settings/{self.username}_Settings.txt"
-            with open(path) as file:
-                for i in range(2):
-                    pword_and_colour.append(file.readline())
-        else:
-            path = "ms_user_data/temp_settings.txt"
+        #pword_and_colour = []
+        #if self.user_signed_in:
+        #    path = f"ms_user_data/Settings/{self.username}_Settings.txt"
+        #    with open(path) as file:
+        #        for i in range(2):
+        #            pword_and_colour.append(file.readline())
+        #else:
+        #    path = "ms_user_data/temp_settings.txt"
+        path = f"ms_user_data/Settings/{self.username}_Settings.txt" if self.user_signed_in else "ms_user_data/temp_settings.txt"
 
         with open(path, "w") as file:
             if self.user_signed_in:
-                for line in pword_and_colour:
-                    file.write(line)
+                #for line in pword_and_colour:
+                #    file.write(line)
+                file.write(self.pword + "\n")
+                file.write(self.profile_pic_colour + "\n")
             for setting in self.user_bool_settings:
                 file.write(f"{setting}:{self.user_bool_settings[setting]}\n")
+            file.write("***\n")
             for setting in self.user_var_settings:
                 file.write(f"{setting}:{self.user_var_settings[setting]}\n")
             file.close()
@@ -93,11 +108,38 @@ class Settings:
 
     def settings_user_sign_out(self):
         self.user_signed_in = False
+        self.load_guest_settings()
 
 
     def settings_user_sign_in(self, username):
         self.user_signed_in = True
         self.username = username
+
+        #resetting temp_settings
+        with open("ms_user_data/temp_settings.txt","w") as file:
+            file.write("Create Game Finished Window:True\n"
+                       "Auto Reveal Cells:True\n"
+                       "Highlight Cells:True\n"
+                       "Dark Mode:False\n"
+                       "***\n"
+                       "test:10\n")
+            file.close()
+
+
+    def change_profile_pic_colour(self, colour):
+        self.profile_pic_colour = colour
+
+        #updating profile pic colour in settings
+        with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as file:
+            file.write(self.pword + "\n")
+            file.write(self.profile_pic_colour + "\n")
+            for setting in self.user_bool_settings:
+                file.write(f"{setting}:{self.user_bool_settings[setting]}\n")
+            file.write("***\n")
+            for setting in self.user_var_settings:
+                file.write(f"{setting}:{self.user_var_settings[setting]}\n")
+            file.close()
+
 
 
 
