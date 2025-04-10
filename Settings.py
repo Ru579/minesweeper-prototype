@@ -18,40 +18,44 @@ class Settings:
 
         if user_signed_in:
             self.user_signed_in = True
-            self.load_user_settings("sign_in")
+            self.load_user_settings()
         else:
             self.user_signed_in = False
-            #self.load_guest_settings()
-            self.load_user_settings()
+            self.load_guest_settings()
+            #self.load_user_settings("guest")
 
 
-    def load_user_settings(self, user_type="guest"):
-        path = f"ms_user_data/Settings/{self.username}_Settings.txt" if user_type=="sign_in" else "ms_user_data/temp_settings.txt"
+    def load_user_settings(self):
+        #sign_in_type="user_log_in"
+        #path = f"ms_user_data/Settings/{self.username}_Settings.txt" if user_type=="user_log_in" else "ms_user_data/temp_settings.txt"
 
-        with open(path) as file:
-            self.settings_data = file.readlines()
+        #with open(path) as file:
+        #file = open(path)
+        file = open(f"ms_user_data/Settings/{self.username}_Settings.txt")
+        self.settings_data = file.readlines()
 
-            #loads password profile pic colour
-            self.pword = self.settings_data[0].strip("\n")
-            self.profile_pic_colour = self.settings_data[1].strip("\n")
+        #loads password profile pic colour
+        self.pword = self.settings_data[0].strip("\n")
+        self.profile_pic_colour = self.settings_data[1].strip("\n")
 
-            # loads boolean settings
-            i = 2
-            while self.settings_data[i] != "***\n":
-                record = self.settings_data[i].strip("\n").split(":")
-                if record[1] == "True":
-                    self.user_bool_settings[record[0]] = True
-                elif record[1] == "False":
-                    self.user_bool_settings[record[0]] = False
-                i += 1
+        # loads boolean settings
+        i = 2
+        while self.settings_data[i] != "***\n":
+            record = self.settings_data[i].strip("\n").split(":")
+            if record[1] == "True":
+                self.user_bool_settings[record[0]] = True
+            elif record[1] == "False":
+                self.user_bool_settings[record[0]] = False
+            i += 1
 
-            # loads variable settings
-            for j in range(i + 1, len(self.settings_data) - 1):
-                record = self.settings_data[j].strip("\n").split(":")
-                self.user_var_settings[record[0]] = record[1]
+        # loads variable settings
+        for j in range(i + 1, len(self.settings_data) - 1):
+            record = self.settings_data[j].strip("\n").split(":")
+            self.user_var_settings[record[0]] = record[1]
 
 
     def load_guest_settings(self):
+        self.username = ""
         self.profile_pic_colour = ""
         self.user_bool_settings = {
             "Create Game Finished Window": True,
@@ -81,6 +85,19 @@ class Settings:
             return None
 
 
+    def create_settings(self, username, pword):
+        with open(f"ms_user_data/Settings/{username}_Settings.txt", "w") as file:
+            file.write(f"{pword}\n"
+                       f"red\n"
+                       f"Create Game Finished Window:True\n"
+                       f"Auto Reveal Cells:True\n"
+                       f"Highlight Cells:True\n"
+                       f"Dark Mode:False\n"
+                       f"***\n"
+                       f"test:10\n")
+            # *** is used to separate Boolean settings from settings that can be more than 2 different values (eg. low, medium, high)
+
+
     def save_settings(self):
         #pword_and_colour = []
         #if self.user_signed_in:
@@ -106,14 +123,11 @@ class Settings:
             file.close()
 
 
-    def settings_user_sign_out(self):
-        self.user_signed_in = False
-        self.load_guest_settings()
-
-
     def settings_user_sign_in(self, username):
         self.user_signed_in = True
         self.username = username
+
+        self.load_user_settings()
 
         #resetting temp_settings
         with open("ms_user_data/temp_settings.txt","w") as file:
@@ -126,10 +140,15 @@ class Settings:
             file.close()
 
 
+    def settings_user_sign_out(self):
+        self.user_signed_in = False
+        self.load_guest_settings()
+
+
     def change_profile_pic_colour(self, colour):
         self.profile_pic_colour = colour
 
-        #updating profile pic colour in settings
+        #updating profile pic colour in settings file
         with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as file:
             file.write(self.pword + "\n")
             file.write(self.profile_pic_colour + "\n")

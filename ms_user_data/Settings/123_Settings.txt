@@ -1,0 +1,7 @@
+321
+red
+Create Game Finished Window:True
+Auto Reveal Cells:True
+Highlight Cells:True
+Dark Mode:False
+***
