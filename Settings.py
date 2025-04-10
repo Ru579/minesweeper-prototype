@@ -52,6 +52,7 @@ class Settings:
         }
 
 
+
     def switch(self, bool_setting):
         if not self.user_bool_settings[bool_setting]:
             self.user_bool_settings[bool_setting] = True

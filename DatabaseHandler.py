@@ -137,13 +137,15 @@ class DatabaseHandler:
 
     def create_account(self, username, pword):
         with open(f"ms_user_data/Settings/{username}_Settings.txt", "w") as file:
-            file.write(f"{pword}\nred\n"
+            file.write(f"{pword}\n"
+                       f"red\n"
                        f"Create Game Finished Window:True\n"
                        f"Auto Reveal Cells:True\n"
                        f"Highlight Cells:True\n"
                        f"Dark Mode:False\n"
                        f"***\n"
                        f"test:10\n")
+            #*** is used to separate Boolean settings from settings that can be more than 2 different values (eg. low, medium, high)
 
         with open(f"ms_user_data/Time Trial/{username}_Time Trial.txt","w") as file:
             file.write("[99999,0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n0\n0\n&&&\n***\n")#first number is very high so that top_10_stage checker will never have to deal with the very first index
