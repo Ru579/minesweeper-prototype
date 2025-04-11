@@ -35,21 +35,21 @@ class GUI:
 
         # getting images
         self.cell_images = {
-            "hidden_cell_image": Image.open("hidden_cell_darker.png"),
-            "mine_image": Image.open("mine_cell_red.png"),
-            "flagged_cell_image": Image.open("minesweeper_flag.png"),
-            "incorrect_flagged_image": Image.open("incorrect_flag_new.png"),
-            "confused_cell_image": Image.open("confuse_cell_v3_green.png"),
-            "highlighted_hidden_cell_image": Image.open("highlighted_hidden_cell.png"),
-            "highlighted_flagged_cell_image": Image.open("highlighted_minesweeper_flag.png"),
-            "highlighted_confused_cell_image": Image.open("highlighted_confuse_cell_v3_green.png")
+            "hidden_cell_image": Image.open("Images/hidden_cell.png"),
+            "mine_image": Image.open("Images/mine_cell_red.png"),
+            "flagged_cell_image": Image.open("Images/minesweeper_flag.png"),
+            "incorrect_flagged_image": Image.open("Images/incorrect_flag.png"),
+            "confused_cell_image": Image.open("Images/confuse_cell_v3_green.png"),
+            "highlighted_hidden_cell_image": Image.open("Images/highlighted_hidden_cell.png"),
+            "highlighted_flagged_cell_image": Image.open("Images/highlighted_minesweeper_flag.png"),
+            "highlighted_confused_cell_image": Image.open("Images/highlighted_confuse_cell_v3_green.png")
         }
         self.formatted_cell_images = {}
         # cell_images are the opened images, not resized or formatted
 
         self.cell_number_images = []
         for i in range(9):
-            current_image = Image.open(f"{i}_cell_new.png")
+            current_image = Image.open(f"Images/{i}_cell.png")
             self.cell_number_images.append(current_image)
         self.formatted_number_images = []
         # cell_number_images are the images of the numbers to go on buttons. not resized or formatted
@@ -148,6 +148,9 @@ class GUI:
     def start_classic_mode(self, difficulty):
         self.game.start_classic_mode(difficulty)
 
+        #FOR TEMP DARK MODE
+        self.cell_grid.config(bg="black")
+
         self.countup_timer = Label(self.game_frame, text="00:00", font=("Calibri", 20), width=5)
         self.countup_timer.grid(row=0, column=2)
 
@@ -177,7 +180,8 @@ class GUI:
 
         for i in range(0, self.game.board.grid_height):
             for j in range(0, self.game.board.grid_width):
-                tile = Button(self.cell_grid)
+                #experimenting with borderwidth
+                tile = Button(self.cell_grid, borderwidth=0)
                 tile.config(command=lambda row=i, column=j: self.ui_open_cell(row, column))
                 tile.bind("<Button-2>", lambda event, row=i, column=j: self.ui_confuse_cell(row, column))
                 tile.bind("<Button-3>", lambda event, row=i, column=j: self.ui_flag_cell(row, column))

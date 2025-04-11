@@ -13,11 +13,11 @@ class SettingsGUI:
         self.settings_switches_frame = Frame(self.settings_frame)
 
         # getting images
-        self.on = Image.open("on_switch.png")
+        self.on = Image.open("Images/on_switch.png")
         self.on = self.on.resize((80, 30))
         self.on = ImageTk.PhotoImage(self.on)
 
-        self.off = Image.open("off_switch.png")
+        self.off = Image.open("Images/off_switch.png")
         self.off = self.off.resize((80, 30))
         self.off = ImageTk.PhotoImage(self.off)
 

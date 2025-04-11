@@ -8,19 +8,19 @@ class LoginGUI():
         self.menu = None
         self.window = window
 
-        logo = Image.open("mine_cell_red.png")
+        logo = Image.open("Images/mine_cell_red.png")
         logo = logo.resize((150, 150))
         self.logo = ImageTk.PhotoImage(logo)
 
-        open_eye = Image.open("open_eye.png")
+        open_eye = Image.open("Images/open_eye.png")
         open_eye = open_eye.resize((30, 22))
         self.open_eye = ImageTk.PhotoImage(open_eye)
 
-        closed_eye = Image.open("closed_eye.png")
+        closed_eye = Image.open("Images/closed_eye.png")
         closed_eye = closed_eye.resize((30, 22))
         self.closed_eye = ImageTk.PhotoImage(closed_eye)
 
-        pic = Image.open("guest_profile.png")
+        pic = Image.open("Images/guest_profile.png")
         pic = pic.resize((60, 60))
         self.guest_image = ImageTk.PhotoImage(pic)
 
