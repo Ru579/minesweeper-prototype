@@ -413,7 +413,10 @@ class GUI:
                 view_mines_button.grid(row=3, column=2)
         #if player clicked a mine in either time trial or classic
         else:
-            self.game.game_finished(self.countup_timer.cget("text"), "LOSE", True)
+            if self.game.game_mode=="Classic":
+                self.game.game_finished(self.countup_timer.cget("text"), "LOSE", True)
+            else:
+                self.game.game_finished(mine_clicked=True)
 
             self.communicator.config(text="GAME OVER!")
             self.toggle_all_mine_reveal()
