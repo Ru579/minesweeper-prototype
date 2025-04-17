@@ -107,7 +107,7 @@ def create_credit_window(outcome):
 
 def user_info_got(window, username, time):  # where time is an array, 1st index is minutes, 2nd index is seconds
     window.destroy()
-    add_user_info(username, time)
+    #add_user_info(username, time)
 
 
 def view_board(window):
