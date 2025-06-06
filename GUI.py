@@ -2,6 +2,7 @@ from GameManager import *
 from SettingsGUI import *
 from LoginGUI import *
 
+print("hello world")
 
 class GUI:
     def __init__(self):
