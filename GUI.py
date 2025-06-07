@@ -2,8 +2,6 @@ from GameManager import *
 from SettingsGUI import *
 from LoginGUI import *
 
-print("hello world")
-
 class GUI:
     def __init__(self):
         # creating main window
@@ -35,6 +33,7 @@ class GUI:
         self.tiles = []
 
         # getting images
+        # cell_images are the opened images, not resized or formatted
         self.cell_images = {
             "hidden_cell_image": Image.open("Images/hidden_cell.png"),
             "mine_image": Image.open("Images/mine_cell_red.png"),
@@ -46,7 +45,11 @@ class GUI:
             "highlighted_confused_cell_image": Image.open("Images/highlighted_confuse_cell_v3_green.png")
         }
         self.formatted_cell_images = {}
-        # cell_images are the opened images, not resized or formatted
+
+        #settings icon
+        settings_icon = Image.open("Images/settings_icon.jpg")
+        self.settings_icon = ImageTk.PhotoImage(settings_icon.resize((60,60)))
+
 
         self.cell_number_images = []
         for i in range(9):
@@ -90,8 +93,12 @@ class GUI:
         game_modes.grid(row=2, column=1)
         Button(self.main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).grid(row=3, column=0)
         Label(self.main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=10).grid(row=3, column=2)
-        Button(self.main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20,
-               command=lambda: self.settingsGUI.create_settings_window(self.main_menu)).grid(row=0, column=0)
+        #Button(self.main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20,
+        #       command=lambda: self.settingsGUI.create_settings_window(self.main_menu)).grid(row=0, column=0)
+        settings_button = Label(self.main_menu, image=self.settings_icon, width=60, height=60)
+        settings_button.bind("<Button-1>", lambda event: self.settingsGUI.create_settings_window(self.main_menu))
+        settings_button.grid(row=0, column=0)
+
         #self.game.loginGUI = LoginGUI(self.main_menu, self.Minesweeper)
         self.loginGUI.create_profile(self.main_menu)
 
