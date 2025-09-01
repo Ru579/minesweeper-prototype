@@ -70,7 +70,7 @@ class GUI:
                 self.main_menu.columnconfigure(i, weight=weights[i])
             self.main_menu.rowconfigure(i, weight=weights[i + 3])
 
-        Label(self.main_menu, text="MINESWEEPER", font=("Calibri", 40), bg="white", fg="black").grid(row=0, column=1, pady=7)
+        Label(self.main_menu, text="MINESWEEPER", font=("Calibri Bold", 40), bg="white", fg="black").grid(row=0, column=1, pady=7)
 
         # creating classic button
         classic_button = Frame(self.main_menu, bg="green")
@@ -78,10 +78,10 @@ class GUI:
             classic_button.columnconfigure(i, weight=1)
         classic_button.rowconfigure(0, weight=2)
         classic_button.rowconfigure(1, weight=1)
-        classic_label = Label(classic_button, text="Classic", font=("Calibri", 30), bg="green", width=33, height=2)
+        classic_label = Label(classic_button, text="Classic", font=("Calibri Bold", 30), bg="green", width=33, height=2)
         classic_label.grid(row=0, column=1)
         # need to access difficulty button later, so it is stored as an attribute
-        self.difficulty_button = Button(classic_button, text="Beginner", font=("Calibri", 16), bg="#10401d", fg="white", width=12,
+        self.difficulty_button = Button(classic_button, text="Beginner", font=("Calibri Bold", 16), bg="#10401d", fg="white", width=12,
                                         command=lambda: self.change_difficulty(self.difficulty_button.cget("text")))
         self.difficulty_button.grid(row=1, column=1)
         classic_button.bind("<Button-1>", lambda event: self.start_game("Classic"))
@@ -91,8 +91,8 @@ class GUI:
         # other main_menu widgets
         game_modes = Frame(self.main_menu)
         game_modes.grid(row=2, column=1)
-        Button(self.main_menu, text="Tutorial", font=("Calibri", 16), bg="green", width=11).grid(row=3, column=0)
-        Label(self.main_menu, text="PROTO", font=("Calibri", 16), bg="grey", width=10).grid(row=3, column=2)
+        Button(self.main_menu, text="Tutorial", font=("Calibri Bold", 16), bg="green", width=11).grid(row=3, column=0)
+        Label(self.main_menu, text="PROTO", font=("Calibri Bold", 16), bg="grey", width=10).grid(row=3, column=2)
         #Button(self.main_menu, text="Settings:gear_icon", font=("Calibri", 12), bg="grey", fg="blue", height=2, width=20,
         #       command=lambda: self.settingsGUI.create_settings_window(self.main_menu)).grid(row=0, column=0)
         settings_button = Label(self.main_menu, image=self.settings_icon, width=60, height=60)
@@ -104,10 +104,10 @@ class GUI:
 
 
         # central buttons (below classic button)
-        Button(game_modes, text="Leaderboard", font=("Calibri", 24), bg="yellow", width=20, height=2, pady=8).grid(row=0, column=0, padx=5, pady=3)
-        Button(game_modes, text="Time Trial", font=("Calibri", 24), bg="blue", width=20, height=2, pady=8, command=lambda: self.start_game("Time Trial")).grid(row=0, column=1, padx=5, pady=3)
-        Button(game_modes, text="Tips", font=("Calibri", 24), bg="purple", width=20, height=2, pady=8).grid(row=1, column=0, padx=5, pady=3)
-        Button(game_modes, text="Statistics", font=("Calibri", 24), bg="red", width=20, height=2, pady=8).grid(row=1, column=1, padx=5, pady=3)
+        Button(game_modes, text="Leaderboard", font=("Calibri Bold", 24), bg="yellow", width=20, height=2, pady=8).grid(row=0, column=0, padx=5, pady=3)
+        Button(game_modes, text="Time Trial", font=("Calibri Bold", 24), bg="blue", width=20, height=2, pady=8, command=lambda: self.start_game("Time Trial")).grid(row=0, column=1, padx=5, pady=3)
+        Button(game_modes, text="Tips", font=("Calibri Bold", 24), bg="purple", width=20, height=2, pady=8).grid(row=1, column=0, padx=5, pady=3)
+        Button(game_modes, text="Statistics", font=("Calibri Bold", 24), bg="red", width=20, height=2, pady=8).grid(row=1, column=1, padx=5, pady=3)
 
         #TEMPORARY
         Button(self.main_menu, text="Delete current account?", bg="red", command=lambda: self.loginGUI.delete_user()).grid(row=4,column=2)

@@ -122,6 +122,9 @@ class Board:
                 self.auto_reveal(x, y)
 
         elif self.grid[x][y].state == "Revealed":
+
+            # HERE is where settings interactions would be added to determine if chording is done or not- make sure to reflect the lack of this code's operation in the GUI file (ie. don't have the GUI look for surrounding cells to highlight)
+
             if self.count_surroundings(x, y, lambda cell: cell.state == "Flagged") == self.grid[x][y].value:
                 self.auto_reveal(x, y)
             elif int(self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")) < int(self.grid[x][y].value):
