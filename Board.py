@@ -101,6 +101,7 @@ class Board:
             return round(0.206 * (stage ** 2))
         elif difficulty == "Very Hard":
             return round(0.237 * (stage ** 2))
+        return 0.0
 
 
     def open_cell(self, x, y, game_started):

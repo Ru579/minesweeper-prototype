@@ -105,7 +105,7 @@ class GUI:
 
         # central buttons (below classic button)
         Button(game_modes, text="Leaderboard", font=("Calibri Bold", 24), bg="yellow", width=20, height=2, pady=8).grid(row=0, column=0, padx=5, pady=3)
-        Button(game_modes, text="Time Trial", font=("Calibri Bold", 24), bg="blue", width=20, height=2, pady=8, command=lambda: self.start_game("Time Trial")).grid(row=0, column=1, padx=5, pady=3)
+        Button(game_modes, text="Time Trial", font=("Calibri Bold", 24), bg="#0181FF", width=20, height=2, pady=8, command=lambda: self.start_game("Time Trial")).grid(row=0, column=1, padx=5, pady=3)
         Button(game_modes, text="Tips", font=("Calibri Bold", 24), bg="purple", width=20, height=2, pady=8).grid(row=1, column=0, padx=5, pady=3)
         Button(game_modes, text="Statistics", font=("Calibri Bold", 24), bg="red", width=20, height=2, pady=8).grid(row=1, column=1, padx=5, pady=3)
 

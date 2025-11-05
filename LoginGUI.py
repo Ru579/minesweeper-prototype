@@ -184,8 +184,9 @@ class LoginGUI():
 
         Button(self.pword_frame, text="Sign In", font=("Calibri Bold", 13), bg="#258cdb",
                command=lambda: self.confirm_pword(pword_input.get())).place(x=330, y=310)
-        Button(self.pword_frame, text="Back", font=("Calibri Bold", 13), fg="#258cdb",
+        Button(self.pword_frame, text="Back", font=("Calibri Bold", 13), fg="black",
                command=lambda: self.back_to_username_frame()).place(x=180, y=310)
+        # old "Back" font colour was #258cdb
 
 
     def confirm_pword(self, pword_input):

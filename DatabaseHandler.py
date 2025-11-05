@@ -18,6 +18,7 @@ class DatabaseHandler:
         #glb = games_losses_boards = no of games played, no of losses, no of boards completed (games won/ boards done in time trial)
         self.glb = {}
         #each value in self.glb is a list, with the three values in the comment above. Each game-mode/difficulty has its own value in the dictionary
+        # each value in the dictionary is for a game mode/ difficulty, and each of these difficulties has a glb (which is the list)
 
         self.top_10_scores = {}
         self.top_10_rank = 100
@@ -63,6 +64,9 @@ class DatabaseHandler:
 
 
     def check_pword(self, password):
+
+        # EDIT here to check password strength?
+
         if str(self.temp_pword) == password:
             return True
         return False
