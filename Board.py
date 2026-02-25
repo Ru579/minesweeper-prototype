@@ -1,9 +1,6 @@
 from Cell import *
 from random import randint
 
-#test commit
-print("this is a test")
-
 class Board:
     def __init__(self, grid_height=0, grid_width=0, no_of_mines=0):
         self.grid_height = grid_height
