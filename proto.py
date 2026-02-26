@@ -7,6 +7,10 @@ class Board:
         self.grid_height = grid_height
         self.grid_width = grid_width
         self.no_of_mines = no_of_mines
+        self.flags_left = 0
+        self.not_enough_flags = False
+        self.game_started = False
+        self.game_over = False
         
         #creating grid
         self.grid = [[Cell() for _ in range(grid_width)] for _ in range(grid_height)]
@@ -60,7 +64,46 @@ class Board:
             return True
         return False
         
+    def open_cell(self, x, y):
+        if self.grid[x][y].state == "Hidden":
+            self.grid[x][y].state = "Revealed"
+
+            if self.grid[x][y].value == "*":
+                self.game_over = True
+            elif self.grid[x][y].value == "0":
+                self.auto_reveal_surroundings(x, y)
     
+    def auto_reveal_surroundings(self, x, y):
+        #iterating through surrounding cells and revealing them
+        for i in range(x-1, x+2):
+            for j in range(y-1, y+2):
+                if self.in_bounds(i, j) and self.grid[i][j].state == "Hidden":
+                    self.grid[i][j].state = "Revealed"
+
+                    if self.grid[i][j].value == "*":
+                        self.game_over = True
+                    
+                    # if any of the surrounding cells are 0 cells, auto reveal their surroundings
+                    if self.grid[i][j].value == "0":
+                        self.auto_reveal_surroundings(i,j)
+
+    
+    def flag_cell(self, x, y):
+        if self.grid[x][y].state == "Hidden":
+            if self.flags_left > 0:
+                self.grid[x][y].state = "Flagged" # flagging the cell if there are enough flags left
+            else:
+                self.not_enough_flags = True
+        elif self.grid[x][y].state == "Flagged":
+            self.grid[x][y].state = "Hidden"
+    
+    def confuse_cell(self, x, y):
+        if self.grid[x][y].state != "Revealed":
+            if self.grid[x][y].state != "Confused":
+                self.grid[x][y].state = "Confused"
+            elif self.grid[x][y].state == "Confused":
+                self.grid[x][y].state = "Hidden"
+
 
     def show_grid(self):
         #reading values and states from cell objects
@@ -71,11 +114,32 @@ class Board:
             print(self.text_grid_values[row])
         for row in range(self.grid_height):
             print(self.text_grid_states[row])
+    
+    def user_interation(self):
+        player_active = True
+        while player_active:
+            game_action = int(input("(1): Open Cell\n(2): Flag Cell\n(3): Confuse Cell\n(4): End Interaction"))
+            if game_action != 4:
+                x_coordinate = int(input("Enter x coordinate:"))
+                y_coordinate = int(input("Enter y coordinate:"))
+            if game_action == 1:
+                self.open_cell(x_coordinate, y_coordinate)
+                if self.game_over:
+                    print("GAME OVER")
+            elif game_action == 2:
+                self.flag_cell(x_coordinate, y_coordinate)
+            elif game_action == 3:
+                self.confuse_cell(x_coordinate, y_coordinate)
+            elif game_action == 4:
+                player_active = False
 
 
 #main code
-board = Board(10,10, 8)
+board = Board(3,3, 2)
+board.flags_left = 2
 board.place_mines()
 board.calculate_cell_numbers()
+board.show_grid()
+board.user_interation()
 board.show_grid()
 
