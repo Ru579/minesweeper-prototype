@@ -117,6 +117,11 @@ class Board:
             temp_value = self.grid[row][self.grid_width-1].value
             del self.grid[row][self.grid_width-1]
             self.grid[row].insert(0, Cell(value=temp_value))
+    
+    def barrel_shift_vertical(self, direction):
+        if direction == "Up":
+            pass
+        # probably not worth the additional 'if' statements because the index at which we insert is the opposite index to what we access
 
 
         
@@ -182,21 +187,13 @@ class Board:
 
 
     def show_grid(self):
-        #reading values and states from cell objects
-        #self.text_grid_values = [[self.grid[i][j].value for j in range(self.grid_width)] for i in range(self.grid_height)]
-        #
-        #self.text_grid_states = [[self.grid[i][j].state for j in range(self.grid_width)] for i in range(self.grid_height)]
-        #
-        #for row in range(self.grid_height):
-        #    print(self.text_grid_values[row])
-        #for row in range(self.grid_height):
-        #    print(self.text_grid_states[row])
-
         for row in range(self.grid_height):
             current_row = ""
             for column in range(self.grid_width):
+                #representing hidden cells with red 'X's
                 if self.grid[row][column].state == "Hidden":
-                    current_row += f"\033[89m X \033[0m"
+                    current_row += f"\033[91m X \033[0m"
+                #representing revealed cells with their value in blue
                 elif self.grid[row][column].state == "Revealed":
                     current_row += f"\033[94m {self.grid[row][column].value} \033[0m"
             print(current_row)
@@ -226,4 +223,10 @@ board = Board(10,10, 8)
 board.show_grid()
 board.user_interation()
 board.show_grid()
+
+#values = [1, 2, 3, 4, 5]
+#values.insert(5, 6)
+#print(values)
+
+# CHANGE barrel shifting left/right into one function in a future iteration since the code is quite repetitive
 
