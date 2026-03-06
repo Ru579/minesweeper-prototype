@@ -144,7 +144,7 @@ class Board:
         
         # chording
         elif self.chording_enabled and self.grid[x][y].state == "Revealed":
-            surrounding_flags = self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")
+            surrounding_flags = self.count_surroundings(x, y, lambda cell: cell.state == "Flagged", edge_wrap= False)
             # successful chording
             if surrounding_flags == self.grid.value:
                 self.auto_reveal_surroundings(x, y)
@@ -199,19 +199,26 @@ class Board:
         for row in range(self.grid_height):
             current_row = ""
             for column in range(self.grid_width):
-                #representing hidden cells with red 'X's
-                if self.grid[row][column].state == "Hidden":
-                    current_row += f"\033[91m X \033[0m"
+                state = self.grid[row][column].state
+                #representing hidden cells with black 'X's
+                if state == "Hidden":
+                    current_row += f"\033[30m X \033[0m"
                 #representing revealed cells with their value in blue
-                elif self.grid[row][column].state == "Revealed":
+                elif state == "Revealed":
                     current_row += f"\033[94m {self.grid[row][column].value} \033[0m"
+                # representing flagged cells with their value in dark red
+                elif state == "Flagged":
+                    current_row += f"\033[31m F \033[0m"
+                #representing confused cells with their value in dark green
+                elif state == "Confused":
+                    current_row += f"\033[32m C \033[0m"
             print(current_row)
 
     
     def user_interation(self):
         player_active = True
         while player_active:
-            game_action = int(input("(1): Open Cell\n(2): Flag Cell\n(3): Confuse Cell\n(4): End Interaction"))
+            game_action = int(input("(1): Open Cell\n(2): Flag Cell\n(3): Confuse Cell\n(4): Show grid\n(5): End Interaction\n"))
             if game_action != 4:
                 x_coordinate = int(input("Enter x coordinate:"))
                 y_coordinate = int(input("Enter y coordinate:"))
@@ -224,6 +231,8 @@ class Board:
             elif game_action == 3:
                 self.confuse_cell(x_coordinate, y_coordinate)
             elif game_action == 4:
+                self.show_grid()
+            elif game_action == 5:
                 player_active = False
 
 
