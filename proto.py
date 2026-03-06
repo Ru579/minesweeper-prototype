@@ -9,9 +9,13 @@ class Board:
         self.no_of_mines = no_of_mines
         self.flags_left = no_of_mines
         self.not_enough_flags = False
+        self.flag_difference = 0
         self.game_over = False
         self.protected_coordinate = []
         self.zero_coordinates = []
+
+        #settings
+        self.chording_enabled = True
         
         #creating grid
         self.grid = [[Cell() for _ in range(grid_width)] for _ in range(grid_height)]
@@ -117,15 +121,9 @@ class Board:
             temp_value = self.grid[row][self.grid_width-1].value
             del self.grid[row][self.grid_width-1]
             self.grid[row].insert(0, Cell(value=temp_value))
-    
-    def barrel_shift_vertical(self, direction):
-        if direction == "Up":
-            pass
-        # probably not worth the additional 'if' statements because the index at which we insert is the opposite index to what we access
-
-
         
     def open_cell(self, x, y, game_started):
+        #revealing a hidden cell
         if self.grid[x][y].state == "Hidden":
             #creating the board on first left click
             if not game_started:
@@ -133,6 +131,7 @@ class Board:
                 self.place_mines()
                 self.calculate_cell_numbers(after_barrel_shift= False)
                 self.barrel_shift_to_zero_cell()
+                # recalculating the non-edge-wrapped numbers on cells for the user
                 self.calculate_cell_numbers(after_barrel_shift= True)
 
             
@@ -142,6 +141,16 @@ class Board:
                 self.game_over = True
             elif self.grid[x][y].value == "0":
                 self.auto_reveal_surroundings(x, y)
+        
+        # chording
+        elif self.chording_enabled and self.grid[x][y].state == "Revealed":
+            surrounding_flags = self.count_surroundings(x, y, lambda cell: cell.state == "Flagged")
+            # successful chording
+            if surrounding_flags == self.grid.value:
+                self.auto_reveal_surroundings(x, y)
+            # unsuccessful chording
+            else:
+                self.flag_difference = int(surrounding_flags) - int(self.grid[x][y].value)
     
     def auto_reveal_surroundings(self, x, y):
         #iterating through surrounding cells and revealing them
