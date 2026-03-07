@@ -1,6 +1,6 @@
-from GameManager import *
-from SettingsGUI import *
-from LoginGUI import *
+from GameManagerOld import *
+from SettingsGUIOld import *
+from LoginGUIOld import *
 
 class GUI:
     def __init__(self):

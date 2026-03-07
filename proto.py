@@ -151,6 +151,7 @@ class Board:
             # unsuccessful chording
             else:
                 self.flag_difference = int(surrounding_flags) - int(self.grid[x][y].value)
+                # flag difference is positive if too many flags, negative if too few flags
     
     def auto_reveal_surroundings(self, x, y):
         #iterating through surrounding cells and revealing them

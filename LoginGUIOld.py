@@ -1,6 +1,6 @@
 from tkinter import *
 from PIL import Image, ImageTk
-from DatabaseHandler import *
+from DatabaseHandlerOld import *
 
 class LoginGUI():
     def __init__(self, database, window):

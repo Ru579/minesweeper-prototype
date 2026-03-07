@@ -1,4 +1,4 @@
-from GameManager import *
+from GameManagerOld import *
 from tkinter import *
 
 
