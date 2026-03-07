@@ -146,7 +146,7 @@ class Board:
         elif self.chording_enabled and self.grid[x][y].state == "Revealed":
             surrounding_flags = self.count_surroundings(x, y, lambda cell: cell.state == "Flagged", edge_wrap= False)
             # successful chording
-            if surrounding_flags == self.grid.value:
+            if surrounding_flags == self.grid[x][y].value:
                 self.auto_reveal_surroundings(x, y)
             # unsuccessful chording
             else:
@@ -175,17 +175,9 @@ class Board:
                     self.grid[x][y].state = "Flagged"
                 else:
                     self.not_enough_flags = True
-            else: # Cell is flagged
+            else: # Cell is already flagged
                 self.grid[x][y].state = "Hidden"
         
-
-        if self.grid[x][y].state == "Hidden":
-            if self.flags_left > 0:
-                self.grid[x][y].state = "Flagged" # flagging the cell if there are enough flags left
-            else:
-                self.not_enough_flags = True
-        elif self.grid[x][y].state == "Flagged":
-            self.grid[x][y].state = "Hidden"
     
     def confuse_cell(self, x, y):
         if self.grid[x][y].state != "Revealed":
@@ -219,7 +211,7 @@ class Board:
         player_active = True
         while player_active:
             game_action = int(input("(1): Open Cell\n(2): Flag Cell\n(3): Confuse Cell\n(4): Show grid\n(5): End Interaction\n"))
-            if game_action != 4:
+            if game_action != 5 and game_action != 4:
                 x_coordinate = int(input("Enter x coordinate:"))
                 y_coordinate = int(input("Enter y coordinate:"))
             if game_action == 1:
@@ -228,6 +220,7 @@ class Board:
                     print("GAME OVER")
             elif game_action == 2:
                 self.flag_cell(x_coordinate, y_coordinate)
+                print(f"Cell as {x_coordinate}, {y_coordinate} is now {self.grid[x_coordinate][y_coordinate].state}")
             elif game_action == 3:
                 self.confuse_cell(x_coordinate, y_coordinate)
             elif game_action == 4:
