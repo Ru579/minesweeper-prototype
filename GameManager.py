@@ -14,6 +14,7 @@ class GameManager:
 
         # Time Trial attributes
         self.stage = 0 # stage corresponds to the length of one side of the square board
+        self.previous_tt_difficulty = ""
         self.tt_difficulty = ""
         self.board_done = False # checks whether an individual board has been completed- is different to game_won since you can't win in Time Trial
         self.swapped_to_hard_tt = False # used for swapping to smaller cells on GUI
@@ -65,7 +66,6 @@ class GameManager:
     def calculate_mine_number(self):
         # returns the number of mines that should be on a square board of a specific length
         # floats determine mine concentration
-        print(self.tt_difficulty)
         if self.tt_difficulty == "Easy":
             return round(0.13 * (self.stage ** 2))
         elif self.tt_difficulty == "Medium":
@@ -92,6 +92,7 @@ class GameManager:
         self.stage += 1
         
         # creating the next board after setting the difficulty (difficulty depends on stage reached)
+        self.previous_tt_difficulty = self.tt_difficulty
         self.set_difficulty()
         self.board = Board(self.stage, self.stage, self.calculate_mine_number())
 
@@ -142,7 +143,7 @@ class GameManager:
             if self.time_to_be_added:
                 # adding time to the timer
                 total_time = self.minutes * 60 + self.seconds
-                total_time += self.bonus_times[self.tt_difficulty]
+                total_time += self.bonus_times[self.previous_tt_difficulty] # adding time based on the difficulty of the stage JUST completed
                 self.time_to_be_added = False
 
                 # restoring total time to minutes:seconds format
@@ -211,9 +212,29 @@ if game_mode_selection == "C":
     game.start_classic_mode("Beginner")
 elif game_mode_selection == "T":
     game.start_time_trial()
-# game.run_game()
+game.run_game()
 
-for _ in range(100):
-    print(f"Time- {game.minutes}:{game.seconds}")
-    sleep(1)
-    game.update_countdown_timer()
+#game.stage = 16
+#game.tt_difficulty = "Medium"
+#print(f"Time- {game.minutes:02}:{game.seconds:02}")
+#game.next_tt_stage()
+#game.update_countdown_timer()
+#print(f"Time- {game.minutes:02}:{game.seconds:02}")
+
+#game.timer_on = False
+#game.time_to_be_added = True
+#game.minutes = 2
+#game.seconds = 35
+#game.tt_difficulty = "Medium"
+#print(f"Time- {game.minutes:02}:{game.seconds:02}")
+#game.update_countdown_timer()
+#print(f"Time- {game.minutes:02}:{game.seconds:02}")
+
+#for _ in range(100):
+#    print(f"Time- {game.minutes:02}:{game.seconds:02}")
+#    sleep(1)
+#    game.update_countdown_timer()
+
+
+
+
