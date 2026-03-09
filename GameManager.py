@@ -12,6 +12,12 @@ class GameManager:
 
         self.user_can_interact = True
 
+        self.loss_bonuses = {
+            "Beginner": 30,
+            "Intermediate": 100,
+            "Expert": 300
+        }
+
         # Time Trial attributes
         self.stage = 0 # stage corresponds to the length of one side of the square board
         self.previous_tt_difficulty = ""
@@ -32,11 +38,17 @@ class GameManager:
             "Very Hard": 90
         }
 
+        # database handler attributes
+        self.top_10_rank = 0
+        self.no_1_states = ""
+        self.outcome = ""
+
     def start_classic_mode(self, difficulty: str):
         self.difficulty = difficulty
         self.game_mode = "Classic"
         self.game_started = False
         self.game_won = False
+        self.outcome = ""
 
         #creating board
         if difficulty == "Beginner":
@@ -52,6 +64,7 @@ class GameManager:
         self.game_started = False
         self.game_won = False
         self.board_done = False
+        self.outcome = ""
         self.swapped_to_hard_tt = False
         # the starting value of the timer
         self.minutes = 3
@@ -150,6 +163,58 @@ class GameManager:
                 self.minutes = total_time // 60
                 self.seconds = total_time % 60
                 self.time_change_type = "Time Added"
+    
+    def add_exp(self, final_score: int, outcome: str):
+        exp_to_add = 0
+        if self.game_mode == "Classic":
+            # adding EXP based on the difficulty of the board and the score achieved by the player
+            if self.difficulty == "Beginner":
+                exp_to_add = self.add_classic_mode_exp(outcome, final_score, base_exp=200, max_bonus=100)
+            elif self.difficulty == "Intermediate":
+                exp_to_add = self.add_classic_mode_exp(outcome, final_score, base_exp=600, max_bonus=200)
+            elif self.difficulty == "Expert":
+                exp_to_add = self.add_classic_mode_exp(outcome, final_score, base_exp=1000, max_bonus=350)
+            
+            # adding EXP if the player achieves a new best score/ top 10 score
+            if outcome == "Win":
+                exp_to_add += self.add_personal_best_exp()
+        
+        elif self.game_mode == "Time Trial":
+            if final_score == 0:
+                # adding exp based on the fraction of the board that was revealed and the difficulty of that board
+                exp_to_add = round(30 * self.board.revealed_cells / (self.board.grid_height * self.board.grid_hwidth))
+            else:
+                exp_to_add = 38 * (final_score**2) - 90(final_score) + 100 # the quadratic equation used for calculating Time Trial EXP
+                if self.swapped_to_hard_tt:
+                    exp_to_add *= 1.2
+            
+            exp_to_add += self.add_personal_best_exp()
+        
+        self.exp = self.exp + exp_to_add
+
+
+    def add_classic_mode_exp(self, outcome:str, final_score:int , base_exp: int, max_bonus: int):
+        if outcome == "Win":
+            # adding a portion of the max_bonus depending on how good the final_score is
+            if final_score <= max_bonus:
+                return base_exp + (max_bonus - final_score)
+            else:
+                return base_exp
+        elif outcome == "Lose":
+            loss_bonus = self.loss_bonuses(self.difficulty)
+            # adding exp based on the fraction of the board that was revealed and the difficulty of that board
+            return round(loss_bonus * (self.board.revealed_cells / (self.board.grid_height * self.board.grid_width)))
+    
+    def add_personal_best_exp(self):
+        exp_to_add = 0
+        if self.top_10_rank:
+            exp_to_add += 200
+            if self.no_1_status == "Tied":
+                exp_to_add += 200
+            elif self.no_1_status == "Reached":
+                exp_to_add += 500
+        return exp_to_add
+        
             
     def run_game(self):
         if self.game_mode == "Classic":
