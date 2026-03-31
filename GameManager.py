@@ -182,18 +182,19 @@ class GameManager:
         elif self.game_mode == "Time Trial":
             if final_score == 0:
                 # adding exp based on the fraction of the board that was revealed and the difficulty of that board
-                exp_to_add = round(30 * self.board.revealed_cells / (self.board.grid_height * self.board.grid_hwidth))
+                exp_to_add = round(30 * self.board.revealed_cells / (self.board.grid_height * self.board.grid_width))
             else:
                 exp_to_add = 38 * (final_score**2) - 90(final_score) + 100 # the quadratic equation used for calculating Time Trial EXP
                 if self.swapped_to_hard_tt:
                     exp_to_add *= 1.2
-            
-            exp_to_add += self.add_personal_best_exp()
+                exp_to_add += self.add_personal_best_exp()
         
-        self.exp = self.exp + exp_to_add
+        self.exp += exp_to_add
 
 
     def add_classic_mode_exp(self, outcome:str, final_score:int , base_exp: int, max_bonus: int):
+        # base_exp is the minimum EXP earnt when completing a Classic board.
+        # max_bonus is the maximum amount of additional EXP that the player can earn depending on how quickly they completed the board
         if outcome == "Win":
             # adding a portion of the max_bonus depending on how good the final_score is
             if final_score <= max_bonus:
@@ -272,33 +273,18 @@ class GameManager:
             
 #main code
 game = GameManager()
-game_mode_selection = input("Select Classic (C) or Time Trial (T):\n").upper()
-if game_mode_selection == "C":
-    game.start_classic_mode("Beginner")
-elif game_mode_selection == "T":
-    game.start_time_trial()
-game.run_game()
+#game_mode_selection = input("Select Classic (C) or Time Trial (T):\n").upper()
+#if game_mode_selection == "C":
+#    game.start_classic_mode("Beginner")
+#elif game_mode_selection == "T":
+#    game.start_time_trial()
+#game.run_game()
 
-#game.stage = 16
-#game.tt_difficulty = "Medium"
-#print(f"Time- {game.minutes:02}:{game.seconds:02}")
-#game.next_tt_stage()
-#game.update_countdown_timer()
-#print(f"Time- {game.minutes:02}:{game.seconds:02}")
-
-#game.timer_on = False
-#game.time_to_be_added = True
-#game.minutes = 2
-#game.seconds = 35
-#game.tt_difficulty = "Medium"
-#print(f"Time- {game.minutes:02}:{game.seconds:02}")
-#game.update_countdown_timer()
-#print(f"Time- {game.minutes:02}:{game.seconds:02}")
-
-#for _ in range(100):
-#    print(f"Time- {game.minutes:02}:{game.seconds:02}")
-#    sleep(1)
-#    game.update_countdown_timer()
+# EXP tester
+game.exp = 200
+game.game_mode = "Classic"
+game.difficulty = "Beginner"
+game.add_exp(outcome="Win", final_score="")
 
 
 
