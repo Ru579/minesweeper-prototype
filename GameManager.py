@@ -12,6 +12,14 @@ class GameManager:
 
         self.user_can_interact = True
 
+        # Classic mode attributes
+        self.difficulty = ""
+        self.main_menu_difficulty = ""
+        self.difficulty_mapper = {
+            "Beginner": "Intermediate",
+            "Intermediate": "Expert", 
+            "Expert": "Beginner"
+        }
         self.loss_bonuses = {
             "Beginner": 30,
             "Intermediate": 100,
@@ -291,9 +299,7 @@ class GameManager:
             print("GAME OVER!")
             
 #main code
-game = GameManager()
-game.start_classic_mode("Medium")
-
+#game = GameManager()
 #game_mode_selection = input("Select Classic (C) or Time Trial (T):\n").upper()
 #if game_mode_selection == "C":
 #    game.start_classic_mode("Beginner")
