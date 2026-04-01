@@ -60,6 +60,8 @@ class GameManager:
             self.board = Board(16,16, 40)
         elif difficulty == "Expert":
             self.board = Board(16, 30, 99)
+        else:
+            raise ValueError("Invalid Classic Difficulty")
     
     def start_time_trial(self):
         # initialising game state variables
@@ -90,6 +92,8 @@ class GameManager:
             return round(0.206 * (self.stage_length ** 2))
         elif self.tt_difficulty == "Very Hard":
             return round(0.237 * (self.stage_length ** 2))
+        else:
+            raise ValueError("Invalid Time Trial Difficulty")
     
     def set_difficulty(self):
         # the first stage is stage 6, as stage = board length and the first board is a 6x6
@@ -136,6 +140,8 @@ class GameManager:
                 self.game_won = True
             elif self.game_mode == "Time Trial":
                 self.board_done = True
+            else:
+                raise ValueError("Invalid Game Mode")
             self.user_can_interact = False
     
     def update_countdown_timer(self):
@@ -179,6 +185,8 @@ class GameManager:
                 exp_to_add = self.add_classic_mode_exp(outcome, final_score, base_exp=600, max_bonus=200)
             elif self.difficulty == "Expert":
                 exp_to_add = self.add_classic_mode_exp(outcome, final_score, base_exp=1000, max_bonus=350)
+            else:
+                raise ValueError("Invalid Classic Difficulty")
             
             # adding EXP if the player achieves a new best score/ top 10 score
             if outcome == "Win":
@@ -189,12 +197,16 @@ class GameManager:
                 # adding exp based on the fraction of the board that was revealed and the difficulty of that board
                 exp_to_add = round(30 * self.board.revealed_cells / (self.board.grid_height * self.board.grid_width))
                 print(exp_to_add)
-            else:
+            elif final_score > 1:
                 exp_to_add = 38 * (final_score**2) - 90 * (final_score) + 100 # the quadratic equation used for calculating Time Trial EXP
                 if self.swapped_to_hard_tt:
                     exp_to_add *= 1.2
                     exp_to_add = round(exp_to_add)
                 exp_to_add += self.add_personal_best_exp()
+            else:
+                raise ValueError("Final score can't be less than 1.")
+        else:
+            raise ValueError("Invalid Game Mode")
         self.exp += exp_to_add
 
 
@@ -279,7 +291,9 @@ class GameManager:
             print("GAME OVER!")
             
 #main code
-#game = GameManager()
+game = GameManager()
+game.start_classic_mode("Medium")
+
 #game_mode_selection = input("Select Classic (C) or Time Trial (T):\n").upper()
 #if game_mode_selection == "C":
 #    game.start_classic_mode("Beginner")
