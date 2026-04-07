@@ -126,11 +126,11 @@ class Board:
             del self.grid[row][self.grid_width-1]
             self.grid[row].insert(0, Cell(value=temp_value))
         
-    def open_cell(self, x, y, game_started):
+    def open_cell(self, x, y, board_started):
         #revealing a hidden cell
         if self.grid[x][y].state == "Hidden":
             #creating the board on first left click
-            if not game_started:
+            if not board_started:
                 self.protected_coordinate.extend([x,y])
                 self.place_mines()
                 self.calculate_cell_numbers(after_barrel_shift= False)

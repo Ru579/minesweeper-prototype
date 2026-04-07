@@ -7,14 +7,14 @@ class GameManager:
         self.board = Board(0,0,0)
         
         self.game_mode = ""
-        self.game_started = False
+        self.board_started = False
         self.game_won = False
 
         self.user_can_interact = True
 
         # Classic mode attributes
         self.difficulty = ""
-        self.main_menu_difficulty = ""
+        self.main_menu_difficulty = "Beginner"
         self.difficulty_mapper = {
             "Beginner": "Intermediate",
             "Intermediate": "Expert", 
@@ -32,6 +32,7 @@ class GameManager:
         self.tt_difficulty = ""
         self.board_done = False # checks whether an individual board has been completed- is different to game_won since you can't win in Time Trial
         self.swapped_to_hard_tt = False # used for swapping to smaller cells on GUI
+        
         # timer related attributes
         self.timer_on = False
         self.minutes = 0
@@ -57,7 +58,7 @@ class GameManager:
     def start_classic_mode(self, difficulty: str):
         self.difficulty = difficulty
         self.game_mode = "Classic"
-        self.game_started = False
+        self.board_started = False
         self.game_won = False
         self.outcome = ""
 
@@ -74,7 +75,7 @@ class GameManager:
     def start_time_trial(self):
         # initialising game state variables
         self.game_mode = "Time Trial"
-        self.game_started = False
+        self.board_started = False
         self.game_won = False
         self.board_done = False
         self.outcome = ""
@@ -131,11 +132,11 @@ class GameManager:
             self.swapped_to_hard_tt = True
     
     def open_cell(self, x: int, y: int):
-        self.board.open_cell(x, y, self.game_started)
+        self.board.open_cell(x, y, self.board_started)
         
         #starting the timer after the first click on the board
-        if not self.game_started:
-            self.game_started = True
+        if not self.board_started:
+            self.board_started = True
             self.timer_on = True
         
         self.board_done_check()

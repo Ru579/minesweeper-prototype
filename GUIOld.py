@@ -162,9 +162,6 @@ class GUI:
         self.countup_timer = Label(self.game_frame, text="00:00", font=("Calibri", 20), width=5)
         self.countup_timer.grid(row=0, column=2)
 
-        # self.mines_left_counter = Label(self.game_frame, text=str(self.game.mines_left), font=("Calibri", 20), width=2)
-        # self.mines_left_counter.grid(row=0, column=0)
-
         if self.formatted_number_images:
             self.formatted_number_images = []
 
@@ -190,16 +187,17 @@ class GUI:
             for j in range(0, self.game.board.grid_width):
                 #experimenting with borderwidth
                 tile = Button(self.cell_grid, borderwidth=0)
-                tile.config(command=lambda row=i, column=j: self.ui_open_cell(row, column))
-                tile.bind("<Button-2>", lambda event, row=i, column=j: self.ui_confuse_cell(row, column))
-                tile.bind("<Button-3>", lambda event, row=i, column=j: self.ui_flag_cell(row, column))
+                tile.config(command=lambda row=i, column=j: self.ui_open_cell(i, j))
+                tile.bind("<Button-2>", lambda  event: self.ui_confuse_cell(i, j))
+                tile.bind("<Button-3>", lambda  event: self.ui_flag_cell(i, j))
 
                 if self.game.difficulty == "Beginner":
                     tile.config(image=self.formatted_cell_images["hidden_cell_image"], width=60, height=60)
                 elif self.game.difficulty == "Intermediate" or self.game.difficulty == "Expert":
                     tile.config(image=self.formatted_cell_images["hidden_cell_image"], width=40, height=40)
 
-                tile.grid(row=i + 1, column=j + 1)
+                ### note: IS ONLY ROW=I AND COLUMN=J IN NEW GUI
+                tile.grid(row=i+1, column=j+1)
                 self.tiles[i][j] = tile
         self.game.user_can_interact = True
 
@@ -208,9 +206,6 @@ class GUI:
 
         self.countdown_timer = Label(self.game_frame, text="03:00", font=("Calibri", 20), width=5)
         self.countdown_timer.grid(row=0, column=2)
-
-        # self.mines_left_counter = Label(self.game_frame, text=str(self.game.mines_left), font=("Calibri", 20), width=2)
-        # self.mines_left_counter.grid(row=0, column=0)
 
         if self.formatted_number_images:
             self.formatted_number_images = []
