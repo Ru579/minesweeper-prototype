@@ -3,3 +3,4 @@ class Cell:
         self.value = value
         self.state = "Hidden"
 
+# add another attribute called highlighted

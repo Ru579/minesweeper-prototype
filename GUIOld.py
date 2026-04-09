@@ -39,10 +39,10 @@ class GUI:
             "mine_image": Image.open("Images/mine_cell_red.png"),
             "flagged_cell_image": Image.open("Images/minesweeper_flag.png"),
             "incorrect_flagged_image": Image.open("Images/incorrect_flag.png"),
-            "confused_cell_image": Image.open("Images/confuse_cell_v3_green.png"),
+            "confused_cell_image": Image.open("Images/confused_cell_v3_green.png"),
             "highlighted_hidden_cell_image": Image.open("Images/highlighted_hidden_cell.png"),
             "highlighted_flagged_cell_image": Image.open("Images/highlighted_minesweeper_flag.png"),
-            "highlighted_confused_cell_image": Image.open("Images/highlighted_confuse_cell_v3_green.png")
+            "highlighted_confused_cell_image": Image.open("Images/highlighted_confused_cell_v3_green.png")
         }
         self.formatted_cell_images = {}
 
@@ -305,6 +305,7 @@ class GUI:
             if self.game.flag_difference < 0:
                 for i in range(x - 1, x + 2):
                     for j in range(y - 1, y + 2):
+                        
                         if self.game.board.in_bounds(i, j):
                             state = self.game.get_cell(i, j, "state")
                             if state == "Hidden" or state == "Confused":
@@ -316,6 +317,7 @@ class GUI:
             if self.game.flag_difference > 0:
                 for i in range(x - 1, x + 2):
                     for j in range(y - 1, y + 2):
+
                         if self.game.board.in_bounds(i, j) and self.game.get_cell(i, j, "state") == "Flagged":
                             self.tiles[i][j].config(image=self.formatted_cell_images["highlighted_flagged_cell_image"])
                             self.return_cell_to_normal(i, j, normal_state="Flagged")

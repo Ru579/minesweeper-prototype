@@ -50,6 +50,9 @@ class GUI:
         # settings icon
         settings_icon = Image.open("Images/settings_icon.jpg")
         self.settings_icon = ImageTk.PhotoImage(settings_icon.resize((60,60)))
+        # account icon
+        guest_icon = Image.open("Images/guest_profile.png")
+        self.guest_icon = ImageTk.PhotoImage(guest_icon.resize((60,60)))
 
     def create_main_menu(self):
         # main title
@@ -68,8 +71,14 @@ class GUI:
             child.config(font=("Calibri Bold", 24), width=20, height=2)
 
         # buttons in corners of main menu
-        Button(self.main_menu, image=self.settings_icon, command= lambda: self.create_settings_window()).grid(row=0, column=0)
-        Button(self.main_menu, text="Account", command= lambda: self.account_interaction()).grid(row=0, column=2)
+        # settings button
+        settings_button = Label(self.main_menu, image=self.settings_icon)
+        settings_button.bind("<Button-1>", lambda _: self.create_settings_window())
+        settings_button.grid(row=0, column=0)
+        # account button
+        account_button = Label(self.main_menu, image=self.guest_icon)
+        account_button.bind("<Button-1>", lambda _: self.account_interaction())
+        account_button.grid(row=0, column=2)
 
         self.main_menu.pack()
 
@@ -144,7 +153,7 @@ class GUI:
         self.clock.config(text = "00:00")
 
         # formatting images
-        self.format_images(image_length=60 if self.game.difficulty=="Beginner" else 40)
+        self.format_images(image_length=62 if self.game.difficulty=="Beginner" else 42)
 
         # making a 2D array of Buttons- these Buttons will be turned into cells in create_cell_grid()
         self.tiles = [[Button(self.cell_grid) for _ in range(self.game.board.grid_width)] for _ in range(self.game.board.grid_height)]
@@ -160,6 +169,20 @@ class GUI:
         self.format_images(image_length=62)
         
         self.make_tt_board()
+    
+    def format_images(self, image_length):
+        # clearing old sizes applied to cell images
+        if self.formatted_number_images:
+            self.formatted_number_images = []
+        
+        # resizing each image
+        for image in self.cell_images:
+            self.formatted_cell_images[image] = self.cell_images[image].resize((image_length, image_length))
+            self.formatted_cell_images[image] = ImageTk.PhotoImage(self.formatted_cell_images[image])
+        for number in range(9):
+            temp_number_image = self.cell_number_images[number].resize((image_length, image_length))
+            temp_number_image = ImageTk.PhotoImage(temp_number_image)
+            self.formatted_number_images.append(temp_number_image)
     
     def create_cell_grid(self):
         for i in range(0, self.game.board.grid_height):
@@ -200,29 +223,103 @@ class GUI:
 
         self.game.user_can_interact = True
 
-    def ui_open_cell(self, row, column):
+    def ui_open_cell(self, x, y):
+        if self.game.user_can_interact:
+            self.game.open_cell(x, y)
+            self.update_ui()
+            self.communicator.config(text="") # hiding previous communicator text
+
+            # if game hasn't started yet, starts the respective timers
+            if not self.game.board_started:
+                self.game.board_started = True
+                if self.game.game_mode == "Classic":
+                    self.clock.after(1000, lambda: self.update_countup_timer(0, 0))
+                elif self.game.game_mode == "Time Trial" and not self.game.tt_running:
+                    self.game.tt_running = True
+                    self.clock.after(1000, lambda: self.update_countdown_timer(3, 0))
+            
+            # unssuccessful chord
+            if self.game.board.chording_enabled and self.game.board.flag_difference != 0:
+                # iterating through surrounding cells
+                for i in range(x-1, x+2):
+                    for j in range(y-1, y+2):
+                        if self.game.board.in_bounds(i, j):
+                            state = self.game.get_cell(i, j, "state")
+                            
+                            # if player has placed too few flags, meaning we highlight surrounding hidden or confused cells
+                            if self.game.board.flag_difference < 0 and state in ("Hidden", "Confused"):
+                                self.tiles[i][j].config(image=self.formatted_cell_images[f"highlighted_{state.lower()}_cell_image"])
+
+                            # if player has placed too many flags, meaning we highlight surrounding flagged cells
+                            if self.game.board.flag_difference > 0 and state == "Flagged":
+                                self.tiles[i][j].config(image=self.formatted_cell_images["highlighted_flagged_cell_image"])
+                            
+                            # restoring the cell to its original image after 500ms
+                            self.tiles[i][j].after(500, lambda row=i, column=j, current_state=state: self.fix_cell_colour(row, column, old_state= current_state))
+                
+                # reporting flag difference
+                self.communicator.config(text=f"Cell has {abs(self.game.board.flag_difference)} too {"many" if self.game.board.flag_difference>0 else "few"} flags")
+            
+            self.game_state_check()
+
+    def ui_flag_cell(self, x, y):
+        if self.game.user_can_interact:
+            self.game.board.flag_cell(x, y)
+
+            # if a cell is being flagged
+            if self.game.get_cell(x, y, "state") == "Flagged":
+                self.tiles[x][y].config(image=self.formatted_cell_images["flagged_cell_image"])
+            # if a cell is being unflagged
+            elif self.game.get_cell(x, y, "state") == "Hidden":
+                self.tiles[x][y].config(image=self.formatted_cell_images["hidden_cell_image"])
+
+            # if the player has ran out of flags
+            if self.game.board.not_enough_flags:
+                self.communicator.config(text="Not enough flags")
+                self.communicator.after(500, lambda: self.communicator.config(text=""))
+                self.game.board.not_enough_flags = False
+            
+            # updating flag counter
+            self.flag_counter.config(text=str(self.game.board.flags_left))
+
+    def ui_confuse_cell(self, x, y):
+        if self.game.user_can_interact:
+            self.game.board.confuse_cell(x, y)
+
+            state = self.game.get_cell(x, y, "state")
+            # making cell image reflect new state after confusing/un-confusing
+            if state in ("Hidden", "Confused"):
+                self.tiles[x][y].config(image=self.formatted_cell_images[f"{state.lower()}_cell_image"])
+
+            # updating flag counter
+            self.flag_counter.config(text=str(self.game.board.flags_left))
+
+    def update_ui(self):
+        # iterating through each cell on the board and updating images of revealed cells
+        for i in range(self.game.board.grid_height):
+            for j in range(self.game.board.grid_width):
+                if self.game.get_cell(i, j, "state") == "Revealed":
+                    if self.game.get_cell(i, j, "value") == "*": # if cell is a mine
+                        self.tiles[i][j].config(image=self.formatted_cell_images["mine_image"])
+                    else: # showing the number on the cell
+                        self.tiles[i][j].config(image=self.formatted_number_images[int(self.game.get_cell(i, j, "value"))])
+
+
+    def fix_cell_colour(self, x, y, old_state):
+        # old_state is equal to the state of the Cell at (x, y) BEFOPRE highlighting occurred
+        new_state = self.game.get_cell(x, y, "state") # new_state is the state of the cell at (x, y) AFTER highlighting has occurred
+        if old_state == new_state and old_state != "Revealed":
+           self.tiles[x][y].config(image=self.formatted_cell_images[f"{old_state.lower()}_cell_image"])
+
+    def update_countup_timer(self, minutes, seconds):
         pass
 
-    def ui_flag_cell(self, row, column):
+    def update_countdown_timer(self, minutes, seconds):
         pass
-
-    def ui_confuse_cell(self, row, column):
-        pass
-
-    def format_images(self, image_length):
-        # clearing old sizes applied to cell images
-        if self.formatted_number_images:
-            self.formatted_number_images = []
-        
-        # resizing each image
-        for image in self.cell_images:
-            self.formatted_cell_images[image] = self.cell_images[image].resize((image_length, image_length))
-            self.formatted_cell_images[image] = ImageTk.PhotoImage(self.formatted_cell_images[image])
-        for number in range(9):
-            temp_number_image = self.cell_number_images[number].resize((image_length, image_length))
-            temp_number_image = ImageTk.PhotoImage(temp_number_image)
-            self.formatted_number_images.append(temp_number_image)
-
+    
+    def game_state_check(self):
+        if self.game.board.game_over:
+            
 
 
 gui = GUI()

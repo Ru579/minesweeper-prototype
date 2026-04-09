@@ -58,6 +58,7 @@ class GameManager:
     def start_classic_mode(self, difficulty: str):
         self.difficulty = difficulty
         self.game_mode = "Classic"
+        self.tt_difficulty = "" # stopping other game mode difficulty from influencing cell size
         self.board_started = False
         self.game_won = False
         self.outcome = ""
@@ -75,6 +76,7 @@ class GameManager:
     def start_time_trial(self):
         # initialising game state variables
         self.game_mode = "Time Trial"
+        self.difficulty = "" # stopping other game mode difficulty from influencing cell size
         self.board_started = False
         self.game_won = False
         self.board_done = False
@@ -243,61 +245,68 @@ class GameManager:
         #    elif self.no_1_status == "Reached":
         #        exp_to_add += 500
         #return exp_to_add
+    
+    def get_cell(self, x, y, info_needed):
+        # returns information about a cell
+        if info_needed=="value":
+            return self.board.grid[x][y].value
+        elif info_needed == "state":
+            return self.board.grid[x][y].state
         
             
-    def run_game(self):
-        if self.game_mode == "Classic":
-            self.show_grid()
-            self.user_interation()
-        elif self.game_mode == "Time Trial":
-            while not self.board.game_over:
-                self.show_grid()
-                self.user_interation()
-                self.next_tt_stage()
-                self.user_can_interact = True
+    #def run_game(self):
+    #    if self.game_mode == "Classic":
+    #        self.show_grid()
+    #        self.user_interation()
+    #    elif self.game_mode == "Time Trial":
+    #        while not self.board.game_over:
+    #            self.show_grid()
+    #            self.user_interation()
+    #            self.next_tt_stage()
+    #            self.user_can_interact = True
 
-    def show_grid(self):
-        print(f"Flags left: {self.board.flags_left}")
-        for row in range(self.board.grid_height):
-            current_row = ""
-            for column in range(self.board.grid_width):
-                state = self.board.grid[row][column].state
-                #representing hidden cells with black 'X's
-                if state == "Hidden":
-                    current_row += f"\033[30m X \033[0m"
-                #representing revealed cells with their value in blue
-                elif state == "Revealed":
-                    current_row += f"\033[94m {self.board.grid[row][column].value} \033[0m"
-                # representing flagged cells with their value in dark red
-                elif state == "Flagged":
-                    current_row += f"\033[31m F \033[0m"
-                #representing confused cells with their value in dark green
-                elif state == "Confused":
-                    current_row += f"\033[32m C \033[0m"
-            print(current_row)
-
-    def user_interation(self):
-        player_active = True
-        while player_active and self.user_can_interact and not self.board.game_over:
-            game_action = int(input("(1): Open Cell\n(2): Flag Cell\n(3): Confuse Cell\n(4): End Interaction\n"))
-            if game_action != 4:
-                x_coordinate = int(input("Enter x coordinate:"))
-                y_coordinate = int(input("Enter y coordinate:"))
-            if game_action == 1:
-                self.open_cell(x_coordinate, y_coordinate)
-            elif game_action == 2:
-                self.board.flag_cell(x_coordinate, y_coordinate)
-            elif game_action == 3:
-                self.board.confuse_cell(x_coordinate, y_coordinate)
-            elif game_action == 4:
-                player_active = False
-            self.show_grid()
-        if self.game_won:
-            print("GAME HAS BEEN WON!")
-        elif self.game_mode == "Time Trial" and self.board_done:
-            print("NEXT STAGE!")
-        elif self.board.game_over:
-            print("GAME OVER!")
+    #def show_grid(self):
+    #    print(f"Flags left: {self.board.flags_left}")
+    #    for row in range(self.board.grid_height):
+    #        current_row = ""
+    #        for column in range(self.board.grid_width):
+    #            state = self.board.grid[row][column].state
+    #            #representing hidden cells with black 'X's
+    #            if state == "Hidden":
+    #                current_row += f"\033[30m X \033[0m"
+    #            #representing revealed cells with their value in blue
+    #            elif state == "Revealed":
+    #                current_row += f"\033[94m {self.board.grid[row][column].value} \033[0m"
+    #            # representing flagged cells with their value in dark red
+    #            elif state == "Flagged":
+    #                current_row += f"\033[31m F \033[0m"
+    #            #representing confused cells with their value in dark green
+    #            elif state == "Confused":
+    #                current_row += f"\033[32m C \033[0m"
+    #        print(current_row)
+#
+    #def user_interation(self):
+    #    player_active = True
+    #    while player_active and self.user_can_interact and not self.board.game_over:
+    #        game_action = int(input("(1): Open Cell\n(2): Flag Cell\n(3): Confuse Cell\n(4): End Interaction\n"))
+    #        if game_action != 4:
+    #            x_coordinate = int(input("Enter x coordinate:"))
+    #            y_coordinate = int(input("Enter y coordinate:"))
+    #        if game_action == 1:
+    #            self.open_cell(x_coordinate, y_coordinate)
+    #        elif game_action == 2:
+    #            self.board.flag_cell(x_coordinate, y_coordinate)
+    #        elif game_action == 3:
+    #            self.board.confuse_cell(x_coordinate, y_coordinate)
+    #        elif game_action == 4:
+    #            player_active = False
+    #        self.show_grid()
+    #    if self.game_won:
+    #        print("GAME HAS BEEN WON!")
+    #    elif self.game_mode == "Time Trial" and self.board_done:
+    #        print("NEXT STAGE!")
+    #    elif self.board.game_over:
+    #        print("GAME OVER!")
             
 #main code
 #game = GameManager()

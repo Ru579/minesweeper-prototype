@@ -127,6 +127,7 @@ class Board:
             self.grid[row].insert(0, Cell(value=temp_value))
         
     def open_cell(self, x, y, board_started):
+        self.flag_difference = 0
         #revealing a hidden cell
         if self.grid[x][y].state == "Hidden":
             #creating the board on first left click
