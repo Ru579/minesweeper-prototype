@@ -11,6 +11,7 @@ class GUI:
         # creating frames
         self.main_menu = Frame(self.Minesweeper)
         self.game_frame = Frame(self.Minesweeper)
+        self.game_finished_window = Frame()
 
         # main menu widgets
         self.difficulty_button = Button()
@@ -20,6 +21,9 @@ class GUI:
         self.flags_left_counter = Label()
         self.cell_grid = Frame()
         self.clock = Label() # either the stopwatch (in Classic) or timer (in Time Trial)
+
+        # game over widgets
+        self.view_mines_button = Button()
 
         self.tiles = [] # an array of all Buttons on the cell grid
 
@@ -318,8 +322,168 @@ class GUI:
         pass
     
     def game_state_check(self):
-        if self.game.board.game_over:
+        if self.game.board.game_over: # if a mine has been revealed
+            self.do_game_over()
+        
+        elif self.game.game_mode == "Classic":
+            if self.game.game_won: # ending the game and showing the appropriate game over screen
+                self.game.terminate_game_variables()
+
+                self.communicator.config(text="Congratulations!")
+
+                self.game_frame.after(500, lambda: self.prepare_game_finished_window("Win"))
+
+
+        elif self.game.game_mode == "Time Trial":
+            if self.game.board_done:  # progressing onto the next stage in Time Trial if current one is completed
+                self.game.timer_on = False
+                self.communicator.config(text="Next Stage")
+                self.ui_next_tt_stage()
+        
+    
+    def do_game_over(self, delay=1250):
+        # stopping all attributes that cause the game to continue
+        self.game.tt_running = False
+        self.game.board_started = False
+        self.game.timer_on = False
+
+        # if player ran out of time in Time Trial
+        if self.game.time_change_type == "Time Game Over":
+            self.game.terminate_game_variables()
+            self.communicator.config(text="GAME OVER: Time Ran Out!")
+        
+        # if player clicked mine in Classic or Time Trial
+        else:
+            self.game.terminate_game_variables()
+            self.communicator.config(text="GAME OVER!")
+            self.toggle_all_mine_reveal(button_used=False)
+        
+        self.game_frame.after(delay, lambda: self.prepare_game_finished_window("Lose"))
+    
+    def ui_next_tt_stage(self):
+        self.communicator.config(text="Next Stage")
+        self.game.time_to_be_added = True
+        self.game.terminate_game_variables() # may need to be called finish_board
+        self.game.next_tt_stage()
+        self.flag_counter.config(text=str(self.game.board.flags_left))
+        self.game_frame.after(500, lambda: self.make_tt_board())
+
+    def prepare_game_finished_window(self, outcome):
+        # swapping frames to game finished window
+        self.game_frame.forget()
+        self.game_finished_window = Frame(self.Minesweeper)
+        self.game_finished_window.pack()
+        
+        # creating the respective game over window
+        if self.game.game_mode == "Classic":
+            self.display_classic_game_over_window(outcome)
+        elif self.game.game_mode == "Time Trial":
+            self.display_tt_game_over_window()
+    
+    def display_classic_game_over_window(self, outcome):
+        # creates text confirming outcome and final time
+        if outcome == "Win":
+            Label(self.game_finished_window, text=self.game.calculate_output_statement(), font=("Calibri", 16)).grid(row=0, column=1)
+        elif outcome == "Lose":
+            Label(self.game_finished_window, text=self.game.calculate_output_statement(), font=("Calibri", 16)).grid(row=0, column=1)
+        
+        # creating grid of buttons to interact with after game is over: retry, change difficulty etc.
+        game_finished_options = Frame(self.game_finished_window)
+        game_finished_options.grid(row=1, column=1)
+
+        # making the retry button
+        retry_button = Button(game_finished_options, text="Retry?", bg="blue", fg="white", font=("Calibri", 16), width=15, command=lambda: self.retry())
+        retry_button.grid(row=0, column=0)
+        # making difficukty changer button
+        retry_difficulty_changer = Button(game_finished_options, text="Change Difficulty?", bg="green", fg="white", font=("Calibri", 16), width=15, command=lambda: self.change_retry_difficulty())
+        retry_difficulty_changer.grid(row=0, column=1)
+        # View board button
+        Button(game_finished_options, text="View Board?", font=("Calibri", 16), width=15, command=lambda: self.view_board()).grid(row=1, column=0)
+        # return to menu button
+        Button(game_finished_options, text="Menu", font=("Calibri", 16), width=15, command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=1, column=1)
+
+
+    def display_tt_game_over_window(self):
+        # making label outlining final score
+        Label(self.game_finished_window, text=self.game.calculate_output_statement(), font=("Calibri", 16)).grid(row=0, column=1)
+
+        # making retry button
+        retry_button = Button(self.game_finished_window, text="Retry?", bg="blue", fg="white", font=("Calibri", 15), width=6, command=lambda: self.retry())
+        retry_button.grid(row=1, column=1)
+
+        # view board and return to menu buttons
+        Button(self.game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: self.view_board()).grid(row=2, column=1)
+        Button(self.game_finished_window, text="Menu", font=("Calibri", 16), command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=3, column=1)
+
+    def retry(self, label_to_check = None, destroy_window=False):
+        # needs to check current game mode and act accordingly
+        if self.game.game_mode == "Classic":
+            if self.game.retry_difficulty_changed:
+                difficulty = label_to_check.cget("text")
+            else:
+                difficulty = self.game.difficulty
             
+            self.game_frame.destroy()
+            self.start_game(self.game.game_mode, difficulty)
+
+
+    def change_retry_difficulty(self):
+        self.game.retry_difficulty_changed = True
+        pass
+
+    def view_board(self):
+        # swapping frames back to the grid of cells
+        self.game_finished_window.forget()
+        self.game_frame.pack()
+        
+        # revealing mines if not already done in Time Trial due to Time Game Over
+        if self.game.game_mode == "Time Trial" and self.game.time_change_type == "Time Game Over":
+            self.toggle_all_mine_reveal()
+
+        Button(self.game_frame, text="Back to Game Over Screen", bg="blue", fg="white", font=("Calibri", 15), width=15, wraplength=150, command=lambda: self.return_to_game_over_screen()).grid(row=2, column=2)
+        self.view_mines_button = Button(self.game_frame, text="Hide Mines", bg="yellow", font=("Calibri", 15), width=10, command=lambda: self.toggle_all_mine_reveal(button_used=True))
+        self.view_mines_button.grid(row=3, column=2)
+
+    def return_to_menu(self, frame):
+        frame.after(500, lambda: frame.destroy())
+        self.main_menu.after(500, lambda: self.main_menu.pack())
+    
+    def return_to_game_over_screen(self):
+        self.game_frame.forget()
+        self.game_finished_window.pack()
+
+    def toggle_all_mine_reveal(self, button_used):
+        # reveal all cells that are mines and adjust flag images
+        if not self.game.mines_revealed or not button_used:
+            for i in range(self.game.board.grid_height):
+                for j in range(self.game.board.grid_width):
+                    value = self.game.get_cell(i, j, "value")
+                    state = self.game.get_cell(i, j, "state")
+                    if value == "*" and state != "Flagged": # is a mine that was not identified and flagged by player
+                        self.tiles[i][j].config(image=self.formatted_cell_images["mine_image"])
+                    elif value != "*" and state == "Flagged": # is a non-mine cell that was incorrectly flagged
+                        self.tiles[i][j].config(image=self.formatted_cell_images["incorrect_flagged_image"])
+            
+            if button_used: # if the View Mines button is being used to reveal mines
+                self.view_mines_button.config(text="Hide Mines")
+            self.game.mines_revealed = True
+        
+        # hide all mines
+        else:
+            for i in range(self.game.board.grid_height):
+                for j in range(self.game.board.grid_width):
+                    value = self.game.get_cell(i, j, "value")
+                    state = self.game.get_cell(i, j, "state")
+                    if state == "Confused": # if a cell is confused, show it to be so (if changed by mines being revealed)
+                        self.tiles[i][j].config(image=self.formatted_cell_images["confused_cell_image"])
+                    elif value != "*" and state == "Flagged": # a cell has been shown to have been incorrectly flagged
+                        self.tiles[i][j].config(image=self.formatted_cell_images["flagged_cell_image"])
+                    elif value == "*" and state != "Flagged": # a cell was a mine but was not flagged 
+                        self.tiles[i][j].config(image=self.formatted_cell_images["hidden_cell_image"])
+            
+            self.view_mines_button.config(text="View Mines")
+            self.game.mines_revealed = False
+
 
 
 gui = GUI()

@@ -8,7 +8,11 @@ class GameManager:
         
         self.game_mode = ""
         self.board_started = False
+        
+        # game over attributes
         self.game_won = False
+        self.mines_revealed = False
+        self.retry_difficulty_changed = False
 
         self.user_can_interact = True
 
@@ -27,6 +31,7 @@ class GameManager:
         }
 
         # Time Trial attributes
+        self.tt_running = False # becomes True when a game of TT starts- is used by the clock
         self.stage_length = 0 # corresponds to the length of one side of the square board
         self.previous_tt_difficulty = ""
         self.tt_difficulty = ""
@@ -53,15 +58,12 @@ class GameManager:
         # database handler attributes
         self.top_10_rank = 0
         self.no_1_states = ""
-        self.outcome = ""
 
     def start_classic_mode(self, difficulty: str):
         self.difficulty = difficulty
         self.game_mode = "Classic"
         self.tt_difficulty = "" # stopping other game mode difficulty from influencing cell size
-        self.board_started = False
-        self.game_won = False
-        self.outcome = ""
+        self.reset_starting_game_variables()
 
         #creating board
         if difficulty == "Beginner":
@@ -76,12 +78,9 @@ class GameManager:
     def start_time_trial(self):
         # initialising game state variables
         self.game_mode = "Time Trial"
+        self.tt_running = True
         self.difficulty = "" # stopping other game mode difficulty from influencing cell size
-        self.board_started = False
-        self.game_won = False
-        self.board_done = False
-        self.outcome = ""
-        self.swapped_to_hard_tt = False
+        self.reset_starting_game_variables()
         # the starting value of the timer
         self.minutes = 3
         self.seconds = 0
@@ -252,6 +251,25 @@ class GameManager:
             return self.board.grid[x][y].value
         elif info_needed == "state":
             return self.board.grid[x][y].state
+    
+    def terminate_game_variables(self):
+        self.timer_on = False
+        self.board_started = False
+        self.user_can_interact = False
+
+    def reset_starting_game_variables(self):
+        self.board_started = False
+        self.board_done = False
+        self.game_won = False
+        self.mines_revealed = False
+        self.retry_difficulty_changed = False
+        self.outcome = ""
+        self.swapped_to_hard_tt = False
+
+    def calculate_output_statement(self):
+        # calculating how long the player took
+        final_time = [f"{self.stopwatch // 60:02}", f"{self.stopwatch % 60:02}"]
+        return("YOUR TIME HERE")
         
             
     #def run_game(self):

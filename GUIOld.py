@@ -187,9 +187,9 @@ class GUI:
             for j in range(0, self.game.board.grid_width):
                 #experimenting with borderwidth
                 tile = Button(self.cell_grid, borderwidth=0)
-                tile.config(command=lambda row=i, column=j: self.ui_open_cell(i, j))
-                tile.bind("<Button-2>", lambda  event: self.ui_confuse_cell(i, j))
-                tile.bind("<Button-3>", lambda  event: self.ui_flag_cell(i, j))
+                tile.config(command=lambda row=i, column=j: self.ui_open_cell(row, column))
+                tile.bind("<Button-2>", lambda  event, row=i, column=j: self.ui_confuse_cell(row, column))
+                tile.bind("<Button-3>", lambda  event, row=i, column=j: self.ui_flag_cell(row, column))
 
                 if self.game.difficulty == "Beginner":
                     tile.config(image=self.formatted_cell_images["hidden_cell_image"], width=60, height=60)
@@ -382,8 +382,9 @@ class GUI:
         if self.game.board.game_over:
             self.game.user_can_interact = False
             self.game.tt_running = False
-            self.do_game_over()
             self.game.game_started = False
+            self.do_game_over()
+            #self.game.game_started = False
         elif self.game.game_mode == "Classic":
             if self.game.game_has_been_won:
                 self.game.game_finished(self.countup_timer.cget("text"), "WIN")
