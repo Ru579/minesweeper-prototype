@@ -77,12 +77,12 @@ class GameManager:
     def start_time_trial(self):
         # initialising game state variables
         self.game_mode = "Time Trial"
-        self.tt_running = True
+        self.tt_running = False # is set to True after the first click on a Time Trial board to coordinate with GUI timers
         self.difficulty = "" # stopping other game mode difficulty from influencing cell size
         self.reset_starting_game_variables()
         # the starting value of the timer
-        self.minutes = 3
-        self.seconds = 0
+        self.minutes = 0
+        self.seconds = 10
 
         self.stage_length = 6 # starting stage: first board has a length of 6
         self.tt_difficulty = "Easy"
@@ -136,8 +136,8 @@ class GameManager:
         
         #starting the timer after the first click on the board
         if not self.board_started:
-            self.board_started = True
             self.timer_on = True
+            # board_started is set to true in the GUI to coordinate with the starting of the timers
         
         self.board_done_check()
     
@@ -164,7 +164,6 @@ class GameManager:
             if self.seconds < 0:
                 self.seconds = 59
                 self.minutes -= 1
-            
             if self.seconds == 0 and self.minutes == 0:
                 self.board.game_over = True
                 self.time_change_type = "Time Game Over"
@@ -176,7 +175,6 @@ class GameManager:
                 total_time = self.minutes * 60 + self.seconds
                 total_time += self.bonus_times[self.previous_tt_difficulty] # adding time based on the difficulty of the stage JUST completed
                 self.time_to_be_added = False
-
                 # restoring total time to minutes:seconds format
                 self.minutes = total_time // 60
                 self.seconds = total_time % 60
@@ -263,6 +261,7 @@ class GameManager:
         self.mines_revealed = False
         self.outcome = ""
         self.swapped_to_hard_tt = False
+        self.stopwatch = 0
 
     def calculate_output_statement(self):
         # calculating how long the player took

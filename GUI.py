@@ -181,6 +181,10 @@ class GUI:
             # making the player only able to click on the popup window until it is closed
             warning_popup.transient(self.Minesweeper) # keeps popup on top of game_frame
             warning_popup.grab_set() # stops interactions with game_frame
+            self.Minesweeper.wait_window(warning_popup) # preventing following lines from being executed until popup closed
+            self.cell_grid.grid(row=2, column=2)
+            if self.game.board_started:
+                self.game.timer_on = True
         
         else: # if returning to menu before first click or when viewing board after game completion
             self.game_finished_window.destroy()
@@ -188,10 +192,10 @@ class GUI:
 
     def return_to_game_from_warning(self, popup_window):
         popup_window.destroy()
-        self.game.timer_on = True
+        if self.game.board_started:
+            self.game.timer_on = True
         self.cell_grid.grid(row=2, column=2)
 
-    
     def change_difficulty(self):
         new_difficulty = self.game.difficulty_mapper[self.difficulty_button.cget("text")]
         self.difficulty_button.config(text = new_difficulty)
@@ -293,8 +297,8 @@ class GUI:
                 if self.game.game_mode == "Classic":
                     self.clock.after(1000, lambda: self.update_countup_timer(0, 0))
                 elif self.game.game_mode == "Time Trial" and not self.game.tt_running:
+                    self.clock.after(1000, lambda: self.gui_update_countdown_timer())
                     self.game.tt_running = True
-                    self.clock.after(1000, lambda: self.update_countdown_timer(3, 0))
             
             # unssuccessful chord
             if self.game.board.chording_enabled and self.game.board.flag_difference != 0:
@@ -369,10 +373,31 @@ class GUI:
            self.tiles[x][y].config(image=self.formatted_cell_images[f"{old_state.lower()}_cell_image"])
 
     def update_countup_timer(self, minutes, seconds):
-        pass
+        if self.game.timer_on:
+            # incrementing timer
+            seconds += 1
+            self.game.stopwatch += 1
+            if seconds == 60:
+                seconds = 0
+                minutes += 1
+            self.clock.config(text=f"{minutes:02}:{seconds:02}")
+            self.clock.after(1000, lambda: self.update_countup_timer(minutes, seconds)) # incrementing the timer again after 1 second
+        
+        elif self.game.board_started: # if gameplay is currently paused due to return to menu attempt
+            # checking every 200ms for when the timer becomes on again
+            self.clock.after(200, lambda: self.update_countup_timer(minutes, seconds))
 
-    def update_countdown_timer(self, minutes, seconds):
-        pass
+    def gui_update_countdown_timer(self):
+        self.game.update_countdown_timer()
+        if self.game.time_change_type == "Time Added" or self.game.time_change_type == "Time Normal":
+            # updating the timer as normal
+            self.clock.config(text=f"{self.game.minutes:02}:{self.game.seconds:02}")
+            self.clock.after(1000, lambda: self.gui_update_countdown_timer())
+        elif self.game.time_change_type == "Time Game Over":
+            self.clock.config(text="00:00")
+            self.do_game_over()
+        elif self.game.tt_running: # checking every 200ms for when the timer becomes on again
+            self.clock.after(200, lambda: self.gui_update_countdown_timer())
     
     def game_state_check(self):
         if self.game.board.game_over: # if a mine has been revealed
@@ -458,7 +483,6 @@ class GUI:
         Button(game_finished_options, text="Menu", font=("Calibri", 16), width=15,
                command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=1, column=1)
 
-
     def display_tt_game_over_window(self):
         # making label outlining final score
         Label(self.game_finished_window, text=self.game.calculate_output_statement(), font=("Calibri", 16)).grid(row=0, column=1)
@@ -505,7 +529,6 @@ class GUI:
             difficulties_menu.tk_popup(x, y)
         finally:
             difficulties_menu.grab_release()
-
 
     def view_board(self):
         # swapping frames back to the grid of cells
