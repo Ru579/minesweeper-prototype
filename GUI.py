@@ -17,12 +17,14 @@ class GUI:
         self.difficulty_button = Button()
 
         # game frame widgets
+        self.title = Label()
         self.communicator = Label()
         self.flags_left_counter = Label()
         self.cell_grid = Frame()
         self.clock = Label() # either the stopwatch (in Classic) or timer (in Time Trial)
 
         # game over widgets
+        self.return_to_game_over_button = Button()
         self.view_mines_button = Button()
 
         self.tiles = [] # an array of all Buttons on the cell grid
@@ -31,6 +33,7 @@ class GUI:
         self.game = GameManager()
         
         # PREPARING IMAGES
+
         # CELL IMAGES
         # cell images are the images as they appear in the folder, not resized or formatted
         self.cell_images = {
@@ -57,6 +60,12 @@ class GUI:
         # account icon
         guest_icon = Image.open("Images/guest_profile.png")
         self.guest_icon = ImageTk.PhotoImage(guest_icon.resize((60,60)))
+        # clock icon
+        clock_icon = Image.open("Images/clock_symbol_v2.png")
+        self.clock_icon = ImageTk.PhotoImage(clock_icon.resize((60,60)))
+        # flag counter icon
+        flag_counter_icon = Image.open("Images/minesweeper_flag.png")
+        self.flag_counter_icon = ImageTk.PhotoImage(flag_counter_icon.resize((60,60)))
 
     def create_main_menu(self):
         # main title
@@ -110,7 +119,7 @@ class GUI:
         classic_button_frame.bind("<Button-1>", lambda _: self.start_game("Classic"))
         classic_label.bind("<Button-1>", lambda _: self.start_game("Classic"))
     
-    def start_game(self, game_mode):
+    def start_game(self, game_mode, difficulty=""):
         # swapping frames
         self.main_menu.forget()
         self.game_frame = Frame(self.Minesweeper)
@@ -118,28 +127,70 @@ class GUI:
 
         # creating the game frame widgets
         # title
-        Label(self.game_frame, text="MINESWEEPER", font=("Calibri", 18)).grid(row=0, column=1)
+        self.game_frame_title = Label(self.game_frame, font=("Calibri Bold", 30))
+        self.game_frame_title.grid(row=0, column=2)
         # textbox at bottom of screen
         self.communicator = Label(self.game_frame, text="Click a cell to start", font=("Calibri", 18), width=24, wraplength=300, height=2)
-        self.communicator.grid(row=2, column=1, rowspan=4)
+        self.communicator.grid(row=3, column=2, rowspan=4)
         
+        # making flag counter
         self.flag_counter = Label(self.game_frame, text="", font=("Calibri", 20), width=2)
-        self.flag_counter.grid(row=0, column=0)
+        self.flag_counter.grid(row=1, column=1)
+        Label(self.game_frame, image=self.flag_counter_icon, bg="white").grid(row=1, column=0) # flag counter icon
 
+        # making clock icon
         self.clock = Label(self.game_frame, font=("Calibri", 20), width=5)
-        self.clock.grid(row=0, column=2)
+        self.clock.grid(row=1, column=3)
+        Label(self.game_frame, image=self.clock_icon).grid(row=1, column=4) # clock icon
+
+        # Return to menu button
+        Button(self.game_frame, text="Menu", bg="black", fg="white", font=("Calibri Bold", 14),
+               command=lambda: self.return_to_menu_attempt()).grid(row=0, column=0)
 
         self.cell_grid = Frame(self.game_frame)
-        self.cell_grid.grid(row=1, column=1)
+        self.cell_grid.grid(row=2, column=2)
 
         # starting the game
         if game_mode == "Classic":
-            self.gui_start_classic_mode()
+            if difficulty: # a difficulty is only passed in if retrying in Classic mode
+                self.gui_start_classic_mode(difficulty)
+            else: # otherwise, if starting Classic mode from main menu, use that difficulty
+                self.gui_start_classic_mode(self.game.main_menu_difficulty)
         elif game_mode == "Time Trial":
             self.gui_start_time_trial()
 
         # updating number of flags left after starting correct game mode
         self.flag_counter.config(text = str(self.game.board.flags_left))
+    
+    def return_to_menu_attempt(self):        
+        self.game.timer_on = False # pausing the timer whilst the popup is up
+        
+        if (self.game.board_started and self.game.game_mode == "Classic") or self.game.tt_running: # if a game is running
+            self.cell_grid.grid_forget() # hiding cell grid whilst the popup is up
+
+            # creating and displaying popup
+            warning_popup = Toplevel()
+            warning_popup.title("UNSAVED GAME")
+            Label(warning_popup, font=("Calibri", 16),
+                  text="Are you sure you want to return to the main menu?\nYour progress in this game WON'T be saved.").pack()
+            Button(warning_popup, text="Quit to Menu", font=("Calibri Bold", 16), bg="red",
+                   command=lambda:self.return_to_menu(self.game_frame, warning_popup)).pack()
+            Button(warning_popup, text="Return to Game", font=("Calibri", 16),
+                   command=lambda:self.return_to_game_from_warning(warning_popup)).pack()
+            
+            # making the player only able to click on the popup window until it is closed
+            warning_popup.transient(self.Minesweeper) # keeps popup on top of game_frame
+            warning_popup.grab_set() # stops interactions with game_frame
+        
+        else: # if returning to menu before first click or when viewing board after game completion
+            self.game_finished_window.destroy()
+            self.return_to_menu(self.game_frame)
+
+    def return_to_game_from_warning(self, popup_window):
+        popup_window.destroy()
+        self.game.timer_on = True
+        self.cell_grid.grid(row=2, column=2)
+
     
     def change_difficulty(self):
         new_difficulty = self.game.difficulty_mapper[self.difficulty_button.cget("text")]
@@ -152,8 +203,9 @@ class GUI:
     def account_interaction(self):
         pass
     
-    def gui_start_classic_mode(self):
-        self.game.start_classic_mode(self.game.main_menu_difficulty)
+    def gui_start_classic_mode(self, difficulty):
+        self.game.start_classic_mode(difficulty)
+        self.game_frame_title.config(text="CLASSIC MODE")
         self.clock.config(text = "00:00")
 
         # formatting images
@@ -168,6 +220,7 @@ class GUI:
     
     def gui_start_time_trial(self):
         self.game.start_time_trial()
+        self.game_frame_title.config(text="TIME TRIAL")
         self.clock.config(text = "03:00")
 
         self.format_images(image_length=62)
@@ -213,6 +266,7 @@ class GUI:
     def make_tt_board(self):
         # setting board_started to False in preparation for player opening the first cell on the new board
         self.game.board_started = False
+        self.flag_counter.config(text=str(self.game.board.flags_left))
 
         # completely removing the old cells and cell
         for widget in self.cell_grid.winfo_children():
@@ -221,7 +275,7 @@ class GUI:
 
         # creating a new cell grid and cells
         self.cell_grid = Frame(self.game_frame)
-        self.cell_grid.grid(row=1, column=1)
+        self.cell_grid.grid(row=2, column=2)
         self.tiles = [[Button(self.cell_grid) for _ in range(self.game.board.grid_width)] for _ in range(self.game.board.grid_height)]
         self.create_cell_grid()
 
@@ -308,7 +362,6 @@ class GUI:
                     else: # showing the number on the cell
                         self.tiles[i][j].config(image=self.formatted_number_images[int(self.game.get_cell(i, j, "value"))])
 
-
     def fix_cell_colour(self, x, y, old_state):
         # old_state is equal to the state of the Cell at (x, y) BEFOPRE highlighting occurred
         new_state = self.game.get_cell(x, y, "state") # new_state is the state of the cell at (x, y) AFTER highlighting has occurred
@@ -339,7 +392,6 @@ class GUI:
                 self.game.timer_on = False
                 self.communicator.config(text="Next Stage")
                 self.ui_next_tt_stage()
-        
     
     def do_game_over(self, delay=1250):
         # stopping all attributes that cause the game to continue
@@ -363,9 +415,9 @@ class GUI:
     def ui_next_tt_stage(self):
         self.communicator.config(text="Next Stage")
         self.game.time_to_be_added = True
-        self.game.terminate_game_variables() # may need to be called finish_board
+        self.game.terminate_game_variables()
+        # making next board
         self.game.next_tt_stage()
-        self.flag_counter.config(text=str(self.game.board.flags_left))
         self.game_frame.after(500, lambda: self.make_tt_board())
 
     def prepare_game_finished_window(self, outcome):
@@ -391,16 +443,20 @@ class GUI:
         game_finished_options = Frame(self.game_finished_window)
         game_finished_options.grid(row=1, column=1)
 
-        # making the retry button
-        retry_button = Button(game_finished_options, text="Retry?", bg="blue", fg="white", font=("Calibri", 16), width=15, command=lambda: self.retry())
-        retry_button.grid(row=0, column=0)
-        # making difficukty changer button
-        retry_difficulty_changer = Button(game_finished_options, text="Change Difficulty?", bg="green", fg="white", font=("Calibri", 16), width=15, command=lambda: self.change_retry_difficulty())
+        # making difficulty changer button
+        retry_difficulty_changer = Button(game_finished_options, text="Change Difficulty?", bg="green", fg="white", font=("Calibri", 16), width=15,
+                                          command=lambda: self.change_retry_difficulty(retry_difficulty_changer))
         retry_difficulty_changer.grid(row=0, column=1)
+        # making the retry button
+        retry_button = Button(game_finished_options, text="Retry?", bg="blue", fg="white", font=("Calibri", 16), width=15,
+                              command=lambda: self.retry(label_to_check=retry_difficulty_changer, destroy_game_over_window=True))
+        retry_button.grid(row=0, column=0)
         # View board button
-        Button(game_finished_options, text="View Board?", font=("Calibri", 16), width=15, command=lambda: self.view_board()).grid(row=1, column=0)
+        Button(game_finished_options, text="View Board?", font=("Calibri", 16), width=15,
+               command=lambda: self.view_board()).grid(row=1, column=0)
         # return to menu button
-        Button(game_finished_options, text="Menu", font=("Calibri", 16), width=15, command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=1, column=1)
+        Button(game_finished_options, text="Menu", font=("Calibri", 16), width=15,
+               command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=1, column=1)
 
 
     def display_tt_game_over_window(self):
@@ -408,28 +464,48 @@ class GUI:
         Label(self.game_finished_window, text=self.game.calculate_output_statement(), font=("Calibri", 16)).grid(row=0, column=1)
 
         # making retry button
-        retry_button = Button(self.game_finished_window, text="Retry?", bg="blue", fg="white", font=("Calibri", 15), width=6, command=lambda: self.retry())
+        retry_button = Button(self.game_finished_window, text="Retry?", bg="blue", fg="white", font=("Calibri", 15), width=6,
+                              command=lambda: self.retry(destroy_game_over_window=True))
         retry_button.grid(row=1, column=1)
 
         # view board and return to menu buttons
         Button(self.game_finished_window, text="View Board?", font=("Calibri", 16), command=lambda: self.view_board()).grid(row=2, column=1)
-        Button(self.game_finished_window, text="Menu", font=("Calibri", 16), command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=3, column=1)
+        Button(self.game_finished_window, text="Menu", font=("Calibri", 16),
+               command=lambda: self.return_to_menu(self.game_finished_window)).grid(row=3, column=1)
 
-    def retry(self, label_to_check = None, destroy_window=False):
-        # needs to check current game mode and act accordingly
+    def retry(self, label_to_check = None, destroy_game_over_window=False):
         if self.game.game_mode == "Classic":
-            if self.game.retry_difficulty_changed:
-                difficulty = label_to_check.cget("text")
-            else:
+            # retries at the current difficulty unless the player has changed the difficulty they wish to play
+            if label_to_check.cget("text") == "Change Difficulty?": # difficulty not changed if text is still the default
                 difficulty = self.game.difficulty
-            
+            else:
+                difficulty = label_to_check.cget("text")
+                
             self.game_frame.destroy()
-            self.start_game(self.game.game_mode, difficulty)
+            self.start_game("Classic", difficulty)
+        
+        elif self.game.game_mode == "Time Trial":
+            self.game_frame.destroy()
+            self.start_game("Time Trial")
+        
+        # if retrying from game_finished_window, that window will be destroyed
+        if destroy_game_over_window:
+            self.game_finished_window.destroy()
 
+    def change_retry_difficulty(self, difficulty_button):
+        # creating the popup menu with the three difficulties- selecting a difficulty sets the button's text to that value
+        difficulties_menu = Menu(self.game_frame, tearoff=False)
+        for difficulty in "Beginner", "Intermediate", "Expert":
+            difficulties_menu.add_command(label=difficulty,
+                                          command=lambda current_difficulty=difficulty: difficulty_button.config(text=current_difficulty))
+        # showing the popup menu
+        try:
+            x = difficulty_button.winfo_rootx()
+            y = difficulty_button.winfo_rooty()
+            difficulties_menu.tk_popup(x, y)
+        finally:
+            difficulties_menu.grab_release()
 
-    def change_retry_difficulty(self):
-        self.game.retry_difficulty_changed = True
-        pass
 
     def view_board(self):
         # swapping frames back to the grid of cells
@@ -438,14 +514,24 @@ class GUI:
         
         # revealing mines if not already done in Time Trial due to Time Game Over
         if self.game.game_mode == "Time Trial" and self.game.time_change_type == "Time Game Over":
-            self.toggle_all_mine_reveal()
+            self.toggle_all_mine_reveal(button_used=False)
 
-        Button(self.game_frame, text="Back to Game Over Screen", bg="blue", fg="white", font=("Calibri", 15), width=15, wraplength=150, command=lambda: self.return_to_game_over_screen()).grid(row=2, column=2)
-        self.view_mines_button = Button(self.game_frame, text="Hide Mines", bg="yellow", font=("Calibri", 15), width=10, command=lambda: self.toggle_all_mine_reveal(button_used=True))
-        self.view_mines_button.grid(row=3, column=2)
+        # removing old buttons (with possible incorrect text)
+        self.return_to_game_over_button.destroy()
+        self.view_mines_button.destroy()
 
-    def return_to_menu(self, frame):
+        # placing new buttons in game frame
+        self.return_to_game_over_button = Button(self.game_frame, text="Back to Game Over Screen", bg="blue", fg="white", font=("Calibri", 15),
+                                                 width=15, wraplength=150, command=lambda: self.return_to_game_over_screen())
+        self.return_to_game_over_button.grid(row=3, column=4)
+        self.view_mines_button = Button(self.game_frame, text="Hide Mines" if self.game.mines_revealed else "View Mines", bg="yellow",
+                                        font=("Calibri", 15), width=10, command=lambda: self.toggle_all_mine_reveal(button_used=True))
+        self.view_mines_button.grid(row=4, column=4)
+
+    def return_to_menu(self, frame, frame2=None):
         frame.after(500, lambda: frame.destroy())
+        if frame2:
+            frame2.after(500, lambda: frame2.destroy())
         self.main_menu.after(500, lambda: self.main_menu.pack())
     
     def return_to_game_over_screen(self):
@@ -468,7 +554,7 @@ class GUI:
                 self.view_mines_button.config(text="Hide Mines")
             self.game.mines_revealed = True
         
-        # hide all mines
+        # hide all mines and restore flag images
         else:
             for i in range(self.game.board.grid_height):
                 for j in range(self.game.board.grid_width):

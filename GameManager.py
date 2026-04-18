@@ -12,7 +12,6 @@ class GameManager:
         # game over attributes
         self.game_won = False
         self.mines_revealed = False
-        self.retry_difficulty_changed = False
 
         self.user_can_interact = True
 
@@ -262,7 +261,6 @@ class GameManager:
         self.board_done = False
         self.game_won = False
         self.mines_revealed = False
-        self.retry_difficulty_changed = False
         self.outcome = ""
         self.swapped_to_hard_tt = False
 

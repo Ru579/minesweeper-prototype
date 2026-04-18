@@ -188,8 +188,8 @@ class GUI:
                 #experimenting with borderwidth
                 tile = Button(self.cell_grid, borderwidth=0)
                 tile.config(command=lambda row=i, column=j: self.ui_open_cell(row, column))
-                tile.bind("<Button-2>", lambda  event, row=i, column=j: self.ui_confuse_cell(row, column))
-                tile.bind("<Button-3>", lambda  event, row=i, column=j: self.ui_flag_cell(row, column))
+                tile.bind("<Button-2>", lambda  _, row=i, column=j: self.ui_confuse_cell(row, column))
+                tile.bind("<Button-3>", lambda  _, row=i, column=j: self.ui_flag_cell(row, column))
 
                 if self.game.difficulty == "Beginner":
                     tile.config(image=self.formatted_cell_images["hidden_cell_image"], width=60, height=60)
