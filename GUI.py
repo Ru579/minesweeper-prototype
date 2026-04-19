@@ -1,6 +1,5 @@
 from GameManager import GameManager
-from tkinter import *
-from PIL import Image, ImageTk
+from LoginGUI import *
 
 class GUI:
     def __init__(self):
@@ -31,6 +30,8 @@ class GUI:
 
         # creating logic units
         self.game = GameManager()
+        # creating GUI logic units
+        self.loginGUI = LoginGUI(self.game.database, self.Minesweeper)
         
         # PREPARING IMAGES
 
@@ -89,9 +90,7 @@ class GUI:
         settings_button.bind("<Button-1>", lambda _: self.create_settings_window())
         settings_button.grid(row=0, column=0)
         # account button
-        account_button = Label(self.main_menu, image=self.guest_icon)
-        account_button.bind("<Button-1>", lambda _: self.account_interaction())
-        account_button.grid(row=0, column=2)
+        self.loginGUI.create_profile(self.main_menu)
 
         self.main_menu.pack()
 

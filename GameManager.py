@@ -1,5 +1,6 @@
 from Board import Board
 from time import sleep
+from DatabaseHandler import DatabaseHandler
 
 class GameManager:
     def __init__(self):
@@ -55,6 +56,9 @@ class GameManager:
         self.exp = 0
         
         # database handler attributes
+        self.database = DatabaseHandler()
+        
+        
         self.top_10_rank = 0
         self.no_1_states = ""
 

@@ -56,8 +56,8 @@ class LoginGUI():
 
     def create_profile(self, menu):
         self.menu = menu
-        self.profile_pic = Canvas(self.menu)
-        self.profile_pic.grid(row=0, column=2)
+        #self.profile_pic = Canvas(self.menu)
+        #self.profile_pic.grid(row=0, column=2)
 
         if self.database_handler.username=="":
             self.signed_in = False
