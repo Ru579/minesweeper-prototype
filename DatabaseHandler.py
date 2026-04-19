@@ -9,7 +9,7 @@ class DatabaseHandler:
         self.temp_username = ""
 
     def find_user_file(self, username_input):
-        self.temporary_username = username_input
+        self.temp_username = username_input
         return True
     
     def check_pword(self, pword_input):

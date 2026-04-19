@@ -200,10 +200,3 @@ class Board:
                 self.grid[x][y].state = "Confused"
 
 
-#main code
-#board = Board(10,10, 8)
-#board.show_grid()
-#board.user_interation()
-#board.show_grid()
-
-

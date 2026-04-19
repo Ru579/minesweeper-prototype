@@ -113,6 +113,7 @@ class LoginGUI:
         pass
 
     def username_sign_in(self):
+        # creating and placing username frame
         self.username_frame = Frame(self.sign_in_frame, width=450, height=350)
         self.username_frame.place(x=175, y=90)
 
