@@ -135,7 +135,8 @@ class DatabaseHandler:
     def username_exists_check(self, username):
         directory = "ms_user_data/Settings"
         for file in os.listdir(directory):
-            if f"{str(file).lower()[0:len(str(file))-13]}_Settings.txt"==f"{username.lower()}_Settings.txt":
+            # if f"{str(file).lower()[0:len(str(file))-13]}_Settings.txt"==f"{username.lower()}_Settings.txt":
+            if str(file).lower()[0:len(str(file))-13] == username.lower():
                 return True
         return False
 
