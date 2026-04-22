@@ -279,18 +279,25 @@ class GameManager:
         self.swapped_to_hard_tt = False
         self.stopwatch = 0
 
-    def calculate_output_statement(self, current_communicator_text):        
+    def calculate_output_statement(self, outcome=""):        
+        final_statement = ""
+        score_statement = ""
+        
+        # SCORE RELATED STATEMENT
+        if self.game_mode == "Classic":
+            if outcome == "Win":
+                score_statement = f"CONGRATULATIONS!\nYou achieved a score of {self.stopwatch//60:02}:{self.stopwatch%60:02}"
+            elif outcome == "Lose":
+                score_statement = f"GAME OVER!\nYour time was {self.stopwatch//60:02}:{self.stopwatch%60:02}"
+        elif self.game_mode == "Time Trial":
+            score_statement = f"You completed {self.stage_length - 6} boards in a time of {self.stopwatch//60:02}:{self.stopwatch%60:02}"
+        
         if self.database.user_signed_in:
-            # SCORE RELATED STATEMENT
-            if self.game_mode == "Classic":
-                score_statement = f"You achieved a score of {self.stopwatch//60:02}:{self.stopwatch%60:02}"
-            elif self.game_mode == "Time Trial":
-                score_statement = f"You completed {self.stage_length - 6} boards in a time of {self.stopwatch//60:02}:{self.stopwatch%60:02}"
-            
             # TOP 10 RANK RELATED STATEMENT
             top_10_statement = ""
             if self.database.top_10_rank != 0: # 0 is the unchanged default rank when a top 10 rank isn't achieved
-                if not (self.game_mode == "Time Trial" and self.stage_length == 6): # a 'new high score' shouldn't be achieved if the player didn't complete a board
+                # a 'new high score' shouldn't be achieved if the player didn't complete a board
+                if not (self.game_mode == "Time Trial" and self.stage_length == 6):
                     if self.database.no_1_status == "Reached":
                         top_10_statement = "NEW HIGHSCORE!"
                     elif self.database.no_1_status == "Tied":
@@ -308,15 +315,16 @@ class GameManager:
                 self.levelled_up = False
 
             final_statement = f"{score_statement}\n{top_10_statement}\n{exp_statement}" if top_10_statement else f"{score_statement}\n{exp_statement}"
-            # putting the text on a new line if there is already important text in the communicator
-            if current_communicator_text:
-                final_statement = "\n" + final_statement
 
             # resetting database no_1_status and top_10_rank
             self.database.no_1_status = ""
             self.database.top_10_rank = 0
-            return f"{current_communicator_text}\n{final_statement}"
-        return current_communicator_text
+        
+        else: # if player wasn't signed in
+            final_statement = score_statement
+        
+        return final_statement
+    
 
     def update_game_data(self, outcome, mine_clicked = False):
         if self.database.user_signed_in:
@@ -334,10 +342,7 @@ class GameManager:
             final_score = self.stage_length -5 if self.game_mode == "Time Trial" else self.stopwatch
             self.add_exp(final_score=final_score, outcome=outcome)
             self.check_for_level_up()
-            self.database.settings.update_exp(self.database.exp, self.database.level)
-
-
-#top_10_statement = f"\n{top_10_statement}" # new line so that text already in communicator isn't replaced (for quick repaly buttons)
+            self.database.settings.update_settings_file(self.database.exp, self.database.level)
 
 
 

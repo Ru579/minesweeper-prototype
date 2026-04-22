@@ -84,7 +84,6 @@ class DatabaseHandler:
         with open(f"ms_user_data/Settings/{self.username}_Settings.txt") as settings_file:
             settings_data = settings_file.readlines()
             self.level = int(settings_data[2])
-            print(f"Your current level is {self.level}")
             self.exp = int(settings_data[3])
             # loading the user's settings
             self.settings.settings_user_sign_in(self.username, settings_data)
@@ -186,7 +185,7 @@ class DatabaseHandler:
             self.update_average_score(boards_completed, "Time Trial")
             self.glb["Time Trial"][0] += 1 # incrementing number of games
             if mine_clicked:
-                self.glb["Time Trial"][1] += 1 # incrementing number of losses if a mine is revealed
+                self.glb["Time Trial"][1] += 1 # incrementing number of losses only if a mine is revealed
             self.glb["Time Trial"][2] += boards_completed
             self.game_time["Time Trial"] += stopwatch_time
 
@@ -196,7 +195,9 @@ class DatabaseHandler:
     def update_average_score(self, new_score, specific_game_mode):
         no_of_games = self.glb[specific_game_mode][0]
         no_of_losses = self.glb[specific_game_mode][1]
-        self.average_scores[specific_game_mode] *= no_of_games - no_of_losses
+        # calculating the new average score
+        # multiplying the current average by the number of scores added to the file (number of wins for Classic or number of games for Time Trial)
+        self.average_scores[specific_game_mode] *= no_of_games if specific_game_mode == "Time Trial" else (no_of_games - no_of_losses)
         self.average_scores[specific_game_mode] += new_score
         self.average_scores[specific_game_mode] /= no_of_games + 1
         self.average_scores[specific_game_mode] = round(self.average_scores[specific_game_mode])
@@ -213,7 +214,6 @@ class DatabaseHandler:
                 del self.top_10_scores[specific_game_mode][10]
 
                 self.top_10_rank = i+2 # +2 because we insert after the current index AND ranks start at 1, not 0
-
                 break
 
             elif i==0:
@@ -237,27 +237,28 @@ class DatabaseHandler:
             specific_game_mode = "Time Trial"
         
         # UPDATING ATTRIBUTES
+        # if a score was passed in (ie. a loss in Classic DIDN'T occur), adds score to the end of the player's file
+        if score is not None:
+            self.user_file_data[specific_game_mode].append(f"{score}\n")
+            self.nonAver_games[specific_game_mode] += 1
+
         # updating top_10_scores and glb of files
         self.user_file_data[specific_game_mode][0] = f"{self.top_10_scores[specific_game_mode]}\n"
         self.user_file_data[specific_game_mode][1] = f"{self.glb[specific_game_mode]}\n"
         self.user_file_data[specific_game_mode][2] = f"{self.average_scores[specific_game_mode]}\n"
         self.user_file_data[specific_game_mode][3] = f"{self.game_time[specific_game_mode]}\n"
 
-        # if a score was passed in (ie. a loss in Classic DIDN'T occur), adds score to the end of the player's file
-        if score is not None:
-            self.user_file_data[specific_game_mode].append(f"{score}\n")
-            self.nonAver_games[specific_game_mode] += 1
+        self.calc_100_average(specific_game_mode)
+        # updating nonAver_games after calc_100_average possibly changed it
+        self.user_file_data[specific_game_mode][4] = f"{self.nonAver_games[specific_game_mode]}\n"
 
 
         # WRITING TO FILE
         with open(path, "w") as rewrite_file:
-            self.calc_100_average(specific_game_mode)
-            # updating nonAver_games after calc_100_average possibly changed it
-            self.user_file_data[specific_game_mode][4] = f"{self.nonAver_games[specific_game_mode]}\n"
-
             # writing player's new data to file
             for line in self.user_file_data[specific_game_mode]:
                 rewrite_file.write(line)
+        rewrite_file.close()
     
     def calc_100_average(self, specific_game_mode):        
         # averages the latest 100 game scores

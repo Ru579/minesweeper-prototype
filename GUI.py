@@ -461,13 +461,8 @@ class GUI:
     
     def display_classic_game_over_window(self, outcome):
         # creates text confirming outcome and final time
-        if outcome == "Win":
-            Label(self.game_finished_window,
-                  text=self.game.calculate_output_statement(current_communicator_text=""),
-                  font=("Calibri", 16)).grid(row=0, column=1)
-        elif outcome == "Lose":
-            Label(self.game_finished_window,
-                  text=self.game.calculate_output_statement(current_communicator_text=""),
+        Label(self.game_finished_window,
+                  text=self.game.calculate_output_statement(outcome),
                   font=("Calibri", 16)).grid(row=0, column=1)
         
         # creating grid of buttons to interact with after game is over: retry, change difficulty etc.
@@ -475,7 +470,9 @@ class GUI:
         game_finished_options.grid(row=1, column=1)
 
         # making difficulty changer button
-        retry_difficulty_changer = Button(game_finished_options, text="Change Difficulty?", bg="green", fg="white", font=("Calibri", 16), width=15,
+        retry_difficulty_changer = Button(game_finished_options, text="Change Difficulty?",
+                                          bg="green", fg="white",
+                                          font=("Calibri", 16), width=15,
                                           command=lambda: self.change_retry_difficulty(retry_difficulty_changer))
         retry_difficulty_changer.grid(row=0, column=1)
         # making the retry button
@@ -492,7 +489,7 @@ class GUI:
     def display_tt_game_over_window(self):
         # making label outlining final score
         Label(self.game_finished_window,
-              text=self.game.calculate_output_statement(current_communicator_text=""),
+              text=self.game.calculate_output_statement(),
               font=("Calibri", 16)).grid(row=0, column=1)
 
         # making retry button

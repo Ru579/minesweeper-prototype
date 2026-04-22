@@ -47,7 +47,7 @@ class Settings:
         self.username = ""
         self.load_guest_settings()
 
-    def update_exp(self, exp, level):
+    def update_settings_file(self, exp, level):
         with open(f"ms_user_data/Settings/{self.username}_Settings.txt", "w") as settings_file:
             settings_file.write(f"{self.pword}\n"
                                 f"{self.profile_pic_colour}\n" \
