@@ -20,8 +20,35 @@ def update_top_10(score, top_10_scores, game_mode):
     
     print(top_10_rank, no_1_status)
     return top_10_scores
-    
-classic_top_10 = [20,22,24,26,32,46,52,68,77,82][::-1]
-classic_top_10 = update_top_10(23, classic_top_10, "Time Trial")
-#classic_top_10 = update_top_10(56, classic_top_10, "Time Trial")
-print(classic_top_10)
+
+#classic_top_10 = [20,22,24,26,32,46,52,68,77,82][::-1]
+#classic_top_10 = update_top_10(23, classic_top_10, "Time Trial")
+##classic_top_10 = update_top_10(56, classic_top_10, "Time Trial")
+#print(classic_top_10)
+
+print(int("13.0"))
+
+
+#bottom_entry_index = len(self.user_file_data[specific_game_mode]) - 1
+#
+#    for line in game_file:
+#        if line == "***\n":
+#            start_sum = True # beginning the sum once we reach the line marking the start of the exact scores
+#        elif start_sum:
+#            bottom_entry_index = len(game_file) - 1
+#            
+#            # 
+#            while game_file[bottom_entry_index] != "***\n":
+#                total_score += int(game_file[bottom_entry_index].strip("\n"))
+#                del self.user_file_data[specific_game_mode][bottom_entry_index] # accessing the attribute directly for deletion
+#                bottom_entry_index -= 1
+#            break
+
+#test = "False"
+#print(bool(test))
+#if not test:
+#    print("no string here")
+#if not bool(test):
+#    print("string is false")
+#if bool(test):
+#    print("The string says True")

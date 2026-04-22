@@ -1,9 +1,8 @@
 import os
+from Settings import Settings
 
 class DatabaseHandler:
     def __init__(self):
-        self.settings = None # settings object will be passed into this class by the GameManager
-
         # status attributes
         self.user_signed_in = False
 
@@ -15,13 +14,16 @@ class DatabaseHandler:
         self.user_file_data = {}
         self.glb = {} #glb = games_losses_boards = no of games played, no of losses, no of boards completed (games won/ boards done in time trial)
         #each value in self.glb is a list, with the three values in the comment above. Each game-mode/difficulty has its own value in the dictionary
+        self.average_scores = {}
         self.game_time = {}
         self.nonAver_games = {}
         # player ranking data
         self.top_10_scores = {}
-        self.top_10_rank = 100
+        self.top_10_rank = 0
         self.no_1_status = ""
-        
+        # player EXP
+        self.exp = 0
+        self.level = 0
 
         # temporary sign in information- used during login
         self.temp_username = ""
@@ -29,6 +31,10 @@ class DatabaseHandler:
 
         # other attributes
         self.difficulties = ["Beginner", "Intermediate", "Expert"] # for easy iteration through Classic mode difficulties
+
+        self.settings = Settings(self.username)
+
+        ### DESCRIBE TEXT FILE LAYOUT HERE
 
     def find_user_file(self, username_input):
         directory = "ms_user_data/Settings"
@@ -48,13 +54,12 @@ class DatabaseHandler:
         return False # user's file was not found
     
     def username_exists_check(self, username: str):
+        # returns True if a file with the input username already exists
         directory = "ms_user_data/Settings"
         for file in os.listdir(directory):
             if str(file).lower()[0:len(str(file))-13] == username.lower():
                 return True
         return False
-
-    
     
     def check_pword(self, pword_input):
         if str(self.temp_pword) == pword_input:
@@ -70,14 +75,22 @@ class DatabaseHandler:
         with open("ms_user_data/current_user_data.txt", "w") as file:
             file.write(f"{self.username}\n")
         file.close()
-        # loading the user's settings
-        self.settings_user_sign_in()
 
         # loading the player's scores
         self.load_current_user_game_data()
     
     def load_current_user_game_data(self):
-        # loading all data from files into attributes
+        # loading the player's level, EXP, and settings
+        with open(f"ms_user_data/Settings/{self.username}_Settings.txt") as settings_file:
+            settings_data = settings_file.readlines()
+            self.level = int(settings_data[2])
+            print(f"Your current level is {self.level}")
+            self.exp = int(settings_data[3])
+            # loading the user's settings
+            self.settings.settings_user_sign_in(self.username, settings_data)
+        settings_file.close()
+
+        # loading all game data from files into attributes
         # opening classic data
         for difficulty in self.difficulties:
             with open(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt") as classic_file:
@@ -91,38 +104,43 @@ class DatabaseHandler:
             self.load_file_data("Time Trial")
         tt_file.close()
 
-    def load_file_data(self, file_name):
-        # EXTRACTING TOP 10 SCORES FROM FILE
-        top_10_scores_file_line = self.user_file_data[file_name][0].strip("\n") # extracting the top line from the text file- the top 10 scores
-        top_10_scores_file_line = top_10_scores_file_line[1:len(top_10_scores_file_line)-2] # removing the square brackets from either side of the line
-        self.top_10_scores[file_name] = top_10_scores_file_line.split(",") # splitting the line into individual scores and storing them in a list
+    def load_file_data(self, specific_game_mode):
+        # extracting top 10 scores from file
+        top_10_scores_file_line = self.user_file_data[specific_game_mode][0].strip("\n") # extracting the top line from the text file- the top 10 scores
+        top_10_scores_file_line = top_10_scores_file_line[1:len(top_10_scores_file_line)-1] # removing the square brackets from either side of the line
+        self.top_10_scores[specific_game_mode] = top_10_scores_file_line.split(",") # splitting the line into individual scores and storing them in a list
         # turning each value in the list into an integer
         for i in range(10): 
-            self.top_10_scores[file_name][i] = int(self.top_10_scores[file_name][i])
+            self.top_10_scores[specific_game_mode][i] = int(self.top_10_scores[specific_game_mode][i])
         
-        # EXTRACTING GLB FROM FILE
-        glb_file_line = self.user_file_data[file_name][1].strip("\n") # extracting the second line from the text file- the GLB list
+        # extractubg GLB from file
+        glb_file_line = self.user_file_data[specific_game_mode][1].strip("\n") # extracting the second line from the text file- the GLB list
         glb_file_line = glb_file_line[1:len(glb_file_line)-1] # removing square brackets
-        self.glb[file_name] = glb_file_line.split(",") # splitting line into individual scores
+        self.glb[specific_game_mode] = glb_file_line.split(",") # splitting line into individual scores
         for i in range(3):
-            self.glb[file_name][i] = int(self.glb[file_name][i])
+            self.glb[specific_game_mode][i] = int(self.glb[specific_game_mode][i])
         
-        # extracting total game time from 3rd line of file
-        self.game_time[file_name] = int(self.user_file_data[file_name][2].strip("\n"))
+        # extracting all-time average score from 3rd line of file
+        self.average_scores[specific_game_mode] = int(self.user_file_data[specific_game_mode][2].strip("\n"))
         
-        # extracting the number of games that haven't been averaged from the 3th line of file
-        self.nonAver_games[file_name] = int(self.user_file_data[file_name][3].strip("\n"))
+        # extracting total game time from 4th line of file
+        self.game_time[specific_game_mode] = int(self.user_file_data[specific_game_mode][3].strip("\n"))
+        
+        # extracting the number of games that haven't been averaged from the 5th line of file
+        self.nonAver_games[specific_game_mode] = int(self.user_file_data[specific_game_mode][4].strip("\n"))
 
     def create_account(self, username, pword):
-        self.create_settings_file()
+        self.settings.create_settings(username, pword)
 
+        # creating new Time Trial text file
         with open(f"ms_user_data/Time Trial/{username}_Time Trial.txt", "w") as tt_file:
-            tt_file.write("[0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n0\n0\n&&&\n***\n")
+            tt_file.write("[0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n0\n0\n0\n&&&\n***\n")
         tt_file.close()
 
+        # creating new Classic mode text file for each of the three difficulties
         for difficulty in self.difficulties:
             with open(f"ms_user_data/Classic/{difficulty}/{username}_Cl{difficulty}.txt", "w") as classic_file:
-                classic_file.write("[999999, 999999, 999999, 999999, 999999, 999999, 999999, 999999, 999999, 999999]\n[0,0,0]\n0\n0\n&&&\n***\n")
+                classic_file.write("[999999, 999999, 999999, 999999, 999999, 999999, 999999, 999999, 999999, 999999]\n[0,0,0]\n0\n0\n0\n&&&\n***\n")
                 # incredibly high values equal to about 11.6 days are placeholders to make the list the correct length- will be passed over by Stats Menu
             classic_file.close()
 
@@ -144,15 +162,52 @@ class DatabaseHandler:
     def user_sign_out(self):
         open("ms_user_data/current_user_data.txt", "w").close()
         self.user_signed_in = False
-        self.settings_user_sign_out()
+        self.settings.settings_user_sign_out()
     
-    def update_top_10(self, score, game_mode, difficulty=""):
+    def add_classic_win(self, stopwatch_time, difficulty):
+        if self.user_signed_in:
+            self.update_average_score(stopwatch_time, f"Cl{difficulty}")
+            self.glb[f"Cl{difficulty}"][0] += 1 # increasing number of games played
+            self.glb[f"Cl{difficulty}"][2] += 1 # increasing number of boards completed
+            self.game_time[f"Cl{difficulty}"] += stopwatch_time
+
+            self.update_top_10("Classic", stopwatch_time, difficulty)
+            self.update_user_files("Classic", stopwatch_time, difficulty)
+    
+    def add_classic_loss(self, stopwatch_time, difficulty):
+        if self.user_signed_in:
+            self.glb[f"Cl{difficulty}"][0] += 1 # increasing number of games played
+            self.glb[f"Cl{difficulty}"][1] += 1 # incrementing number of losses
+            self.game_time[f"Cl{difficulty}"] += stopwatch_time
+            self.update_user_files("Classic", difficulty=difficulty)
+    
+    def add_tt_stage(self, boards_completed, mine_clicked, stopwatch_time):
+        if self.user_signed_in:
+            self.update_average_score(boards_completed, "Time Trial")
+            self.glb["Time Trial"][0] += 1 # incrementing number of games
+            if mine_clicked:
+                self.glb["Time Trial"][1] += 1 # incrementing number of losses if a mine is revealed
+            self.glb["Time Trial"][2] += boards_completed
+            self.game_time["Time Trial"] += stopwatch_time
+
+            self.update_top_10("Time Trial", boards_completed)
+            self.update_user_files("Time Trial", boards_completed)
+    
+    def update_average_score(self, new_score, specific_game_mode):
+        no_of_games = self.glb[specific_game_mode][0]
+        no_of_losses = self.glb[specific_game_mode][1]
+        self.average_scores[specific_game_mode] *= no_of_games - no_of_losses
+        self.average_scores[specific_game_mode] += new_score
+        self.average_scores[specific_game_mode] /= no_of_games + 1
+        self.average_scores[specific_game_mode] = round(self.average_scores[specific_game_mode])
+    
+    def update_top_10(self, game_mode, score, difficulty=""):
         specific_game_mode = f"Cl{difficulty}" if game_mode=="Classic" else "Time Trial"
 
         for i in range(9, -1, -1):
             if (
-                (score <= self.top_10_scores[specific_game_mode][i] and game_mode=="Classic") or 
-                (score >= self.top_10_scores[specific_game_mode][i] and game_mode=="Time Trial")
+                (score >= self.top_10_scores[specific_game_mode][i] and game_mode=="Classic") or 
+                (score <= self.top_10_scores[specific_game_mode][i] and game_mode=="Time Trial")
             ): # if achieved a worse or equal score
                 self.top_10_scores[specific_game_mode].insert(i+1, score)
                 del self.top_10_scores[specific_game_mode][10]
@@ -167,18 +222,58 @@ class DatabaseHandler:
                 self.no_1_status = "Reached"
         
         # determining if player has tied with top score
-        if score == self.top_10_scores[specific_game_mode][0]:
+        if score == self.top_10_scores[specific_game_mode][0] == self.top_10_scores[specific_game_mode][1]:
             self.no_1_status = "Tied"
+        
+    def update_user_files(self, game_mode, score=None, difficulty=""):
+        # setting up specific path to correct folder depending on game mode
+        path=""
+        specific_game_mode = ""
+        if game_mode == "Classic":
+            path=f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt"
+            specific_game_mode = f"Cl{difficulty}"
+        elif game_mode == "Time Trial":
+            path = f"ms_user_data/Time Trial/{self.username}_Time Trial.txt"
+            specific_game_mode = "Time Trial"
+        
+        # UPDATING ATTRIBUTES
+        # updating top_10_scores and glb of files
+        self.user_file_data[specific_game_mode][0] = f"{self.top_10_scores[specific_game_mode]}\n"
+        self.user_file_data[specific_game_mode][1] = f"{self.glb[specific_game_mode]}\n"
+        self.user_file_data[specific_game_mode][2] = f"{self.average_scores[specific_game_mode]}\n"
+        self.user_file_data[specific_game_mode][3] = f"{self.game_time[specific_game_mode]}\n"
+
+        # if a score was passed in (ie. a loss in Classic DIDN'T occur), adds score to the end of the player's file
+        if score is not None:
+            self.user_file_data[specific_game_mode].append(f"{score}\n")
+            self.nonAver_games[specific_game_mode] += 1
 
 
+        # WRITING TO FILE
+        with open(path, "w") as rewrite_file:
+            self.calc_100_average(specific_game_mode)
+            # updating nonAver_games after calc_100_average possibly changed it
+            self.user_file_data[specific_game_mode][4] = f"{self.nonAver_games[specific_game_mode]}\n"
 
+            # writing player's new data to file
+            for line in self.user_file_data[specific_game_mode]:
+                rewrite_file.write(line)
+    
+    def calc_100_average(self, specific_game_mode):        
+        # averages the latest 100 game scores
+        if self.nonAver_games[specific_game_mode] >= 100:
+            total_score = 0
+            bottom_entry_index = len(self.user_file_data[specific_game_mode]) - 1
+            
+            # starting from bottom of file, adding the score to a total and then deleting that line until *** marker is reached
+            while self.user_file_data[specific_game_mode][bottom_entry_index] != "***\n":
+                total_score += int(self.user_file_data[specific_game_mode][bottom_entry_index].strip("\n"))
+                del self.user_file_data[specific_game_mode][bottom_entry_index] # accessing the attribute directly for deletion
+                bottom_entry_index -= 1
+            
+            # adding the average score (total/100) to the line before the *** line (in the averages section)
+            self.user_file_data[specific_game_mode].insert(len(self.user_file_data[specific_game_mode])-1, f"{round(total_score/100)}\n")
 
+            # resets the number of games that haven't been averaged
+            self.nonAver_games[specific_game_mode] = 0
 
-    def settings_user_sign_in(self):
-        pass
-
-    def create_settings_file(self):
-        pass
-
-    def settings_user_sign_out(self):
-        pass

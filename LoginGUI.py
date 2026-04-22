@@ -3,7 +3,7 @@ from PIL import Image, ImageTk
 from DatabaseHandler import DatabaseHandler
 
 class LoginGUI:
-    def __init__(self, database, minesweeper_window):
+    def __init__(self, database: DatabaseHandler, minesweeper_window):
         self.database = database # importing the database handler into this class
 
         # allowing this class to edit the main window and main menu frame
@@ -41,6 +41,10 @@ class LoginGUI:
         self.user_warning_text = None
         self.pword_entry = None
         self.pword_warning_text = None
+
+        # warnings
+        self.warning_given = {} # dictionary of which warnings have been given
+        self.creation_warning_labels = {} # dictionary of warning labels
 
         
     
@@ -222,8 +226,63 @@ class LoginGUI:
         Button(self.create_account_frame, text="Create Account", font=("Calibri Bold", 13), bg="#258cdb",
                command=lambda: self.account_validator(username_input.get(), pword_input1.get(), pword_input2.get())).place(x=300, y=310)
     
-    def account_validator(self):
-        pass
+    def account_validator(self, username_input, pword_input1, pword_input2):
+        # removing old Labels and making new ones
+        if self.creation_warning_labels:
+            self.creation_warning_labels["user"].destroy()
+            self.creation_warning_labels["pword"].destroy()
+        self.creation_warning_labels = {
+            "user": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red"),
+            "pword": Label(self.create_account_frame, font=("Calibri Bold", 12), fg="red")
+        }
+
+        # resetting whether warnings have been given yet
+        self.warning_given = {
+            "user": False,
+            "pword": False
+        }
+
+        account_valid = True # assume details are valid until proven otherwise
+
+        # each condition maps to the warning displayed if it is met
+        warning_text = ["Please Enter a Valid Username",
+                        "Username Already Exists",
+                        "Passwords Don't Match",
+                        "Please Enter a Valid Password"]
+        conditions = [username_input.strip()=="",
+                      self.database.username_exists_check(username_input),
+                      pword_input1!=pword_input2,
+                      pword_input1.strip()==""]
+        
+
+        # checking if any of the above conditions are met, in which case invalidating account creation
+        for i in range(4):
+            warning_type = "pword" if i==2 or i==3 else "user"
+            account_valid = self.check_condition(account_valid, conditions[i], warning_text[i], warning_type)
+        
+        self.creation_warning_labels["user"].place(x=250, y=70)
+        self.creation_warning_labels["pword"].place(x=250, y=270)
+
+        # creates an account and signs in user if account details are valid
+        if account_valid:
+            self.database.create_account(username_input, pword_input1)
+            self.create_user_profile()
+            self.return_to_menu()
+    
+    def check_condition(self, account_valid, condition, warning_text, warning_type):
+        if condition:
+            # if the condition was met, show the corresponding warning text to user, account details no longer valid
+            self.creation_warning_labels[warning_type].config(text=warning_text)
+            self.warning_given[warning_type] = True
+            account_valid = False
+        elif not self.warning_given[warning_type]: 
+            # resetting the warning text label to be blank if a warning hasn't been given at all
+            self.creation_warning_labels[warning_type].config(text="")
+        
+        return account_valid
+
+
+
 
     def switch_eye_image(self, button, pword_input, entry_type):
         current_input = pword_input.get() # retrieving what the user has currently entered into the Entry box for reinsertion later

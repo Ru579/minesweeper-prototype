@@ -156,13 +156,13 @@ class DatabaseHandler:
 
         with open(f"ms_user_data/Time Trial/{username}_Time Trial.txt","w") as file:
             file.write("[99999,0,0,0,0,0,0,0,0,0,0]\n[0,0,0]\n0\n0\n&&&\n***\n")#first number is very high so that top_10_stage checker will never have to deal with the very first index
-        open(f"ms_user_data/Exact Scores/Time Trial/{username}_Time Trial_long_term.txt", "w").close()
+        #open(f"ms_user_data/Exact Scores/Time Trial/{username}_Time Trial_long_term.txt", "w").close()
 
         for difficulty in self.difficulties:
             with open(f"ms_user_data/Classic/{difficulty}/{username}_Cl{difficulty}.txt","w") as file:
                 file.write("[-100,999999,999999,999999,999999,999999,999999,999999,999999,999999,999999]\n[0,0,0]\n0\n0\n&&&\n***\n")
                 #first number is very low so that top_10_stage checker will never have to deal with the very first index, following numbers are very large so that user's time is guaranteed to be faster at first
-            open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{username}_Cl{difficulty}_long_term.txt","w") .close()
+            #open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{username}_Cl{difficulty}_long_term.txt","w") .close()
 
         # *** is used to separate average scores from the normal scores added to the file
         # &&& is used to separate average scores from the beginning three lines (top 10, glb, nonAver_games)
@@ -193,10 +193,10 @@ class DatabaseHandler:
         if self.user_signed_in:
             os.remove(f"ms_user_data/Settings/{self.username}_Settings.txt")
             os.remove(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt")
-            os.remove(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt")
+            #os.remove(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt")
             for difficulty in self.difficulties:
                 os.remove(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt")
-                os.remove(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt")
+                #os.remove(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt")
 
             open("ms_user_data/current_user_data.txt","w").close()
             self.user_signed_in = False
@@ -214,9 +214,9 @@ class DatabaseHandler:
             # increasing the number of games that haven't been averaged
             self.nonAver_games[f"Cl{difficulty}"] += 1
 
-            with open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt", "a") as file:
-                date = datetime.datetime.now().strftime("%d-%m-%Y")
-                file.write(f"{time}:{date}\n")
+            #with open(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt", "a") as file:
+            #    date = datetime.datetime.now().strftime("%d-%m-%Y")
+            #    file.write(f"{time}:{date}\n")
 
             self.update_top_10(time, "Classic", difficulty)
             self.update_user_files("Classic", time, difficulty)
@@ -233,9 +233,9 @@ class DatabaseHandler:
             # increasing the number of games that haven't been averaged
             self.nonAver_games["Time Trial"] += 1
 
-            with open(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt", "a") as file:
-                date = datetime.datetime.now().strftime("%d-%m-%Y")
-                file.write(f"{stage}:{date}\n")
+            #with open(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt", "a") as file:
+            #    date = datetime.datetime.now().strftime("%d-%m-%Y")
+            #    file.write(f"{stage}:{date}\n")
 
             self.update_top_10(stage, "Time Trial")
             self.update_user_files("Time Trial", stage)

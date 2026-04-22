@@ -405,6 +405,7 @@ class GUI:
         elif self.game.game_mode == "Classic":
             if self.game.game_won: # ending the game and showing the appropriate game over screen
                 self.game.terminate_game_variables()
+                self.game.update_game_data(outcome="Win")
 
                 self.communicator.config(text="Congratulations!")
 
@@ -426,11 +427,13 @@ class GUI:
         # if player ran out of time in Time Trial
         if self.game.time_change_type == "Time Game Over":
             self.game.terminate_game_variables()
+            self.game.update_game_data(outcome="Lose", mine_clicked=False)
             self.communicator.config(text="GAME OVER: Time Ran Out!")
         
         # if player clicked mine in Classic or Time Trial
         else:
             self.game.terminate_game_variables()
+            self.game.update_game_data(outcome="Lose", mine_clicked=True)
             self.communicator.config(text="GAME OVER!")
             self.toggle_all_mine_reveal(button_used=False)
         
@@ -459,9 +462,13 @@ class GUI:
     def display_classic_game_over_window(self, outcome):
         # creates text confirming outcome and final time
         if outcome == "Win":
-            Label(self.game_finished_window, text=self.game.calculate_output_statement(), font=("Calibri", 16)).grid(row=0, column=1)
+            Label(self.game_finished_window,
+                  text=self.game.calculate_output_statement(current_communicator_text=""),
+                  font=("Calibri", 16)).grid(row=0, column=1)
         elif outcome == "Lose":
-            Label(self.game_finished_window, text=self.game.calculate_output_statement(), font=("Calibri", 16)).grid(row=0, column=1)
+            Label(self.game_finished_window,
+                  text=self.game.calculate_output_statement(current_communicator_text=""),
+                  font=("Calibri", 16)).grid(row=0, column=1)
         
         # creating grid of buttons to interact with after game is over: retry, change difficulty etc.
         game_finished_options = Frame(self.game_finished_window)
@@ -484,7 +491,9 @@ class GUI:
 
     def display_tt_game_over_window(self):
         # making label outlining final score
-        Label(self.game_finished_window, text=self.game.calculate_output_statement(), font=("Calibri", 16)).grid(row=0, column=1)
+        Label(self.game_finished_window,
+              text=self.game.calculate_output_statement(current_communicator_text=""),
+              font=("Calibri", 16)).grid(row=0, column=1)
 
         # making retry button
         retry_button = Button(self.game_finished_window, text="Retry?", bg="blue", fg="white", font=("Calibri", 15), width=6,

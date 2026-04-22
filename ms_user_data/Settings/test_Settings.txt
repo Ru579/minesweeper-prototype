@@ -1,8 +1,7 @@
 123
 red
+4
+5298
 Create Game Finished Window:True
-Auto Reveal Cells:True
-Highlight Cells:True
-Dark Mode:False
-***
-test:10
+Enable Chording:True
+Highlight Cells when Chording:True

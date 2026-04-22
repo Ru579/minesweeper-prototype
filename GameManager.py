@@ -1,6 +1,6 @@
 from Board import Board
-from time import sleep
-from DatabaseHandler import DatabaseHandler
+from DatabaseHandler import *
+from math import e
 
 class GameManager:
     def __init__(self):
@@ -53,14 +53,12 @@ class GameManager:
         }
 
         # EXP related
-        self.exp = 0
+        self.levelled_up = False
+        self.exp_earnt = 0 # need to write exp and level increases to settings file
+        self.fixed_level_exp_values = [1000, 2000, 3000, 4500, 6000, 8000, 10000, 13000, 18000, 24000,]
         
         # database handler attributes
         self.database = DatabaseHandler()
-        
-        
-        self.top_10_rank = 0
-        self.no_1_states = ""
 
     def start_classic_mode(self, difficulty: str):
         self.difficulty = difficulty
@@ -85,8 +83,8 @@ class GameManager:
         self.difficulty = "" # stopping other game mode difficulty from influencing cell size
         self.reset_starting_game_variables()
         # the starting value of the timer
-        self.minutes = 0
-        self.seconds = 10
+        self.minutes = 3
+        self.seconds = 0
 
         self.stage_length = 6 # starting stage: first board has a length of 6
         self.tt_difficulty = "Easy"
@@ -109,7 +107,7 @@ class GameManager:
             raise ValueError("Invalid Time Trial Difficulty")
     
     def set_difficulty(self):
-        # the first stage is stage 6, as stage = board length and the first board is a 6x6
+        # the first stage length is 6, for a 6x6 board
         if self.stage_length < 10:
             self.tt_difficulty = "Easy"
         elif 10 <= self.stage_length <= 16:
@@ -218,7 +216,8 @@ class GameManager:
                 raise ValueError("Final score can't be less than 1.")
         else:
             raise ValueError("Invalid Game Mode")
-        self.exp += exp_to_add
+        self.exp_earnt = exp_to_add
+        self.database.exp += exp_to_add
 
 
     def add_classic_mode_exp(self, outcome:str, final_score:int , base_exp: int, max_bonus: int):
@@ -236,15 +235,28 @@ class GameManager:
             return round(loss_bonus * (self.board.revealed_cells / (self.board.grid_height * self.board.grid_width)))
     
     def add_personal_best_exp(self):
-        return 0
-        #exp_to_add = 0
-        #if self.top_10_rank:
-        #    exp_to_add += 200
-        #    if self.no_1_status == "Tied":
-        #        exp_to_add += 200
-        #    elif self.no_1_status == "Reached":
-        #        exp_to_add += 500
-        #return exp_to_add
+        exp_to_add = 0
+        if self.database.top_10_rank != 0:
+            exp_to_add += 200
+            if self.database.no_1_status == "Tied":
+                exp_to_add += 200
+            elif self.database.no_1_status == "Reached":
+                exp_to_add += 500
+        return exp_to_add
+    
+    def check_for_level_up(self):
+        if self.database.level <= 12:
+            if self.database.exp >= self.fixed_level_exp_values[self.database.level - 1]:
+                self.database.level += 1
+                self.levelled_up = True
+        elif 13 <= self.database.level <= 40:
+            if self.database.exp >= round(55 * (self.database.level**2)):
+                self.database.level += 1
+                self.levelled_up = True
+        elif self.database.level >= 41:
+            if self.database.exp >= round(2 * (self.database.level ** 3.6) + 2 * (e ** (0.25 * self.database.level)) - 240000):
+                self.database.level += 1
+                self.levelled_up = True
     
     def get_cell(self, x, y, info_needed):
         # returns information about a cell
@@ -267,8 +279,65 @@ class GameManager:
         self.swapped_to_hard_tt = False
         self.stopwatch = 0
 
-    def calculate_output_statement(self):
-        # calculating how long the player took
-        final_time = [f"{self.stopwatch // 60:02}", f"{self.stopwatch % 60:02}"]
-        return("YOUR TIME HERE")
+    def calculate_output_statement(self, current_communicator_text):        
+        if self.database.user_signed_in:
+            # SCORE RELATED STATEMENT
+            if self.game_mode == "Classic":
+                score_statement = f"You achieved a score of {self.stopwatch//60:02}:{self.stopwatch%60:02}"
+            elif self.game_mode == "Time Trial":
+                score_statement = f"You completed {self.stage_length - 6} boards in a time of {self.stopwatch//60:02}:{self.stopwatch%60:02}"
+            
+            # TOP 10 RANK RELATED STATEMENT
+            top_10_statement = ""
+            if self.database.top_10_rank != 0: # 0 is the unchanged default rank when a top 10 rank isn't achieved
+                if not (self.game_mode == "Time Trial" and self.stage_length == 6): # a 'new high score' shouldn't be achieved if the player didn't complete a board
+                    if self.database.no_1_status == "Reached":
+                        top_10_statement = "NEW HIGHSCORE!"
+                    elif self.database.no_1_status == "Tied":
+                        top_10_statement = "So Close- You Have Tied With Your Best Score"
+                    else:
+                        # preparing a grammatically correct report of top 10 rank
+                        suffixes = ["st", "nd", "rd"]
+                        suffix = "th" if self.database.top_10_rank not in (1,2,3) else suffixes[self.database.top_10_rank-1]
+                        top_10_statement = f"Top 10 Score Achieved: {self.database.top_10_rank}{suffix}"
+
+            # EXP RELATED STATEMENT
+            exp_statement = f"You Earnt {self.exp_earnt} EXP"
+            if self.levelled_up:
+                exp_statement += f"\nYou Levelled Up!\nYou are now Level {self.database.level}!"
+                self.levelled_up = False
+
+            final_statement = f"{score_statement}\n{top_10_statement}\n{exp_statement}" if top_10_statement else f"{score_statement}\n{exp_statement}"
+            # putting the text on a new line if there is already important text in the communicator
+            if current_communicator_text:
+                final_statement = "\n" + final_statement
+
+            # resetting database no_1_status and top_10_rank
+            self.database.no_1_status = ""
+            self.database.top_10_rank = 0
+            return f"{current_communicator_text}\n{final_statement}"
+        return current_communicator_text
+
+    def update_game_data(self, outcome, mine_clicked = False):
+        if self.database.user_signed_in:
+            # updating top 10 scores and GLB and adding score to file
+            if self.game_mode == "Classic":
+                if outcome == "Win":
+                    self.database.add_classic_win(self.stopwatch, self.difficulty)
+                elif outcome == "Lose":
+                    self.database.add_classic_loss(self.stopwatch, self.difficulty)
+            elif self.game_mode == "Time Trial":
+                # number of boards completed is equal to the stage length - 6 (on first stage, for a 6x6 board, 0 boards have been completed)
+                self.database.add_tt_stage(self.stage_length-6, mine_clicked=mine_clicked, stopwatch_time=self.stopwatch)
+            
+            # adding exp
+            final_score = self.stage_length -5 if self.game_mode == "Time Trial" else self.stopwatch
+            self.add_exp(final_score=final_score, outcome=outcome)
+            self.check_for_level_up()
+            self.database.settings.update_exp(self.database.exp, self.database.level)
+
+
+#top_10_statement = f"\n{top_10_statement}" # new line so that text already in communicator isn't replaced (for quick repaly buttons)
+
+
 
