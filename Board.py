@@ -2,7 +2,7 @@ from Cell import Cell
 from random import randint
 
 class Board:
-    def __init__(self, grid_height, grid_width, no_of_mines):
+    def __init__(self, grid_height, grid_width, no_of_mines, chording_enabled):
         #initialising variables
         self.grid_height = grid_height
         self.grid_width = grid_width
@@ -19,7 +19,7 @@ class Board:
         self.zero_coordinates = []
 
         #settings
-        self.chording_enabled = True
+        self.chording_enabled = chording_enabled
         
         #creating grid
         self.grid = [[Cell() for _ in range(grid_width)] for _ in range(grid_height)]

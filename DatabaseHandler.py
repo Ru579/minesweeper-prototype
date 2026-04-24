@@ -32,9 +32,18 @@ class DatabaseHandler:
         # other attributes
         self.difficulties = ["Beginner", "Intermediate", "Expert"] # for easy iteration through Classic mode difficulties
 
-        self.settings = Settings(self.username)
-
-        ### DESCRIBE TEXT FILE LAYOUT HERE
+        # Loading data for currently logged-in player, otherwise loading guest data
+        with open("ms_user_data/current_user_data.txt", "r") as current_user_file:
+            username_line = current_user_file.readline()
+            if username_line:
+                self.username = str(username_line.strip("\n"))
+                self.user_signed_in = True
+                self.settings = Settings(self.username, user_signed_in=True)
+                self.load_current_user_game_data()
+            else:
+                self.settings = Settings(self.username, user_signed_in=False)
+                self.user_signed_in = False
+        current_user_file.close()
 
     def find_user_file(self, username_input):
         directory = "ms_user_data/Settings"
@@ -86,7 +95,7 @@ class DatabaseHandler:
             self.level = int(settings_data[2])
             self.exp = int(settings_data[3])
             # loading the user's settings
-            self.settings.settings_user_sign_in(self.username, settings_data)
+            self.settings.settings_user_sign_in(self.username, settings_data, exp=self.exp, level=self.level)
         settings_file.close()
 
         # loading all game data from files into attributes
@@ -111,6 +120,9 @@ class DatabaseHandler:
         # turning each value in the list into an integer
         for i in range(10): 
             self.top_10_scores[specific_game_mode][i] = int(self.top_10_scores[specific_game_mode][i])
+        # removing any bugged extra scores
+        while len(self.top_10_scores[specific_game_mode]) > 10:
+            del self.top_10_scores[specific_game_mode][10] 
         
         # extractubg GLB from file
         glb_file_line = self.user_file_data[specific_game_mode][1].strip("\n") # extracting the second line from the text file- the GLB list
@@ -146,14 +158,12 @@ class DatabaseHandler:
         self.temp_username = username # sign_in_user() will then copy the value of self.temp_username to self.username
         self.sign_in_user()
     
-    def delete_user(self):
+    def delete_current_user(self):
         # deleting all of the player's files
         os.remove(f"ms_user_data/Settings/{self.username}_Settings.txt")
         os.remove(f"ms_user_data/Time Trial/{self.username}_Time Trial.txt")
-        os.remove(f"ms_user_data/Exact Scores/Time Trial/{self.username}_Time Trial_long_term.txt")
         for difficulty in self.difficulties:
             os.remove(f"ms_user_data/Classic/{difficulty}/{self.username}_Cl{difficulty}.txt")
-            os.remove(f"ms_user_data/Exact Scores/Classic/{difficulty}/{self.username}_Cl{difficulty}_long_term.txt")
 
         open("ms_user_data/current_user_data.txt","w").close() # resetting the contents of current_user_data
         self.user_signed_in = False
@@ -199,7 +209,8 @@ class DatabaseHandler:
         # multiplying the current average by the number of scores added to the file (number of wins for Classic or number of games for Time Trial)
         self.average_scores[specific_game_mode] *= no_of_games if specific_game_mode == "Time Trial" else (no_of_games - no_of_losses)
         self.average_scores[specific_game_mode] += new_score
-        self.average_scores[specific_game_mode] /= no_of_games + 1
+        # dividing new total by number of games in Time Trial or number of wins in Classic
+        self.average_scores[specific_game_mode] /= (no_of_games + 1) if specific_game_mode == "Time Trial" else (no_of_games - no_of_losses + 1)
         self.average_scores[specific_game_mode] = round(self.average_scores[specific_game_mode])
     
     def update_top_10(self, game_mode, score, difficulty=""):

@@ -75,8 +75,8 @@ class LoginGUI:
         # creating profile picture
         self.profile_pic = Canvas(self.main_menu, width=60, height=60, bg="#f0f0f0")
         self.profile_pic.bind("<Button-1>", lambda _: self.show_login_options())
-        self.profile_pic.bind("<Button-3>", lambda _: self.change_profile_colour())
-        self.profile_circle = self.profile_pic.create_oval(3,3,61,61, fill="red")
+        self.profile_pic.bind("<Button-3>", lambda _: self.show_colour_options())
+        self.profile_circle = self.profile_pic.create_oval(3,3,61,61, fill=self.database.settings.profile_pic_colour)
         self.profile_pic.create_text(32, 32, text=self.database.username[0:2], font=("Calibri Bold", 15), anchor="center")
         self.profile_pic.grid(row=0, column=2)
 
@@ -111,10 +111,67 @@ class LoginGUI:
         self.main_menu.pack()
 
     def show_login_options(self):
-        pass
+        log_in_options = Menu(self.main_menu, tearoff=False)
+        log_in_options.add_command(label="Sign Out", command=lambda: self.sign_out())
+        log_in_options.add_command(label="Sign in with a different account", command=lambda: self.different_log_in())
+        log_in_options.add_command(label="Create an Account", command=lambda: self.create_account_access_frame("Create Account"))
+        log_in_options.add_command(label="Delete Account", command=lambda: self.show_delete_account_popup())
+        
+        # displaying the menu
+        try:
+            x=self.profile_pic.winfo_rootx()
+            y=self.profile_pic.winfo_rooty()
+            log_in_options.tk_popup(x,y+60)
+        finally:
+            log_in_options.grab_release()
+    
+    def sign_out(self):
+        self.create_guest_profile()
+        self.database.user_sign_out()
+    
+    def different_log_in(self):
+        self.database.user_sign_out()
+        self.create_account_access_frame("Sign In")
 
-    def change_profile_colour(self):
-        pass
+    def show_delete_account_popup(self):
+        # creating a popup to ask if the player truly wishes to delete their account
+        deletion_warning = Toplevel()
+        deletion_warning.title("Delete Account?")
+        Label(deletion_warning, text="Are you sure you want to delete your account- this will remove ALL game data.\n" \
+        "This action cannot be reversed.").grid(row=0, column=0)
+        Button(deletion_warning, text="DELETE ACCOUNT", font=("Calibri Bold", 16), bg="red",
+                   command=lambda:self.delete_account(deletion_warning)).grid(row=1, column=0)
+        Button(deletion_warning, text="Cancel", font=("Calibri", 16),
+               command=lambda:deletion_warning.destroy()).grid(row=2, column=0)
+        
+        # making the player only able to click on the popup window until it is closed
+        deletion_warning.transient(self.main_window) # keeps popup on top of main window
+        deletion_warning.grab_set() # stops interactions with main window
+    
+    def delete_account(self, deletion_warning_popup):
+        deletion_warning_popup.destroy()
+        self.database.delete_current_user()
+        self.sign_out()
+
+    def show_colour_options(self):
+        # preparing a menu of all colours the player can choose from
+        colour_options = Menu(self.main_menu, tearoff=False)
+        colours = ["red", "orange", "yellow", "green", "blue", "purple", "pink"]
+        for colour in colours:
+            colour_options.add_command(label="", background=colour,
+                                       command=lambda current_colour=colour: self.switch_profile_colour(current_colour))
+        
+        # displaying the menu
+        try:
+            x = self.profile_pic.winfo_rootx()
+            y = self.profile_pic.winfo_rooty()
+            colour_options.tk_popup(x,y+60)
+        finally:
+            colour_options.grab_release()
+    
+    def switch_profile_colour(self, colour):
+        self.profile_pic.itemconfig(self.profile_circle, fill=colour)
+        self.database.settings.update_settings_file(new_profile_pic_colour=colour)
 
     def username_sign_in(self):
         # creating and placing username frame
@@ -222,7 +279,7 @@ class LoginGUI:
 
         # button for going back to username sign in frame or for officially creating the account
         Button(self.create_account_frame, text="Sign In", font=("Calibri Bold", 13), fg="#258cdb",
-               command=lambda: self.show_account_access_frame("username_frame", self.create_account_frame)).place(x=220, y=310)
+               command=lambda: self.show_account_access_frame("Sign In", self.create_account_frame)).place(x=220, y=310)
         Button(self.create_account_frame, text="Create Account", font=("Calibri Bold", 13), bg="#258cdb",
                command=lambda: self.account_validator(username_input.get(), pword_input1.get(), pword_input2.get())).place(x=300, y=310)
     
@@ -280,9 +337,6 @@ class LoginGUI:
             self.creation_warning_labels[warning_type].config(text="")
         
         return account_valid
-
-
-
 
     def switch_eye_image(self, button, pword_input, entry_type):
         current_input = pword_input.get() # retrieving what the user has currently entered into the Entry box for reinsertion later

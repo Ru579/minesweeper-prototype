@@ -5,7 +5,7 @@ from math import e
 class GameManager:
     def __init__(self):
         #initialising attributes
-        self.board = Board(0,0,0)
+        self.board = Board(0,0,0, False)
         
         self.game_mode = ""
         self.board_started = False
@@ -68,11 +68,11 @@ class GameManager:
 
         #creating board
         if difficulty == "Beginner":
-            self.board = Board(8, 8, 10)
+            self.board = Board(8, 8, 10, self.database.settings.user_settings["Enable Chording"])
         elif difficulty == "Intermediate":
-            self.board = Board(16,16, 40)
+            self.board = Board(16,16, 40, self.database.settings.user_settings["Enable Chording"])
         elif difficulty == "Expert":
-            self.board = Board(16, 30, 99)
+            self.board = Board(16, 30, 99, self.database.settings.user_settings["Enable Chording"])
         else:
             raise ValueError("Invalid Classic Difficulty")
     
@@ -90,7 +90,7 @@ class GameManager:
         self.tt_difficulty = "Easy"
 
         #creating the first board
-        self.board = Board(self.stage_length, self.stage_length, self.calculate_mine_number())
+        self.board = Board(self.stage_length, self.stage_length, self.calculate_mine_number(), self.database.settings.user_settings["Enable Chording"])
     
     def calculate_mine_number(self):
         # returns the number of mines that should be on a square board of a specific length
@@ -125,7 +125,7 @@ class GameManager:
         # creating the next board after setting the difficulty (difficulty depends on stage reached)
         self.previous_tt_difficulty = self.tt_difficulty
         self.set_difficulty()
-        self.board = Board(self.stage_length, self.stage_length, self.calculate_mine_number())
+        self.board = Board(self.stage_length, self.stage_length, self.calculate_mine_number(), self.database.settings.user_settings["Enable Chording"])
 
         # resetting whether the board has been completed since a new board has been created
         self.board_done = False
@@ -205,7 +205,6 @@ class GameManager:
             if final_score == 1:
                 # adding exp based on the fraction of the board that was revealed and the difficulty of that board
                 exp_to_add = round(30 * self.board.revealed_cells / (self.board.grid_height * self.board.grid_width))
-                print(exp_to_add)
             elif final_score > 1:
                 exp_to_add = 38 * (final_score**2) - 90 * (final_score) + 100 # the quadratic equation used for calculating Time Trial EXP
                 if self.swapped_to_hard_tt:

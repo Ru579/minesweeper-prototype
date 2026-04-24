@@ -1,5 +1,6 @@
 from GameManager import GameManager
 from LoginGUI import *
+from SettingsGUI import SettingsGUI
 
 class GUI:
     def __init__(self):
@@ -32,6 +33,7 @@ class GUI:
         self.game = GameManager()
         # creating GUI logic units
         self.loginGUI = LoginGUI(self.game.database, self.Minesweeper)
+        self.settingsGUI = SettingsGUI(self.game.database.settings, self.Minesweeper)
         
         # PREPARING IMAGES
 
@@ -54,7 +56,6 @@ class GUI:
             current_image = Image.open(f"Images/{i}_cell.png")
             self.cell_number_images.append(current_image)
         self.formatted_number_images = []
-
         # settings icon
         settings_icon = Image.open("Images/settings_icon.jpg")
         self.settings_icon = ImageTk.PhotoImage(settings_icon.resize((60,60)))
@@ -77,17 +78,17 @@ class GUI:
         # Player Level, Time Trial, Tutorial and Statistics buttons
         main_buttons = Frame(self.main_menu)
         main_buttons.grid(row= 2, column= 1)
-        Button(main_buttons, text="Player Level", bg="yellow").grid(row=0, column=0, padx=5, pady=3)
+        Button(main_buttons, text="Player Level", bg="yellow", command=lambda: self.display_player_level_screen()).grid(row=0, column=0, padx=5, pady=3)
         Button(main_buttons, text="Play - Time Trial", bg="#0181FF", command=lambda: self.start_game("Time Trial")).grid(row=0, column=1, padx=5, pady=3)
         Button(main_buttons, text="Tutorial", bg="purple").grid(row=1, column=0, padx=5, pady=3)
-        Button(main_buttons, text="Statistics", bg="red").grid(row=1, column=1, padx=5, pady=3)
+        Button(main_buttons, text="Statistics", bg="red", command=lambda: self.display_stats_menu()).grid(row=1, column=1, padx=5, pady=3)
         for child in main_buttons.grid_slaves():
             child.config(font=("Calibri Bold", 24), width=20, height=2)
 
         # buttons in corners of main menu
         # settings button
-        settings_button = Label(self.main_menu, image=self.settings_icon)
-        settings_button.bind("<Button-1>", lambda _: self.create_settings_window())
+        settings_button = Label(self.main_menu, image=self.settings_icon, width=60, height=60)
+        settings_button.bind("<Button-1>", lambda _: self.settingsGUI.create_settings_window(self.main_menu))
         settings_button.grid(row=0, column=0)
         # account button
         self.loginGUI.create_profile(self.main_menu)
@@ -129,7 +130,7 @@ class GUI:
         self.game_frame_title = Label(self.game_frame, font=("Calibri Bold", 30))
         self.game_frame_title.grid(row=0, column=2)
         # textbox at bottom of screen
-        self.communicator = Label(self.game_frame, text="Click a cell to start", font=("Calibri", 18), width=24, wraplength=300, height=2)
+        self.communicator = Label(self.game_frame, text="Click a cell to start", font=("Calibri", 18), width=24, wraplength=300, height=6)
         self.communicator.grid(row=3, column=2, rowspan=4)
         
         # making flag counter
@@ -161,6 +162,78 @@ class GUI:
         # updating number of flags left after starting correct game mode
         self.flag_counter.config(text = str(self.game.board.flags_left))
     
+    def display_player_level_screen(self):
+        print(self.game.database.top_10_scores["ClBeginner"])
+        # swapping frames
+        exp_level_frame = Frame(self.Minesweeper)
+        self.main_menu.forget()
+        exp_level_frame.pack()
+
+        if self.game.database.user_signed_in:
+            # reporting player's level
+            Label(exp_level_frame, font=("Calibri", 20),
+                  text=f"Level: {self.game.database.level}").pack()
+            # reporting player's current EXP
+            Label(exp_level_frame, font=("Calibri", 20),
+                  text=f"Total EXP: {self.game.database.exp}").pack()
+        else:
+            Label(exp_level_frame, font=("Calibri", 20),
+                  text="Sign In or Create an Account to access this menu").pack()
+        # return to menu button
+        Button(exp_level_frame, font=("Calibri", 15),
+               text="Return to Menu",
+               command=lambda: self.return_to_menu(exp_level_frame)).pack(pady=30)
+    
+    def display_stats_menu(self):
+        # swapping frames
+        stats_menu = Frame(self.Minesweeper)
+        self.main_menu.forget()
+        stats_menu.pack()
+
+        # title
+        Label(stats_menu, font=("Calibri", 30),
+              text="Statistics Menu").pack(pady=30)
+        
+        if self.game.database.user_signed_in:
+            # frame containing all of players info- contains a frame for each game mode
+            info_frame = Frame(stats_menu)
+            info_frame.pack(pady=20)
+            # creating info frames for each game mode
+            self.create_game_mode_info_frame("ClBeginner", "Classic: Beginner", info_frame).grid(row=0, column=0)
+            self.create_game_mode_info_frame("ClIntermediate", "Classic: Intermediate", info_frame).grid(row=0, column=1)
+            self.create_game_mode_info_frame("ClExpert", "Classic: Expert", info_frame).grid(row=1, column=0)
+            self.create_game_mode_info_frame("Time Trial", "Time Trial", info_frame).grid(row=1, column=1)
+        else:
+            Label(stats_menu, font=("Calibri", 20),
+                  text="Sign In or Create an Account to access this menu").pack(pady=20)
+        
+        # return to menu button
+        Button(stats_menu, font=("Calibri", 15),
+               text="Return to Menu",
+               command=lambda: self.return_to_menu(stats_menu)).pack(pady=30)
+
+    def create_game_mode_info_frame(self, specific_game_mode, title, info_frame):
+        game_mode_frame = Frame(info_frame, width=400)
+        Label(game_mode_frame, font=("Calibri", 20), text=title).pack() # title
+        
+        # removing placeholder values from top 10 scores
+        top_10_scores = self.game.database.top_10_scores[specific_game_mode]
+        cleaned_top_10_scores = []
+        for score in top_10_scores:
+            if not ((score==999999 and specific_game_mode[0:2]=="Cl") or (score==0 and specific_game_mode=="Time Trial")):
+                cleaned_top_10_scores.append(score)
+
+        # creating a label for each line to be displayed
+        for info_line in (f"Average Score: {self.game.database.average_scores[specific_game_mode]}",
+                     f"Top 10 Scores: {cleaned_top_10_scores}",
+                     f"Games Played: {self.game.database.glb[specific_game_mode][0]}",
+                     f"Number of Boards Completed: {self.game.database.glb[specific_game_mode][2]}",
+                     f"Number of Losses: {self.game.database.glb[specific_game_mode][1]}",
+                     f"Total Time Spent Playing: {self.game.database.game_time[specific_game_mode]} seconds"
+        ):
+            Label(game_mode_frame, font=("Calibri", 12), text=info_line).pack()
+        return game_mode_frame
+
     def return_to_menu_attempt(self):        
         self.game.timer_on = False # pausing the timer whilst the popup is up
         
@@ -199,12 +272,6 @@ class GUI:
         new_difficulty = self.game.difficulty_mapper[self.difficulty_button.cget("text")]
         self.difficulty_button.config(text = new_difficulty)
         self.game.main_menu_difficulty = new_difficulty
-    
-    def create_settings_window(self):
-        pass
-
-    def account_interaction(self):
-        pass
     
     def gui_start_classic_mode(self, difficulty):
         self.game.start_classic_mode(difficulty)
@@ -301,22 +368,23 @@ class GUI:
             
             # unssuccessful chord
             if self.game.board.chording_enabled and self.game.board.flag_difference != 0:
-                # iterating through surrounding cells
-                for i in range(x-1, x+2):
-                    for j in range(y-1, y+2):
-                        if self.game.board.in_bounds(i, j):
-                            state = self.game.get_cell(i, j, "state")
-                            
-                            # if player has placed too few flags, meaning we highlight surrounding hidden or confused cells
-                            if self.game.board.flag_difference < 0 and state in ("Hidden", "Confused"):
-                                self.tiles[i][j].config(image=self.formatted_cell_images[f"highlighted_{state.lower()}_cell_image"])
+                if self.game.database.settings.user_settings["Highlight Cells when Chording"]:
+                    # iterating through surrounding cells
+                    for i in range(x-1, x+2):
+                        for j in range(y-1, y+2):
+                            if self.game.board.in_bounds(i, j):
+                                state = self.game.get_cell(i, j, "state")
 
-                            # if player has placed too many flags, meaning we highlight surrounding flagged cells
-                            if self.game.board.flag_difference > 0 and state == "Flagged":
-                                self.tiles[i][j].config(image=self.formatted_cell_images["highlighted_flagged_cell_image"])
-                            
-                            # restoring the cell to its original image after 500ms
-                            self.tiles[i][j].after(500, lambda row=i, column=j, current_state=state: self.fix_cell_colour(row, column, old_state= current_state))
+                                # if player has placed too few flags, meaning we highlight surrounding hidden or confused cells
+                                if self.game.board.flag_difference < 0 and state in ("Hidden", "Confused"):
+                                    self.tiles[i][j].config(image=self.formatted_cell_images[f"highlighted_{state.lower()}_cell_image"])
+
+                                # if player has placed too many flags, meaning we highlight surrounding flagged cells
+                                if self.game.board.flag_difference > 0 and state == "Flagged":
+                                    self.tiles[i][j].config(image=self.formatted_cell_images["highlighted_flagged_cell_image"])
+
+                                # restoring the cell to its original image after 500ms
+                                self.tiles[i][j].after(500, lambda row=i, column=j, current_state=state: self.fix_cell_colour(row, column, old_state= current_state))
                 
                 # reporting flag difference
                 self.communicator.config(text=f"Cell has {abs(self.game.board.flag_difference)} too {"many" if self.game.board.flag_difference>0 else "few"} flags")
@@ -403,13 +471,17 @@ class GUI:
             self.do_game_over()
         
         elif self.game.game_mode == "Classic":
-            if self.game.game_won: # ending the game and showing the appropriate game over screen
+            if self.game.game_won: # ending the game and showing the appropriate game over screen/ quick replay buttons
                 self.game.terminate_game_variables()
                 self.game.update_game_data(outcome="Win")
 
                 self.communicator.config(text="Congratulations!")
 
-                self.game_frame.after(500, lambda: self.prepare_game_finished_window("Win"))
+                # showing game over screen/ quick replay buttons
+                if self.game.database.settings.user_settings["Create Game Finished Window"]:
+                    self.game_frame.after(500, lambda: self.prepare_game_finished_window("Win"))
+                else:
+                    self.make_quick_replay_buttons()
 
 
         elif self.game.game_mode == "Time Trial":
@@ -437,7 +509,33 @@ class GUI:
             self.communicator.config(text="GAME OVER!")
             self.toggle_all_mine_reveal(button_used=False)
         
-        self.game_frame.after(delay, lambda: self.prepare_game_finished_window("Lose"))
+        # showing game over screen/ quick replay buttons
+        if self.game.database.settings.user_settings["Create Game Finished Window"]:
+            self.game_frame.after(delay, lambda: self.prepare_game_finished_window(outcome="Lose"))
+        else:
+            self.make_quick_replay_buttons(outcome="Lose")
+    
+    def make_quick_replay_buttons(self, outcome=""):
+        # creating retry button without command assigned as this is dependent on game mode
+        retry_button = Button(self.game_frame, text="Retry?", bg="blue", fg="white", font=("Calibri", 15), width=10)
+        retry_button.grid(row=4, column=0)
+        # creating button for viewing mines
+        self.view_mines_button = Button(self.game_frame, text="Hide Mines" if self.game.mines_revealed else "View Mines",
+                                        bg="yellow", font=("Calibri", 15), width=10, command=lambda: self.toggle_all_mine_reveal(button_used=True))
+        self.view_mines_button.grid(row=4, column=4)
+
+        if self.game.game_mode == "Classic":
+            # creating button for changing the difficulty of the next game
+            retry_difficulty_changer = Label(self.game_frame, text="Change Difficulty?", wraplength=120, bg="green", fg="white", font=("Calibri", 15), width=15)
+            retry_difficulty_changer.bind("<Button-1>", lambda _: self.change_retry_difficulty(difficulty_button=retry_difficulty_changer))
+            retry_difficulty_changer.grid(row=3, column=0)
+            # making sure that retry button checks the text of retry_difficulty_changer
+            retry_button.bind("<Button-1>", lambda _: self.retry(label_to_check=retry_difficulty_changer))
+        elif self.game.game_mode == "Time Trial":
+            retry_button.bind("<Button-1>", lambda _: self.retry())
+        
+        self.communicator.config(text=self.game.calculate_output_statement(outcome = outcome))
+
     
     def ui_next_tt_stage(self):
         self.communicator.config(text="Next Stage")

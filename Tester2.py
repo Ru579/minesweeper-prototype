@@ -21,13 +21,24 @@ def update_top_10(score, top_10_scores, game_mode):
     print(top_10_rank, no_1_status)
     return top_10_scores
 
+#with open("ms_user_data/Classic/Beginner/test_ClBeginner.txt", "a") as file:
+#    for i in range(1, 100):
+#        file.write(f"{i}\n")
+#file.close()
+
+car = {
+  "brand": "Ford",
+  "model": "Mustang",
+  "year": 1964
+}
+
+print(True if "Ford" in car else False)
+
+
 #classic_top_10 = [20,22,24,26,32,46,52,68,77,82][::-1]
 #classic_top_10 = update_top_10(23, classic_top_10, "Time Trial")
 ##classic_top_10 = update_top_10(56, classic_top_10, "Time Trial")
 #print(classic_top_10)
-
-print(int("13.0"))
-
 
 #bottom_entry_index = len(self.user_file_data[specific_game_mode]) - 1
 #
