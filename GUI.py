@@ -254,7 +254,10 @@ class GUI:
             warning_popup.transient(self.Minesweeper) # keeps popup on top of game_frame
             warning_popup.grab_set() # stops interactions with game_frame
             self.Minesweeper.wait_window(warning_popup) # preventing following lines from being executed until popup closed
-            self.cell_grid.grid(row=2, column=2)
+            try:
+                self.cell_grid.grid(row=2, column=2)
+            except TclError:
+                pass
             if self.game.board_started:
                 self.game.timer_on = True
         

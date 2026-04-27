@@ -1,7 +1,7 @@
 123
 red
-4
-4080
+5
+5055
 Create Game Finished Window:True
 Enable Chording:True
 Highlight Cells when Chording:True
