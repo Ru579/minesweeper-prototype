@@ -163,7 +163,6 @@ class GUI:
         self.flag_counter.config(text = str(self.game.board.flags_left))
     
     def display_player_level_screen(self):
-        print(self.game.database.top_10_scores["ClBeginner"])
         # swapping frames
         exp_level_frame = Frame(self.Minesweeper)
         self.main_menu.forget()
@@ -538,7 +537,6 @@ class GUI:
             retry_button.bind("<Button-1>", lambda _: self.retry())
         
         self.communicator.config(text=self.game.calculate_output_statement(outcome = outcome))
-
     
     def ui_next_tt_stage(self):
         self.communicator.config(text="Next Stage")
@@ -698,8 +696,6 @@ class GUI:
             
             self.view_mines_button.config(text="View Mines")
             self.game.mines_revealed = False
-
-
 
 gui = GUI()
 gui.create_main_menu()

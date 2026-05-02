@@ -45,6 +45,11 @@ class DatabaseHandler:
                 self.user_signed_in = False
         current_user_file.close()
 
+        # TEXT FILE LAYOUT
+        # GAME FILE: top 10 scores, GLB, average score, total game time, nonAver games, list of averaged scores, list of exact scores
+        # SETTINGS FILE: password, profile picture colour, player level, player EXP, list of settings and their current value
+
+
     def find_user_file(self, username_input):
         directory = "ms_user_data/Settings"
         # iterating through all files until the user's file is found

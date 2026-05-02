@@ -1,62 +1,91 @@
 To test in video:
 
-Generating an expert board
 
-Left clicking on a cell
 
-Flagging a cell
+**Classic Mode User Journey**
 
-Revealing a cell
+Expert Board 1
 
-* Left clicking on a flagged cell
+* big break
 
-Confusing a cell
+**Flag**
 
-* Left clicking on a confused cell
+* Flag cells
+* undo flags
 
-Chording
+**Reveal Cells**
 
-* Successfully
+* Flag
+* Left click on flags
+
+**Confuse**
+
+* Confuse cells
+* un confuse cells
+* flag cells and confuse over them
+* confuse cells and flag over them
+* left click on confused
+
+**Chording**
+
+* Not enough flags
 * Too many flags
-* Too few flags
+* Successful chording
+
+**Return to menu**
+
+* Show transience
+* return to board
+* Return to popup
+* return to menu
+
+**Change difficulty to beginner**- **Board 2**
+
+* open cell **ON EDGE**
+
+**Use all flags section**
+
+* Place all flags
+* can still confuse cells
+* can't flag over confused cells when run out
+
+**complete beginner board: game over menu section**
+
+* return to board
+* hide mines, show mines
+* return to screen
+* change difficulty, but don't retry
+* return to menu
+
+**Settings**
+
+* end with all settings off
+* return to menu
+
+**start beginner board**
+
+**show lack of chording**
+
+* fail the board, showing quick replay
+* **retry** on intermediate
+
+**return to menu**
+
+* Enable chording, keep highlighting off
+
+**Start beginner board: chording no highlight section**
+
+* try chording with **too few flags**
+* message appears, but no highlighting
+* Chord **successfully**
 
 
 
 
 
-Finish game
-
-View board
-
-Change retry difficulty to Beginner
-
-Retry board
-
-Click on edge of board
-
-Return to menu
 
 
-
-**Settings section**
-
-Turn off chording
-
-Turn on highlighting
-
-Turn off highlighting
-
-Turn off chording
-
-Turn off create game finished window
+**Time Trial User Journey**
 
 
-
-Starting Beginner
-
-Placing too many flags
-
-Confusing a cell, then trying to flag over it
-
-Undoing all flags
 
